@@ -510,9 +510,9 @@ writing or editing the css file. All css script is created on the fly. You doesn
         return this;
     };
     // CREATING CLASS BUILDER.
-    var tClass = {};
+    var TocmClass = {};
     // FUNCTION TO CREATE MEDIA QUERIES COLLECTIONS.
-    tClass.media = function (name, value) {
+    TocmClass.media = function (name, value) {
         if (typeOf(name) === 'string') {
             var media, idx;
             if (typeOf(value) === 'string') {
@@ -541,7 +541,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
             return -1;
         }
     };
-    tClass.font = function (name, src, opt) {
+    TocmClass.font = function (name, src, opt) {
         var fonts, cssfont, key, fdx, i, j;
         // Creating font collections.
         if (typeOf(window.TocmFonts) === 'undefined') {
@@ -622,7 +622,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
         style.innerHTML = cssfont;
     };
     // CREATING FUNCTION TO CREATE NEW CLASS.
-    tClass.create = function (selector, props, media) {
+    TocmClass.create = function (selector, props, media) {
         var cls = {}, regs = TocmDefClass, minfo, mdx, sdx, pdx;
         if (typeOf(selector) === 'string' && typeOf(props) === 'object') {
             // COLLECTING CSS PROPERTIES.
@@ -667,6 +667,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
             }
             // Writing CSS to Handler.
             TocmBuilder.writeCSS(cls);
+            return cls;
         }
     };
 
@@ -675,5 +676,5 @@ writing or editing the css file. All css script is created on the fly. You doesn
     
     // ATTACHING TOCM MAKER TO WINDOW OBJECT.
     window.Tocm = window.tClass = tocm;
-    window.TocmClass = tClass;
+    window.TocmClass = TocmClass;
 })(window);
