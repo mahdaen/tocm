@@ -16,8 +16,115 @@ writing or editing the css file. All css script is created on the fly. You doesn
 
 // CREATING GLOBAL REFERENCES.
 (function(window) {
-    'use strict';
-	var ObjectType = function (obj) {
+	'use strict';
+	window.rgb = function (hexColor, opacity, rtype) {
+		var shorthandRegex, result, objRgb, isPrs;
+		
+		// Expand shorthand form (e.g. '03F') to full form (e.g. '0033FF')
+		shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+		hexColor = hexColor.replace(shorthandRegex, function (m, r, g, b) {
+			return r + r + g + g + b + b;
+		});
+	
+		result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexColor);
+		
+		objRgb = {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		};
+		
+		if (opacity && typeOf(opacity) === 'string') {
+			isPrs = opacity.search('%');
+			
+			if (isPrs !== -1) {
+				opacity = opacity.replace('%', '');
+				opacity = Number(opacity) / 100;
+			}
+			objRgb.o = opacity;
+		} else if (opacity && typeOf(opacity) === 'number') {
+			objRgb.o = opacity;
+		}
+		
+		if (!rtype || rtype !== 'object') {
+			result = objRgb.r + ', ' + objRgb.g + ', ' + objRgb.b;
+			if (objRgb.o) {
+				result = 'rgba(' + result + ', ' + objRgb.o + ')';
+			} else {
+				result = 'rgb(' + result + ')';
+			}
+			
+			return result;
+		} else {
+			return objRgb;
+		}
+	};
+	window.newline = '<br/>';
+	window.unit = {
+		pixel: function (unit) {
+			
+		},
+		count: function (result) {
+			
+		},
+		type: function (unit) {
+			var rxHex3, rxHex6, type;
+			type = typeof unit;
+			if (typeof unit == 'string') {
+				// Match for hex color format.
+				rxHex3 = /^#([a-f\d]{3})$/i;
+				rxHex6 = /^#([a-f\d]{6})$/i;
+				if (unit.match(rxHex3) || unit.match(rxHex6)) {
+					type = 'hexcolor';
+				}
+				// Match for percentage.
+				if (unit.match(/(^\d+%$)|(^\d+\.\d+\%)/)) {
+					type = 'percentage';
+				}
+				// Match for Pixel.
+				if (unit.match(/(^\d+px$)|(^\d+\.\d+px$)/)) {
+					type = 'pixel';
+				}
+				// Match for typography or em.
+				if (unit.match(/(^\d+em$)|(^\d+\.\d+em$)/)) {
+					type = 'typography';
+				}
+				// Match for centimeter.
+				if (unit.match(/(^\d+cm$)|(^\d+\.\d+cm$)/)) {
+					type = 'centimeter';
+				}
+				// Match for millimeter.
+				if (unit.match(/(^\d+mm$)|(^\d+\.\d+mm$)/)) {
+					type = 'millimeter';
+				}
+				// Match for inch.
+				if (unit.match(/(^\d+in$)|(^\d+\.\d+in$)/)) {
+					type = 'inch';
+				}
+				// Match for point.
+				if (unit.match(/(^\d+pt$)|(^\d+\.\d+pt$)/)) {
+					type = 'point';
+				}
+				//Match for pica.
+				if (unit.match(/(^\d+pc$)|(^\d+\.\d+pc$)/)) {
+					type = 'pica';
+				}
+			}
+			return type;
+		}
+	};
+	window.define = function (name, value) {
+		window[name] = value;
+		Object.defineProperty(window, name, {
+			enumerable: false,
+			configurable: false,
+			writable: false
+		});
+		return window[name];
+	};
+
+    
+    var ObjectType = function (obj) {
 		if (typeof obj === 'undefined') {
 			return 'undefined';
 		}
@@ -72,11 +179,15 @@ writing or editing the css file. All css script is created on the fly. You doesn
         }
         return result;
     };
-    window.$path = XPathSelector;
+    window.$path = function (pattern) {
+        return new XPathSelector(pattern);
+    };
+    window.$path.module = XPathSelector.prototype = {};
     var Gradient = function (value, mode) {
         var gstr = '', vendor = TocmRef.vendor, type;
         if (typeOf('mode') === 'string') {
             mode += '-gradient';
+            gstr += mode + '(' + value + '); ';
         } else {
             mode = 'gradient';
         }
@@ -116,7 +227,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
             'transition_property', 'transition_duration', 'transition_timing_function', 'transition_delay',
             // POSSIBLE DROPPED //
             'appearance', 'backface_visibility', 'grid_columns', 'grid_rows', 'hanging_punctuation', 'icon', 'punctuation_trim', 'resize',
-            'target', 'target_name', 'target_new', 'target_position', 'word_break', 'word_wrap', 'filter'
+            'target', 'target_name', 'target_new', 'target_position', 'word_break', 'word_wrap', 'filter', 'user_select'
         ],
         // CUSTOM PROPERTIES //
         ccss: [
@@ -134,7 +245,10 @@ writing or editing the css file. All css script is created on the fly. You doesn
         vendor: [
             '-webkit-', '-moz-', '-o-', '-ms-'
         ],
-        
+        // RESTRICTED PROPERTIES FROM NUMBER AUTOMATIONS.
+        noint: [
+            'opacity', 'z-index', 'font-weight', 'column-count'
+        ],
         // CREATING PRIVATE CSS GENERATOR.
         createCCSS: function (prop, value, tab) {
             var gradient = TocmRef.createGRDN;
@@ -282,8 +396,8 @@ writing or editing the css file. All css script is created on the fly. You doesn
             // Processing CSS Object.
             for (var key in obj) {
                 if (obj.hasOwnProperty(key) && obj[key] !== '') {
-                    prop = key.replace('_', '-').replace('$', '*');
-                    if (typeOf(obj[key]) === 'number' && key !== 'font_weight' && key !== 'z_index') {
+                    prop = key.replace(/_/g, '-').replace(/\$/g, '*');
+                    if (typeOf(obj[key]) === 'number' && TocmRef.noint.indexOf(prop) < 0) {
                         obj[key] += 'px';
                     }
                     if (obj[key] !== null) {
@@ -346,7 +460,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
     };
     ClassBuilder.writeSCS = function () {
         var defc = TocmDefClass, medc = TocmMedClass, key, fml, cls, dstr = '', mstr = '';
-        var area, family, auto, pdstr = {}, pmdstr = {};
+        var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
         // ENUMERATING DEFAULT CLASSES.
         for (key in defc) {
             if (defc.hasOwnProperty(key)) {
@@ -391,14 +505,31 @@ writing or editing the css file. All css script is created on the fly. You doesn
                 }
                 // WRITING GLOBAL CLASSES.
                 if (mstr !== '') {
-                    TocmBuilder.writeDOM('Global Class', key, mstr);
+                    // GETTING MEDIA INFO.
+                    minfo = $media(key); gcstr = '';
+                    // OPENING MEDIA QUERIES.
+                    gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    // ADDING CSS STRING.
+                    gcstr += mstr;
+                    // CLOSING MEDIA QUERIES.
+                    gcstr += '\t}\n';
+                    TocmBuilder.writeDOM('Global Class', key, gcstr);
+                    mstr = '';
                 }
                 // WRITING PRIVATE CLASSES.
                 for (fml in pmdstr) {
                     if (pmdstr.hasOwnProperty(fml)) {
-                        TocmBuilder.writeDOM(fml, key, pmdstr[fml]);
+                        minfo = $media(key); fmcstr = '';
+                        // OPENING MEDIA QUERIES.
+                        fmcstr += '\n\t@media ' + minfo.value + ' {\n';
+                        // ADDING CSS STRING.
+                        fmcstr += pmdstr[fml];
+                        // CLOSING MEDIA QUERIES.
+                        fmcstr += '\t}\n';
+                        TocmBuilder.writeDOM(fml, key, fmcstr);
                     }
                 }
+                pmdstr = {};
             }
         }
     };
@@ -410,7 +541,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
                 minfo = $media(tclass.media);
                 if (typeOf(minfo) === 'object') {
                     // OPENING CSSS MEDIA QUERIES.
-                    cstr += '\n\t@media ' + minfo.value + ' {\n';
+                    // cstr += '\n\t@media ' + minfo.value + ' {\n';
                     // OPENING CSS SELECTOR.
                     cstr += '\t\t' + tclass.name + ' {\n';
                     // CREATING CSS STRING.
@@ -429,7 +560,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
                         }
                     }
                     // CLOSING CSS MEDIA QUERIES.
-                    cstr += '\t}\n';
+                    // cstr += '\t}\n';
                     if (typeOf(isget) === 'boolean' && isget === true) {
                         return cstr;
                     } else {
@@ -475,10 +606,6 @@ writing or editing the css file. All css script is created on the fly. You doesn
 // CREATING TOCM CORE FUNCTIONS.
 (function(window) {
     'use strict';
-    // TocmClass Wrapper.
-    var tocm = function (selector, media) {
-        return new TocmClass(selector, media);
-    };
     // CREATING CLASS SELECTOR.
     var TocmClass = function (selector, media) {
         var obj, key;
@@ -513,6 +640,10 @@ writing or editing the css file. All css script is created on the fly. You doesn
         }
         return this;
     };
+    // TocmClass Wrapper.
+    var tocm = function (selector, media) {
+        return new TocmClass(selector, media);
+    };
     // CREATING MODULE WRAPPER.
     tocm.module = TocmClass.prototype = {
         // CREATING FUNCTION TO APPLY CHANGES.
@@ -534,11 +665,191 @@ writing or editing the css file. All css script is created on the fly. You doesn
                 }
             }
             return this;
+        },
+        write: function () {
+            TocmBuilder.writeSCS();
+            return this;
         }
     };
     // ATTACHING TOCM MAKER TO WINDOW OBJECT.
-    window.$class = window.Tocm = tocm;
+    window.TocmClass = tocm;
     
+    // CREATING FUNCTION TO CREATE NEW CLASS.
+    var TocmCreate = function (selector, props, media, auto) {
+        var cls = {}, regs = TocmDefClass, obj;
+        if (typeOf(selector) === 'string' && typeOf(props) === 'object') {
+            // COLLECTING CSS PROPERTIES.
+            cls.name = cls.family = selector;
+            cls.properties = props;
+            cls.pseudo = {};
+            cls.config = {
+                write_area: 'universal', // family <> universal <> independent.
+                write_auto: true
+            };
+            cls.parent = {};
+            
+            // ADDING TO MEDIA SPESIFIC COLLECTION IF 'media' WAS DEFINED.
+            if (typeOf(media) === 'string' && media !== 'none') {
+                if ($media(media).hasOwnProperty('name') === false) {
+                    return;
+                }
+                cls.media = media;
+                if (typeOf(TocmMedClass[media]) === 'object') {
+                    TocmMedClass[media][selector] = cls;
+                } else {
+                    TocmMedClass[media] = {};
+                    TocmMedClass[media][selector] = cls;
+                }
+            } else {
+                cls.media = 'none';
+                TocmDefClass[selector] = cls;
+            }
+            // Writing CSS to Handler.
+            //TocmBuilder.writeSCS(cls);
+            var newclass;
+            if (typeOf(media) === 'string' && media !== 'none') {
+                newclass = new TocmClass(selector, media);
+            } else {
+                newclass = new TocmClass(selector);
+            }
+            return newclass;
+        }
+    };
+    // CREATING FUNCTION TO CREATE BATCH OBJECT CLASSES.
+    var TocmBatchCreate = function (name, object, cmedia, area, family, parent) {
+        var key, xkey, newclass, media, newname, subclass, vobj = {}, vpsdo = {};
+        if (typeOf(name) === 'string' && typeOf(object) === 'object') {
+            // Parsing name and media.
+            if (name.search('@') > -1) {
+                name = name.replace(/\s+(\@)\s+/g, '@');
+                name = name.split('@');
+                media = name[1];
+                name = name[0];
+            } else {
+                if (typeOf(cmedia) === 'string' && cmedia !== 'none') {
+                    media = cmedia;
+                } else {
+                    media = 'none';
+                }
+            }
+            
+            // Parsing name string wether have a golbal identifier or not. E.g. $class('!.header');
+            if (name.search('!') > -1) {
+                name = name.replace('!', '');
+                area = 'global';
+            }
+            
+            // Enumerating Property and new object.
+            if (typeOf(area) !== 'string' && area !== 'global') {
+                newclass = new TocmCreate(name, {}, media, false);
+                if (newclass.hasOwnProperty('name')) {
+                    newclass.config.write_area = 'family';
+                } else {
+                    return;
+                }
+            } else {
+                newclass = new TocmCreate(name, {}, media, true);
+                if (!newclass.hasOwnProperty('name')) {
+                    return;
+                }
+            }
+            
+            for (key in object) {
+                if (object.hasOwnProperty(key)) {
+                    if (typeOf(object[key]) === 'object') {
+                        if (TocmRef.pseudo.indexOf(key) < 0) {
+                            // If not pseudo, then create new object with adding parent name.
+                            newname = name + ' ';
+                            if (key.search('&') > -1) {
+                                // If  name is multiple.
+                                xkey = key.replace(/\s+(\&)\s+/g, '&');
+                                xkey = xkey.split('&');
+                                for (var i = 0; i < xkey.length - 1; ++i) {
+                                    newname += xkey[i] + ', ' + name + ' ';
+                                }
+                                newname += xkey[xkey.length - 1];
+                            } else {
+                                newname += key;
+                            }
+                            if (typeOf(family) !== 'string') {
+                                family = name;
+                            }
+                            subclass = new TocmBatchCreate(newname, object[key], media, area, family, newclass);
+                        } else {
+                            if (typeOf(vpsdo[key]) !== 'object') {
+                                vpsdo[key] = object[key];
+                            } else {
+                                for (var vip in object[key]) {
+                                    if (object[key].hasOwnProperty(vip)) {
+                                        vpsdo[key][vip] = [object][key][vip];
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        vobj[key] = object[key];
+                    }
+                }
+            }
+            if (typeOf(newclass) === 'object' && newclass.hasOwnProperty('name')) {
+                if (typeOf(family) === 'string') {
+                    newclass.family = family;
+                } else {
+                    newclass.family = name;
+                }
+                if (typeOf(parent) === 'object' && parent.hasOwnProperty('name')) {
+                    newclass.parent = parent;
+                }
+                for (var po in vobj) {
+                    if (vobj.hasOwnProperty(po)) {
+                        newclass.properties[po] = vobj[po];
+                    }
+                }
+                for (var ps in vpsdo) {
+                    if (vpsdo.hasOwnProperty(ps)) {
+                        newclass.pseudo[ps] = vpsdo[ps];
+                    }
+                }
+                newclass.apply();
+            }
+            return newclass;
+        }
+    };
+
+    // CREATING WRPAPPER //
+    window.$glob = function (selector, props, media) {
+        return new TocmBatchCreate(selector, props, media, 'global');
+    };
+    // CREATE A TOCM SELECTOR AND CREATOR WRAPPER.
+    window.$class = window.Tocm = function (select, omedia, media) {
+        // Ensure the selector/class pattern is string.
+        if (typeOf(select) === 'string') {
+            // If 'omedia' is string, then use it as media to select class.
+            if (typeOf(omedia) === 'string') {
+                return new TocmClass(select, omedia);
+            }
+            // Else if 'omedia' is object, then use it as object to create class.
+            else if (typeOf(omedia) === 'object') {
+                // If the 'media' is string, then use it as media to create class.
+                if (typeOf(media) === 'string' && media !== 'none') {
+                    return new TocmBatchCreate(select, omedia, media);
+                }
+                // Else, just create class as universal class.
+                else {
+                    return new TocmBatchCreate(select, omedia);
+                }
+            }
+            // Else, just select class with no media.
+            else {
+                return new TocmClass(select);
+            }
+        }
+    };
+})(window);
+
+// CREATING A TOCM CLASS SUPPORT.
+(function(window) {
+    'use strict';
     // CREATING KEYFRAMES DEFINITIONS.
     var TocmKeyframe = function (name, position, properties) {
         var frame, pos;
@@ -733,140 +1044,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
             }
         }
     };
-    // CREATING FUNCTION TO CREATE NEW CLASS.
-    var TocmCreate = function (selector, props, media, auto) {
-        var cls = {}, regs = TocmDefClass, obj;
-        if (typeOf(selector) === 'string' && typeOf(props) === 'object') {
-            // COLLECTING CSS PROPERTIES.
-            cls.name = cls.family = selector;
-            cls.properties = props;
-            cls.pseudo = {};
-            cls.config = {
-                write_area: 'universal', // family <> universal <> independent.
-                write_auto: true
-            };
-            cls.parent = {};
-            
-            // ADDING TO MEDIA SPESIFIC COLLECTION IF 'media' WAS DEFINED.
-            if (typeOf(media) === 'string' && media !== 'none') {
-                if ($media(media).hasOwnProperty('name') === false) {
-                    return;
-                }
-                cls.media = media;
-                if (typeOf(TocmMedClass[media]) === 'object') {
-                    TocmMedClass[media][selector] = cls;
-                } else {
-                    TocmMedClass[media] = {};
-                    TocmMedClass[media][selector] = cls;
-                }
-            } else {
-                cls.media = 'none';
-                TocmDefClass[selector] = cls;
-            }
-            // Writing CSS to Handler.
-            //TocmBuilder.writeSCS(cls);
-            var newclass;
-            if (typeOf(media) === 'string' && media !== 'none') {
-                newclass = $class(selector, media);
-            } else {
-                newclass = $class(selector);
-            }
-            if (!auto || auto !== false) {
-                newclass.apply();
-            }
-            return newclass;
-        }
-    };
-    // CREATING FUNCTION TO CREATE PRIVATE CLASS.
-    var TocmPrivate = function (selector, props, media) {
-        var newclass = $glob(selector, props, media, false);
-        if (newclass.hasOwnProperty('name')) {
-            newclass.config.write_area = 'family';
-            newclass.apply();
-            return newclass;
-        } else {
-            return null;
-        }
-    };
-    window.$priv = TocmPrivate;
-    // CREATING FUNCTION TO CREATE BATCH OBJECT CLASSES.
-    window.$batch = function (name, object, family, parent) {
-        var key, xkey, newclass, media, newname, subclass, vobj = {}, vpsdo = {};
-        if (typeOf(name) === 'string' && typeOf(object) === 'object') {
-            // Parsing name and media.
-            if (name.search('@') > -1) {
-                name = name.replace(/\s+(\@)\s+/g, '@');
-                name = name.split('@');
-                media = name[1];
-                name = name[0];
-            } else {
-                media = 'none';
-            }
-            // Enumerating Property and new object.
-            newclass = $priv(name, {}, media);
-            
-            for (key in object) {
-                if (object.hasOwnProperty(key)) {
-                    if (typeOf(object[key]) === 'object') {
-                        if (TocmRef.pseudo.indexOf(key) < 0) {
-                            // If not pseudo, then create new object with adding parent name.
-                            newname = name + ' ';
-                            if (key.search('&') > -1) {
-                                // If  name is multiple.
-                                xkey = key.replace(/\s+(\&)\s+/g, '&');
-                                xkey = xkey.split('&');
-                                for (var i = 0; i < xkey.length - 1; ++i) {
-                                    newname += xkey[i] + ', ' + name + ' ';
-                                }
-                                newname += xkey[xkey.length - 1];
-                            } else {
-                                newname += key;
-                            }
-                            if (typeOf(family) !== 'string') {
-                                family = name;
-                            }
-                            subclass = $batch(newname, object[key], family, newclass);
-                        } else {
-                            if (typeOf(vpsdo[key]) !== 'object') {
-                                vpsdo[key] = object[key];
-                            } else {
-                                for (var vip in object[key]) {
-                                    if (object[key].hasOwnProperty(vip)) {
-                                        vpsdo[key][vip] = [object][key][vip];
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        vobj[key] = object[key];
-                    }
-                }
-            }
-            if (typeOf(newclass) === 'object' && newclass.hasOwnProperty('name')) {
-                if (typeOf(family) === 'string') {
-                    newclass.family = family;
-                } else {
-                    newclass.family = name;
-                }
-                if (typeOf(parent) === 'object' && parent.hasOwnProperty('name')) {
-                    newclass.parent = parent;
-                }
-                for (var po in vobj) {
-                    if (vobj.hasOwnProperty(po)) {
-                        newclass.properties[po] = vobj[po];
-                    }
-                }
-                for (var ps in vpsdo) {
-                    if (vpsdo.hasOwnProperty(ps)) {
-                        newclass.pseudo[ps] = vpsdo[ps];
-                    }
-                }
-                newclass.apply();
-            }
-            return newclass;
-        }
-    };
-    // CREATING WRPAPPER //
+
     // TocmKeyframe Wrapper.
     window.$frame = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
@@ -878,9 +1056,6 @@ writing or editing the css file. All css script is created on the fly. You doesn
     // TocmMedia Wrapper.
     window.$media = function (name, value) {
         return new TocmMedia(name, value);
-    };
-    window.$glob = function (selector, props, media, auto) {
-        return new TocmCreate(selector, props, media, auto);
     };
 })(window);
 
@@ -944,9 +1119,9 @@ writing or editing the css file. All css script is created on the fly. You doesn
         var parent, key, ppsdo;
         if (typeOf(name) === 'string') {
             if (typeOf(media) === 'string' && media !== '' && media !== 'none') {
-                parent = $class(name, media);
+                parent = new TocmClass(name, media);
             } else {
-                parent = $class(name);
+                parent = new TocmClass(name);
             }
             
             for (key in parent.properties) {
@@ -998,7 +1173,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
     };
     // MOODULE TO NAVIGATE TO OTHER CLASS.
     Tocm.module.goto = function (name) {
-        var fclass = $class(this.name + ' ' + name, this.media);
+        var fclass = new TocmClass(this.name + ' ' + name, this.media);
         if (fclass.hasOwnProperty('name')) {
             return fclass;
         } else {
@@ -1013,4 +1188,4 @@ writing or editing the css file. All css script is created on the fly. You doesn
             return this;
         }
     };
-})(Tocm);
+})(TocmClass);
