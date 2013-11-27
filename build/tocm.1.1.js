@@ -829,6 +829,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
                                 family = name;
                             }
                             // CREATING NEW CLASS INHERITING TO THIS CLASS.
+                            TocmConfig.autowrite = false;
                             subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
                         } else {
                             // IF PROPERTY IS PSEUDO OBJECT, THEN ADD THE PSEUDO OBJEC TO QUEUE.
@@ -871,6 +872,9 @@ writing or editing the css file. All css script is created on the fly. You doesn
                 }
             }
             // APPLYING CLASS.
+            if (newclass.name === newclass.family) {
+                TocmConfig.autowrite = true;
+            }
             newclass.apply();
             // RETURNING CLASS.
             return newclass;
@@ -942,6 +946,13 @@ writing or editing the css file. All css script is created on the fly. You doesn
             Object.defineProperty(Tocm.module, name, {enumerable: false});
             return Tocm.module[name];
         }
+    };
+    // CREATING LAYOUT DEBUGGER.
+    Tocm.debugLayout = function (linecolor) {
+        if (typeOf(linecolor) !== 'string' || linecolor.match(/\#/)) {
+            linecolor = '#f00';
+        }
+        $class('!*', {box_shadow: '0 0 0 1px ' + linecolor});
     };
 })(window);
 
@@ -1046,7 +1057,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
                 newname += name[name.length - 1];
             }
         }
-        var newclass = $global(newname, prop, this.media, false);
+        var newclass = $class(newname, prop, this.media);
         if (newclass.hasOwnProperty('name')) {
             newclass.family = this.family;
             newclass.parent = this;

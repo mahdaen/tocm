@@ -10,8 +10,13 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <!-- Loading Application Scripts -->
     <link rel="stylesheet" href="test/boilerplate.css" />
+    <link rel="stylesheet" href="test/css/brushcore.css" />
+    <link rel="stylesheet" href="test/css/brushtheme.css" />
     <script src="build/tocm.1.1.min.js"></script>
     <script src="build/tocm.global.min.js"></script>
+    <script src="test/script/brush.js"></script>
+    <script src="test/script/jsbrush.js"></script>
+    <script src="test/script/cssbrush.js"></script>
     <script src="test/class/default.css.js"></script>
 </head>
 <body>
@@ -20,24 +25,252 @@
             <a href="">
                 <img class="logo" src="logo.png" />
             </a>
-            <h2 class="slogan">A light weight css library for javascript</h2>
+            <h2 class="slogan">A lightweight css library for javascript</h2>
         </div>
         <div class="bottom">
             <nav id="menu" class="menu">
-                <a href="#tocm" class="item">Tocm Core</a>
-                <a href="#media" class="item">Tocm Media</a>
-                <a href="#font" class="item">Tocm Font</a>
-                <a href="#keyframe" class="item">Tocm Keyframe</a>
-                <a href="#query" class="item">Tocm Query</a>
-                <a href="#animation" class="item">Tocm Animation</a>
-                <a href="#dom" class="item">Tocm Dom</a>
+                <a href="#tocm" class="item">Core</a>
+                <a href="#media" class="item">Media Query</a>
+                <a href="#font" class="item">Font</a>
+                <a href="#keyframe" class="item">Keyframes</a>
+                <a href="#debug" class="item">Debugger</a>
+                <a href="#animation" class="item">Animation</a>
+                <a href="#dom" class="item">Dom</a>
             </nav>
         </div>
     </header>
     <section id="page" class="page container">
-        <div class="welcome window">
-            <p class="text">Welcome to Tocm Documentation</p>
+        <div id="tocm" class="welcome window">
+            <h2 class="title">Tocm Class</h2>
+            <p class="paragraph">
+                <b>Tocm Class</b> is the core function of Tocm. With Tocm Class you can create and manage css easily and on the fly.
+                <span class="name">$class(<i>string</i> name, <i>object</i> properties, <i>string</i> media);</span>
+                <span class="detail">Sample:</span>
+            </p>
+            <pre class="codeblock brush: js">
+                $class('.header', {
+                    display: 'block',
+                    height: 400,
+                    background_image: linear_gradient('180deg, #fff, #ccc')
+                });
+            </pre>
+            <p class="paragraph detail">
+                On the sample above, we're creating a css with <code>.header</code> as css selector and <code>display, height, etc</code> is a property.
+                We're also can create same class but in different media type. To do this, we have to register the media query first to use
+                when we create a class in a specific media. But we doesn't need to register again if we've already register this media.
+                <span class="name">$media(<i>string</i> name, <i>string</i> rules);</span>
+                <span class="detail">Sample:</span>
+            </p>
+            <pre class="codeblock brush: js">
+                $media('Desktop', 'screen and (min-width: 1024px)');
+
+                $class('.header', {
+                    display: 'block',
+                    height: 400,
+                    background_image: linear_gradient('180deg, #fff, #ccc')
+                }, 'Desktop');
+            </pre>
+            <p class="paragraph detail">
+                You can also use in-name identifier to specfy wich media will be used in the class. Look at this sample: 
+            </p>
+            <pre class="codeblock brush: js">
+                $class('.header@Desktop', {
+                    display: 'block',
+                    height: 400,
+                    background_image: linear_gradient('180deg, #fff, #ccc')
+                });
+            </pre>
+            <p class="paragraph detail">
+                Both sample above is creating class for media 'Desktop'. By default, each class is writed in family-group node. So, if you want
+                to create some class for Global Group, you have to specify the global identifier ('!') before the class name. Look at this sample:
+            </p>
+            <pre class="codeblock brush: js">
+                $class('!.header@Desktop', {
+                    display: 'block',
+                    height: 400,
+                    background_image: linear_gradient('180deg, #fff, #ccc')
+                });
+            </pre>
+            <p class="paragraph detail">
+                To create a class tree, simply do like this:
+            </p>
+            <pre class="codeblock brush: js">
+                $class('.header', {
+                    display: 'block',
+                    height: 400,
+                    background_image: linear_gradient('180deg, #fff, #ccc'),
+            
+                    '.logo': {
+                        max_width: '100%'
+                    },
+                    '.menu': {
+                        padding: 10, text_decoration: 'none', font_family: 'Tahoma',
+                        
+                        hover: {
+                            color: '#444'
+                        }
+                    }
+                });
+            </pre>
+            <p class="paragraph detail">
+                Sample above is a standard method. It's like when we write <code>.header .logo {}</code> and <code>.header .menu {}</code> selector in css.
+                Besides using standard method, you can aslo use chaining method. This method is generally used when modifying the class. Look at this sample:
+            </p>
+            <pre class="codeblock brush: js">
+                $class('.header', {
+                    display: 'block',
+                    height: 400,
+                    background_image: linear_gradient('180deg, #fff, #ccc')
+                })
+                .add('.logo', {width: '100%'})
+                .add('.menu', {display: 'inline-block'});
+            </pre>
+            <p class="paragraph detail">
+                To select the existing class, you can simply enter the name like this:
+            </p>
+            <pre class="codeblock brush: js">
+                // Select universal class.
+                $class('.header');
+                // Select media class.
+                $class('.header', 'Desktop');
+            </pre>
+            <p class="paragraph detail">
+                To manage the class, you can simply select the class and then modify them. Look at this sample:
+            </p>
+            <pre class="codeblock brush: js">
+                // Select universal class.
+                $class('.header').set('display', 'none');
+                
+                $class('.header@desktop').set('width': '100%').on('hover', {background: '#ccc'});
+            </pre>
+            <p class="paragraph detail">
+                You can also set multiple properties with this method:
+            </p>
+            <pre class="codeblock brush: js">
+                // Select universal class.
+                $class('.header').set({display: 'block', width: '100%', max_width: 960});
+            </pre>
+        </div>
+        <div id="media" class="welcome window">
+            <h2 class="title">Tocm Media Query</h2>
+            <p class="paragraph">
+                <b>Tocm Media Query</b> is a function to register media query collections.
+                <span class="name">$media(<i>string</i> name, <i>string</i> rules);</span>
+                <span class="detail">Sample:</span>
+            </p>
+            <pre class="codeblock brush: js">
+                // Registering media query.
+                $media('Desktop', 'all and (min-width: 1024px)');
+
+                // Adding class to media query.
+                $class('!.test@Desktop', {width: 100});
+                $class('!.second-test@Desktop', {width: 100});
+            </pre>
+            <p class="paragraph detail">
+                This is the css script generated by the sample above:
+            </p>
+            <pre class="codeblock brush: css">
+                @media all and (min-width: 1024px) {
+                    .test {
+                        width: 100px;
+                    }
+                    .second-test {
+                        width: 100px;
+                    }
+                }
+            </pre>
+        </div>
+        <div id="keyframe" class="welcome window">
+            <h2 class="title">Tocm Font</h2>
+            <p class="paragraph">
+                <b>Tocm Font</b> is a function to register web fonts. With Tocm Font you can add your font easily.
+                <span class="name">$fonts(<i>string</i> name, <i>array</i> source, <i>opt object</i> property);</span>
+                <span class="detail">Sample:</span>
+            </p>
+            <pre class="codeblock brush: js">
+                $fonts('Gotham Book', ['font/gotham.book.eot', 'font/gotham.book.ttf', 'font/gotham.book.woff']);
+            </pre>
+            <p class="paragraph detail">
+                This is the css script generated by the sample above:
+            </p>
+            <pre class="codeblock brush: css">
+                @font-face {
+                    font-family: "Gotham Book";
+                    src: local("Gotham Book");
+                    src: url("font/gotham.book.eot");
+                    src: url("font/gotham.book.eot?#iefix") format("embedded-opentype");
+                    src: url("font/gotham.book.ttf") format("truetype");
+                    src: url("font/gotham.book.woff") format("woff");
+                }
+            </pre>
+        </div>
+        <div id="font" class="welcome window">
+            <h2 class="title">Tocm Keyframe</h2>
+            <p class="paragraph">
+                <b>Tocm Keyframe</b> is a function to create a animation keyframes.
+                <span class="name">$keyframes(<i>string</i> name, <i>string</i> position, <i>object</i> properties);</span>
+                <span class="detail">Sample:</span>
+            </p>
+            <pre class="codeblock brush: js">
+                $keyframes('SlideLeft', '0%', {
+                    left: '110%'
+                })
+                .at('50%', {
+                    left: '50%'
+                })
+                .at('100%', {
+                    left: '100%'
+                });
+            </pre>
+            <p class="paragraph detail">
+                This is the css script generated by the sample above:
+            </p>
+            <pre class="codeblock brush: css">
+                @keyframes SlideLeft {
+                    0% {
+                        left: 110%;
+                    }
+                    50% {
+                        left: 50%;
+                    }
+                    100% {
+                        left: 100%;
+                    }
+                }
+            
+                @-webkit-keyframes SlideLeft {
+                    0% {
+                        left: 110%;
+                    }
+                    50% {
+                        left: 50%;
+                    }
+                    100% {
+                        left: 100%;
+                    }
+                }
+            </pre>
+        </div>
+        <div id="debug" class="welcome window">
+            <h2 class="title">Tocm Debugger</h2>
+            <p class="paragraph">
+                <b>Tocm Debugger</b> is a function to help you debug the layout with adding line on each box.
+                <span class="name">$class.debugLayout(<i>string</i> lineColor);</span>
+                <span class="detail">Sample:</span>
+            </p>
+            <pre class="codeblock brush: js">
+                // Debug with default line color.
+                $class.debugLayout();
+                // Debug with custom line color.
+                $class.debugLayout('green');
+                $class.debugLayout('#f33');
+                // Debug with line color inheriting from the box color.
+                $class.debugLayout('');
+            </pre>
         </div>
     </section>
+    <script type="text/javascript">
+        SyntaxHighlighter.all();
+    </script>
 </body>
 </html>
