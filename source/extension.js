@@ -1,4 +1,9 @@
-﻿// CREATING A TOCM CLASS SUPPORT.
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+// CREATING A TOCM CLASS SUPPORT.
+// KEYFRAME COLLECTIONS.
 (function (window) {
     'use strict';
     // CREATING KEYFRAMES DEFINITIONS.
@@ -33,7 +38,9 @@
         }
         return this;
     };
+    // CREATING PROTOTYPE.
     TocmKeyframe.prototype = {
+        // FUNCTION TO WRITE KEYFRAME.
         write: function () {
             var cstr = '', style, vendor;
             vendor = ['', '-webkit-'];
@@ -47,7 +54,7 @@
                             cstr += '\t\t' + pos + ' {\n';
                             // Creating Properties.
                             if (typeOf(this[pos]) === 'object') {
-                                cstr += TocmBuilder.createCSS(this[pos], '\t\t\t');
+                                cstr += TocmBuilder.generateCSS(this[pos], '\t\t\t');
                             }
                             // Closing Position.
                             cstr += '\t\t}\n';
@@ -60,6 +67,7 @@
             }
             return this;
         },
+        // FUNCTION TO ADD TIMELINE POSITION.
         at: function (position, properties) {
             var key, current;
             if (this.hasOwnProperty('name') && typeOf(position) === 'string' && typeOf(properties) === 'object') {
@@ -78,6 +86,22 @@
             return this;
         }
     };
+    // Hiding Prototype.
+    Object.defineProperty(TocmKeyframe.prototype, 'write', {
+        enumerable: false
+    });
+    Object.defineProperty(TocmKeyframe.prototype, 'at', {
+        enumerable: false
+    });
+    // TocmKeyframe Wrapper.
+    window.$keyframes = function (name, position, propertis) {
+        return new TocmKeyframe(name, position, propertis);
+    };
+})(window);
+
+// FONTS COLLECTIONS.
+(function (window) {
+    'use strict';
     // CREATING FUNCTION TO CREATE OR GET FONT-FACE COLLECTIONS.
     var TocmFont = function (name, src, opt) {
         var fonts, key;
@@ -110,7 +134,9 @@
         }
         return this;
     };
+    // CREATING PROTOTYPES.
     TocmFont.prototype = {
+        // WRITING FONTS.
         write: function () {
             var cstr = '', key, j;
             if (this.hasOwnProperty('name')) {
@@ -151,6 +177,7 @@
             }
             return this;
         },
+        // CONFIGURING FONTS.
         set: function (objkey, value) {
             var name, key;
             if (this.hasOwnProperty('name')) {
@@ -171,6 +198,22 @@
             return this;
         }
     };
+    // Hiding Prototype.
+    Object.defineProperty(TocmFont.prototype, 'write', {
+        enumerable: false
+    });
+    Object.defineProperty(TocmFont.prototype, 'set', {
+        enumerable: false
+    });
+    // TocmFont Wrapper.
+    window.$fonts = function (name, src, opt) {
+        return new TocmFont(name, src, opt);
+    };
+})(window);
+
+// MEDIA COLLECTIONS.
+(function (window) {
+    'use strict';
     // CREATING FUNCTION TO CREATE MEDIA QUERIES COLLECTIONS.
     var TocmMedia = function (name, value) {
         var media;
@@ -196,14 +239,6 @@
         }
     };
 
-    // TocmKeyframe Wrapper.
-    window.$keyframes = function (name, position, propertis) {
-        return new TocmKeyframe(name, position, propertis);
-    };
-    // TocmFont Wrapper.
-    window.$fonts = function (name, src, opt) {
-        return new TocmFont(name, src, opt);
-    };
     // TocmMedia Wrapper.
     window.$media = function (name, value) {
         return new TocmMedia(name, value);

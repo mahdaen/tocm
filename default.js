@@ -1,7 +1,5 @@
-﻿// Creating require.js configuration.
-requirejs.config({
-    baseUrl: 'src'
-});
+/*jshint undef:false*/
 
 // Calling Tocm scripts.
-require(['global', 'object', 'builder', 'extension', 'tocm', 'module']);
+require(['source/native', 'source/tocmreg', 'source/tocmref', 'source/builder', 'source/extension']);
+require(['source/global', 'source/tocm', 'test/default.css']);
