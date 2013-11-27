@@ -408,18 +408,3 @@ writing or editing the css file. All css script is created on the fly. You doesn
         });
     }
 })(Tocm);
-
-// HIDING ALL TOCM FROM WINDOW.
-(function (window) {
-    'use strict';
-    var tocm = [
-        '$class', '$global', '$media', '$fonts', '$keyframes',
-        'Tocm', 'TocmBuilder', 'TocmConfig', 'TocmDefClass', 'TocmFonts',
-        'TocmKeyframes', 'TocmMedClass', 'TocmMedia', 'TocmRef'
-    ];
-    for (var i = 0; i < tocm.length; ++i) {
-        Object.defineProperty(window, tocm[i], {
-            enumerable: false
-        });
-    }
-})(window);
