@@ -7,7 +7,8 @@
     'use strict';
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
-        autowrite: true
+        autowrite: true,
+        sortclass: false
     };
     // CREATING COLLECTIONS OF UNIVERSAL CLASS.
     window.TocmDefClass = {};

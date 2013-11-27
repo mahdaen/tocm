@@ -9,9 +9,35 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <!-- Loading Application Scripts -->
-    <script data-main="default.js" src="reference/require.js"></script>
+    <link rel="stylesheet" href="test/boilerplate.css" />
+    <script src="build/tocm.1.1.min.js"></script>
+    <script src="build/tocm.global.min.js"></script>
+    <script src="test/class/default.css.js"></script>
 </head>
 <body>
-
+    <header id="header" class="header">
+        <div class="top">
+            <a href="">
+                <img class="logo" src="logo.png" />
+            </a>
+            <h2 class="slogan">A light weight css library for javascript</h2>
+        </div>
+        <div class="bottom">
+            <nav id="menu" class="menu">
+                <a href="#tocm" class="item">Tocm Core</a>
+                <a href="#media" class="item">Tocm Media</a>
+                <a href="#font" class="item">Tocm Font</a>
+                <a href="#keyframe" class="item">Tocm Keyframe</a>
+                <a href="#query" class="item">Tocm Query</a>
+                <a href="#animation" class="item">Tocm Animation</a>
+                <a href="#dom" class="item">Tocm Dom</a>
+            </nav>
+        </div>
+    </header>
+    <section id="page" class="page container">
+        <div class="welcome window">
+            <p class="text">Welcome to Tocm Documentation</p>
+        </div>
+    </section>
 </body>
 </html>

@@ -189,7 +189,8 @@ writing or editing the css file. All css script is created on the fly. You doesn
     'use strict';
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
-        autowrite: true
+        autowrite: true,
+        sortclass: false
     };
     // CREATING COLLECTIONS OF UNIVERSAL CLASS.
     window.TocmDefClass = {};
@@ -614,6 +615,9 @@ writing or editing the css file. All css script is created on the fly. You doesn
         var defaultClass = TocmDefClass, mediaClass = TocmMedClass, name, fml, className, dstr = '', mstr = '';
         var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
         // ENUMERATING DEFAULT CLASSES.
+        if (TocmConfig.sortclass === true) {
+            defaultClass = TocmDefClass.sort();
+        }
         for (name in defaultClass) {
             if (defaultClass.hasOwnProperty(name)) {
                 area = defaultClass[name].config.write_area; family = defaultClass[name].family;
@@ -640,8 +644,14 @@ writing or editing the css file. All css script is created on the fly. You doesn
         }
 
         // ENUMERATING MEDIA CLASSES.
+        if (TocmConfig.sortclass === true) {
+            mediaClass = TocmMedClass.sort();
+        }
         for (name in mediaClass) {
             if (mediaClass.hasOwnProperty(name)) {
+                if (TocmConfig.sortclass === true) {
+                    mediaClass[name] = mediaClass[name].sort();
+                }
                 for (className in mediaClass[name]) {
                     if (mediaClass[name].hasOwnProperty(className)) {
                         area = mediaClass[name][className].config.write_area; family = mediaClass[name][className].family;
