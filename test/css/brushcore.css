@@ -52,8 +52,8 @@
 }
 
 .syntaxhighlighter {
-  padding: 10px; border-radius: 5px;
-  background: #fff;
+  padding: 10px;
+  background: #f0f0f0;
   width: 100% !important;
   margin: 1em 0 1em 0 !important;
   position: relative !important;

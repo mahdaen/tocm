@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="test/boilerplate.css" />
     <link rel="stylesheet" href="test/css/brushcore.css" />
     <link rel="stylesheet" href="test/css/brushtheme.css" />
-    <script src="build/tocm.1.1.min.js"></script>
+    <script src="build/tocm.1.1.js"></script>
     <script src="build/tocm.global.min.js"></script>
     <script src="test/script/brush.js"></script>
     <script src="test/script/jsbrush.js"></script>
@@ -29,18 +29,18 @@
         </div>
         <div class="bottom">
             <nav id="menu" class="menu">
-                <a href="#tocm" class="item">Core</a>
-                <a href="#media" class="item">Media Query</a>
-                <a href="#font" class="item">Font</a>
-                <a href="#keyframe" class="item">Keyframes</a>
-                <a href="#debug" class="item">Debugger</a>
-                <a href="#animation" class="item">Animation</a>
-                <a href="#dom" class="item">Dom</a>
+                <a href="#tocm" onclick="window.scrollTo(0,0);" class="item">Core</a>
+                <a href="#media" onclick="window.scrollTo(0,0);" class="item">Media Query</a>
+                <a href="#font" onclick="window.scrollTo(0,0);" class="item">Font</a>
+                <a href="#keyframe" onclick="window.scrollTo(0,0);" class="item">Keyframes</a>
+                <a href="#debug" onclick="window.scrollTo(0,0);" class="item">Debugger</a>
+                <a href="#animation" onclick="window.scrollTo(0,0);" class="item">Animation</a>
+                <a href="#query" onclick="window.scrollTo(0,0);" class="item">Query</a>
             </nav>
         </div>
     </header>
     <section id="page" class="page container">
-        <div id="tocm" class="welcome window">
+        <div id="tocm" class="window">
             <h2 class="title">Tocm Class</h2>
             <p class="paragraph">
                 <b>Tocm Class</b> is the core function of Tocm. With Tocm Class you can create and manage css easily and on the fly.
@@ -151,7 +151,7 @@
                 $class('.header').set({display: 'block', width: '100%', max_width: 960});
             </pre>
         </div>
-        <div id="media" class="welcome window">
+        <div id="media" class="window">
             <h2 class="title">Tocm Media Query</h2>
             <p class="paragraph">
                 <b>Tocm Media Query</b> is a function to register media query collections.
@@ -180,7 +180,7 @@
                 }
             </pre>
         </div>
-        <div id="keyframe" class="welcome window">
+        <div id="font" class="window">
             <h2 class="title">Tocm Font</h2>
             <p class="paragraph">
                 <b>Tocm Font</b> is a function to register web fonts. With Tocm Font you can add your font easily.
@@ -204,7 +204,7 @@
                 }
             </pre>
         </div>
-        <div id="font" class="welcome window">
+        <div id="keyframe" class="window">
             <h2 class="title">Tocm Keyframe</h2>
             <p class="paragraph">
                 <b>Tocm Keyframe</b> is a function to create a animation keyframes.
@@ -251,7 +251,7 @@
                 }
             </pre>
         </div>
-        <div id="debug" class="welcome window">
+        <div id="debug" class="window">
             <h2 class="title">Tocm Debugger</h2>
             <p class="paragraph">
                 <b>Tocm Debugger</b> is a function to help you debug the layout with adding line on each box.

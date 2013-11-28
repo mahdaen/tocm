@@ -226,7 +226,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
         ],
         // PSEUDO LISTS //
         pseudo: [
-            'link', 'visited', 'active', 'hover', 'focus', 'first_letter', 'first_line', 'first_child', 'before', 'after', 'lang'
+            'link', 'visited', 'active', 'hover', 'focus', 'first_letter', 'first_line', 'first_child', 'before', 'after', 'lang', 'target'
         ],
         // VENDOR LISTS //
         vendor: [
@@ -1062,6 +1062,10 @@ writing or editing the css file. All css script is created on the fly. You doesn
             newclass.family = this.family;
             newclass.parent = this;
             newclass.config.write_area = 'family';
+            var doc = document.getElementById(newclass.name);
+            if (doc) {
+                doc.parentNode.removeChild(doc);
+            }
             newclass.apply();
             return newclass;
         } else {

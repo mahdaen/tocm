@@ -24,7 +24,7 @@
         ],
         // PSEUDO LISTS //
         pseudo: [
-            'link', 'visited', 'active', 'hover', 'focus', 'first_letter', 'first_line', 'first_child', 'before', 'after', 'lang'
+            'link', 'visited', 'active', 'hover', 'focus', 'first_letter', 'first_line', 'first_child', 'before', 'after', 'lang', 'target'
         ],
         // VENDOR LISTS //
         vendor: [
