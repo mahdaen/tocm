@@ -16,7 +16,7 @@
         }
         return Object.prototype.toString.call(obj).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
     };
-    window.typeOf = window.ObjectType = ObjectType;
+    window.typeOf = ObjectType;
     
     // Last Node.
     var ObjectLastNode = function (from, what) {

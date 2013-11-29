@@ -4,7 +4,8 @@
 
 $class('!body', {
     background_color: '#f9f9f9',
-    background_image: 'url(test/img/bg.png)'
+    background_image: 'url(test/img/bg.png)',
+    overflow_y: 'auto'
 });
 
 $class('!.window', {
@@ -79,7 +80,7 @@ $class('.header', {
         background_color: rgb('#f7f7f7', 1),
 
         '.logo': {
-            width: 150
+            width: 172
         },
         '.slogan': {
             font_family: 'Consolas',
@@ -116,13 +117,15 @@ $class('.header', {
 });
 
 var paging_off = {
-    position: 'absolute', top: '-400%', transition: 'all .6s ease-in-out', opacity: 0
+    position: 'absolute', top: '-600%', transition: 'all .6s ease-in-out', opacity: 0
 };
 var paging_on = {
     position: 'relative', top: 0, transition: 'all 2s ease-in-out', opacity: 1
 };
 
-$class('.page', {padding_bottom: 30, position: 'relative', padding_top: 0})
+$class('.page', {
+    padding_bottom: 60, position: 'relative'
+})
 .on('before', {
     content: '""', display: 'block', width: 418, height: 117, margin: '0 auto', background_image: 'url(logo.png)',
     margin_top: '50%', position: 'absolute', left: '27.5%', filter: 'grayscale(1) drop-shadow(0 1px 0px #a0a0a0)', opacity: 0.2

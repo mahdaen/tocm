@@ -1,38 +1,51 @@
-var anim = {
-    // PARENT ANIMATION OBJECT -->
-    // Config:
-    name: 'HeadLine',
-    duration: 0.5,
-    easing: 'ease-in',
-    delay: 0.2,
-    plays: 1,
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+$animation('.headline', {
+    // CONFIGURATIONS.
+    duration: 0.6,
+    timing: 'ease-in-out',
+    delay: 0.3,
+    repeat: 1,
     direction: 'normal',
     state: 'running',
-    callback: function () {}, // Function to call when the animation reaching duration count.
+    complete: function () {},
     
-    // Timeline:
+    // TIMELINE.
     '0%': {
-        left: 10, top: 10
+        left: 100
     },
-    '0%-callback': function () {},
     '10%': {
-        left: 20,
+        left: 200
     },
     '100%': {
-        left: -500
+        left: '100%'
     },
     
-    // CHILD ANIMATION OBJECT.
     '.title': {
-        name: 'HeadLine-title',
-        duration: 0.5,
-        easing: 'ease-in-out',
-        
         '0%': {
-            left: 100
+            left: 200, top: 10
         },
         '100%': {
-            left: 0
+            left: -500, top: 0
         }
     }
-};
+});
+
+$animation('.test-slide')
+.set('.test', {
+    duration: 2,
+    
+    '20%': {
+        left: 20
+    },
+    
+    '.sub-test': {
+        duration: 0.4,
+        
+        '30%': {
+            left: 20
+        }
+    }
+});
