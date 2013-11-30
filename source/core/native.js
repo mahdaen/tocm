@@ -71,6 +71,22 @@
             enumerable: false
         });
     }
+    
+    // Delete array.
+    if (!Array.prototype.delete) {
+        Array.prototype.delete = function (index) {
+            if (typeOf(index) === 'number') {
+                var narr = [];
+                for (var i = 0; i < this.length; ++i) {
+                    if (i !== index) {
+                        narr.push(this[i]);
+                    }
+                }
+                return narr;
+            }
+            return this;
+        };
+    }
 })(Array);
 
 // Extend Object.

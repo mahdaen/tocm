@@ -139,23 +139,19 @@
     Object.defineProperty(TocmQuery.prototype, 'apply', {enumerable: false, writable: false});
     
     // CREATING MODULE EXTENDER.
-    tocmQuery.extend = function (modulename, func) {
+    tocmQuery.extends = function (modulename, func) {
         if (typeOf(modulename) === 'string' && modulename.match(/[a-zA-Z\d\_]+/) && typeOf(func) === 'function') {
             TocmQuery.prototype[modulename] = func;
             Object.defineProperty(TocmQuery.prototype, modulename, {enumerable: false});
         } else if (typeOf(modulename === 'object')) {
             for (var name in modulename) {
                 if (modulename.hasOwnProperty(name)) {
-                    tocmQuery.extend(name, modulename[name]);
+                    tocmQuery.extends(name, modulename[name]);
                 }
             }
         }
     };
     
     // ADDING TOCMQUERY TO WINDOW.
-    window.$path = window.TocmQuery = tocmQuery;
-    if (!window.jQuery) {
-        window.$ = tocmQuery;
-    }
+    window.$ = window.TocmQuery = tocmQuery;
 })(window);
-

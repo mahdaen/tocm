@@ -21,3 +21,4 @@
     // CREATING FONTS COLLECTIONS.
     window.TocmFonts = {};
 })(window);
+

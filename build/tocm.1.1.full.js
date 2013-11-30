@@ -14,7 +14,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
 /*jshint boss:true*/
 /*jshint undef:false*/
 /*jshint -W065 */
-
+/*jshint undef:false */
 
 // A COLLECTIONS OF NATIVE OBJECT PROTOTYPE EXTENDER.
 // --------------------------------------------------------------------------
@@ -200,6 +200,10 @@ writing or editing the css file. All css script is created on the fly. You doesn
     }
 })(String);
 
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
 // CREATING TOCM REGISTRY.
 (function(window) {
     'use strict';
@@ -219,6 +223,10 @@ writing or editing the css file. All css script is created on the fly. You doesn
     // CREATING FONTS COLLECTIONS.
     window.TocmFonts = {};
 })(window);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
 
 // CREATING REFERENCE OBJECTS.
 (function (window) {
@@ -254,6 +262,232 @@ writing or editing the css file. All css script is created on the fly. You doesn
         ]
     };
 })(window);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+// CREATING CSS STRING BUILDER.
+(function (window) {
+    'use strict';
+    var TocmBuilder = {};
+    // FUNCTION TO CREATE CSS STRING.
+    TocmBuilder.generateCSS = function (object, tab) {
+        var ccss = TocmRef.ccss, xcss = TocmRef.xcss, css3 = TocmRef.css3, cssString = '', property;
+
+        if (typeOf(object) === 'object') {
+            // Sorting Properties.
+            object.sort();
+            // CREATE CUSTOM TAB.
+            if (typeOf(tab) !== 'string') {
+                tab = '';
+            }
+            // Processing CSS Object.
+            for (var index in object) {
+                if (object.hasOwnProperty(index) && object[index] !== '') {
+                    // Formatting to CSS property format.
+                    property = index.replace(/_/g, '-').replace(/\$/g, '*');
+                    if (typeOf(object[index]) === 'number' && TocmRef.noint.indexOf(property) < 0) {
+                        // Formatting number.
+                        object[index] += 'px';
+                    }
+                    if (object[index] !== null) {
+                        if (css3.indexOf(index) > -1) {
+                            // CSS3 Properties.
+                            cssString += tab + property + ': ' + object[index] + '; ';
+                            cssString += '-webkit-' + property + ': ' + object[index] + '; ';
+                            cssString += '-moz-' + property + ': ' + object[index] + '; ';
+                            cssString += '-o-' + property + ': ' + object[index] + '; ';
+                            cssString += '-ms-' + property + ': ' + object[index] + ';\n';
+                        } else {
+                            cssString += tab + property + ': ' + object[index] + ';\n';
+                        }
+                    }
+                }
+            }
+            return cssString;
+        } else {
+            return '';
+        }
+    };
+    // FUNCTION TO WRITE CSS STRING TO HANDLER.
+    TocmBuilder.writeDOM = function (name, media, value) {
+        var node, head, chld, last;
+        var find = function (path) {
+            var xpeval = document.evaluate(path, document, null, XPathResult.ANY_TYPE, null);
+            while (node = xpeval.iterateNext()) {
+                return node;
+            }
+            return null;
+        };
+        if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
+            head = document.getElementsByTagName('head')[0];
+            chld = head.children;
+            last = lastNode(chld, 'style');
+            node = find('//style[@id="' + name + '"][@data="' + media + '"]');
+            if (node) {
+                node.innerHTML = value;
+            } else {
+                node = document.createElement('style');
+                node.setAttribute('id', name);
+                node.setAttribute('data', media);
+                node.setAttribute('type', 'text/css');
+                node.innerHTML = value;
+
+                if (last > -1) {
+                    head.insertBefore(node, chld[last + 1]);
+                } else {
+                    head.appendChild(node);
+                }
+            }
+        }
+        return node;
+    };
+    // FUNCTION TO WRITE CSS STRING INTO COMMON FORMATED STRING.
+    TocmBuilder.writeCSS = function (object, isget) {
+        if (typeOf(object) === 'object' && object.hasOwnProperty('name')) {
+            var mediaInfo, cssString = '', property, pseudo;
+            var area = object.config.write_area, auto = object.config.write_auto, family = object.family, domid;
+        
+            if (object.media !== 'none') {
+                // GENERATING CLASS FROM MEDIA COLLECTIONS.
+                mediaInfo = $media(object.media);
+                if (typeOf(mediaInfo) === 'object') {
+                    // OPENING CSS SELECTOR.
+                    cssString += '\t\t' + object.name + ' {\n';
+                    // CREATING CSS STRING.
+                    cssString += TocmBuilder.generateCSS(object.properties, '\t\t\t');
+                    // CLOSING CSS SELECTOR.
+                    cssString += '\t\t}\n';
+                    // CREATING PSEUDO IF EXISTS.
+                    pseudo = object.pseudo;
+                    for (property in pseudo) {
+                        if (pseudo.hasOwnProperty(property)) {
+                            if (typeOf(pseudo[property]) === 'object' && Object.keys(pseudo[property]).length > 0) {
+                                cssString += '\t\t' + object.name + ':' + property + ' {\n';
+                                cssString += TocmBuilder.generateCSS(pseudo[property], '\t\t\t');
+                                cssString += '\t\t}\n';
+                            }
+                        }
+                    }
+                    // RETURNING THE GENERATED CSS STRING.
+                    return cssString;
+                }
+            } else {
+                // GENERATING CLASS FROM GLOBAL COLLECTIONS.
+                cssString += '\n\t' + object.name + ' {\n';
+                cssString += TocmBuilder.generateCSS(object.properties, '\t\t');
+                cssString += '\t}\n';
+
+                // CREATING PSEUDO IF EXISTS.
+                pseudo = object.pseudo;
+                for (property in pseudo) {
+                    if (pseudo.hasOwnProperty(property)) {
+                        if (typeOf(pseudo[property]) === 'object' && Object.keys(pseudo[property]).length > 0) {
+                            cssString += '\t' + object.name + ':' + property + ' {\n';
+                            cssString += TocmBuilder.generateCSS(pseudo[property], '\t\t');
+                            cssString += '\t}\n';
+                        }
+                    }
+                }
+                // RETURNING THE GENERATED CSS STRING.
+                return cssString;
+            }
+        }
+    };
+    // FUNCTION TO WRITE READY STRIG TO HANDLER.
+    TocmBuilder.writeSCS = function () {
+        var defaultClass = TocmDefClass, mediaClass = TocmMedClass, name, fml, className, dstr = '', mstr = '';
+        var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
+        // ENUMERATING DEFAULT CLASSES.
+        if (TocmConfig.sortclass === true) {
+            defaultClass = TocmDefClass.sort();
+        }
+        for (name in defaultClass) {
+            if (defaultClass.hasOwnProperty(name)) {
+                area = defaultClass[name].config.write_area; family = defaultClass[name].family;
+                if (area === 'family') {
+                    if (typeOf(pdstr[family]) !== 'string') {
+                        pdstr[family] = '';
+                    }
+                    pdstr[family] += TocmBuilder.writeCSS(defaultClass[name], true);
+                } else {
+                    dstr += TocmBuilder.writeCSS(defaultClass[name], true);
+                }
+            }
+        }
+
+        // WRITING GLOBAL CLASSES.
+        if (dstr !== '') {
+            TocmBuilder.writeDOM('Global Class', 'universal', dstr);
+        }
+        // WRITING PRIVATE CLASSES.
+        for (fml in pdstr) {
+            if (pdstr.hasOwnProperty(fml)) {
+                TocmBuilder.writeDOM(fml, 'universal', pdstr[fml]);
+            }
+        }
+
+        // ENUMERATING MEDIA CLASSES.
+        if (TocmConfig.sortclass === true) {
+            mediaClass = TocmMedClass.sort();
+        }
+        for (name in mediaClass) {
+            if (mediaClass.hasOwnProperty(name)) {
+                if (TocmConfig.sortclass === true) {
+                    mediaClass[name] = mediaClass[name].sort();
+                }
+                for (className in mediaClass[name]) {
+                    if (mediaClass[name].hasOwnProperty(className)) {
+                        area = mediaClass[name][className].config.write_area; family = mediaClass[name][className].family;
+                        if (area === 'family') {
+                            if (typeOf(pmdstr[family]) !== 'string') {
+                                pmdstr[family] = '';
+                            }
+                            pmdstr[family] += TocmBuilder.writeCSS(mediaClass[name][className], true);
+                        } else {
+                            mstr += TocmBuilder.writeCSS(mediaClass[name][className], true);
+                        }
+                    }
+                }
+                // WRITING GLOBAL CLASSES.
+                if (mstr !== '') {
+                    // GETTING MEDIA INFO.
+                    minfo = $media(name); gcstr = '';
+                    // OPENING MEDIA QUERIES.
+                    gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    // ADDING CSS STRING.
+                    gcstr += mstr;
+                    // CLOSING MEDIA QUERIES.
+                    gcstr += '\t}\n';
+                    TocmBuilder.writeDOM('Global Class', name, gcstr);
+                    mstr = '';
+                }
+                // WRITING PRIVATE CLASSES.
+                for (fml in pmdstr) {
+                    if (pmdstr.hasOwnProperty(fml)) {
+                        minfo = $media(name); fmcstr = '';
+                        // OPENING MEDIA QUERIES.
+                        fmcstr += '\n\t@media ' + minfo.value + ' {\n';
+                        // ADDING CSS STRING.
+                        fmcstr += pmdstr[fml];
+                        // CLOSING MEDIA QUERIES.
+                        fmcstr += '\t}\n';
+                        TocmBuilder.writeDOM(fml, name, fmcstr);
+                    }
+                }
+                pmdstr = {};
+            }
+        }
+    };
+
+    // ATTACHING CSS STRING BUILDER TO WINDOW OBJECT.
+    window.TocmBuilder = TocmBuilder;
+})(window);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
 
 // CREATING A TOCM CLASS SUPPORT.
 // KEYFRAME COLLECTIONS.
@@ -498,223 +732,9 @@ writing or editing the css file. All css script is created on the fly. You doesn
     };
 })(window);
 
-// CREATING CSS STRING BUILDER.
-(function (window) {
-    'use strict';
-    var TocmBuilder = {};
-    // FUNCTION TO CREATE CSS STRING.
-    TocmBuilder.generateCSS = function (object, tab) {
-        var ccss = TocmRef.ccss, xcss = TocmRef.xcss, css3 = TocmRef.css3, cssString = '', property;
-
-        if (typeOf(object) === 'object') {
-            // Sorting Properties.
-            object.sort();
-            // CREATE CUSTOM TAB.
-            if (typeOf(tab) !== 'string') {
-                tab = '';
-            }
-            // Processing CSS Object.
-            for (var index in object) {
-                if (object.hasOwnProperty(index) && object[index] !== '') {
-                    // Formatting to CSS property format.
-                    property = index.replace(/_/g, '-').replace(/\$/g, '*');
-                    if (typeOf(object[index]) === 'number' && TocmRef.noint.indexOf(property) < 0) {
-                        // Formatting number.
-                        object[index] += 'px';
-                    }
-                    if (object[index] !== null) {
-                        if (css3.indexOf(index) > -1) {
-                            // CSS3 Properties.
-                            cssString += tab + property + ': ' + object[index] + '; ';
-                            cssString += '-webkit-' + property + ': ' + object[index] + '; ';
-                            cssString += '-moz-' + property + ': ' + object[index] + '; ';
-                            cssString += '-o-' + property + ': ' + object[index] + '; ';
-                            cssString += '-ms-' + property + ': ' + object[index] + ';\n';
-                        } else {
-                            cssString += tab + property + ': ' + object[index] + ';\n';
-                        }
-                    }
-                }
-            }
-            return cssString;
-        } else {
-            return '';
-        }
-    };
-    // FUNCTION TO WRITE CSS STRING TO HANDLER.
-    TocmBuilder.writeDOM = function (name, media, value) {
-        var node, head, chld, last;
-        var find = function (path) {
-            var xpeval = document.evaluate(path, document, null, XPathResult.ANY_TYPE, null);
-            while (node = xpeval.iterateNext()) {
-                return node;
-            }
-            return null;
-        };
-        if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
-            head = document.getElementsByTagName('head')[0];
-            chld = head.children;
-            last = lastNode(chld, 'style');
-            node = find('//style[@id="' + name + '"][@data="' + media + '"]');
-            if (node) {
-                node.innerHTML = value;
-            } else {
-                node = document.createElement('style');
-                node.setAttribute('id', name);
-                node.setAttribute('data', media);
-                node.setAttribute('type', 'text/css');
-                node.innerHTML = value;
-
-                if (last > -1) {
-                    head.insertBefore(node, chld[last + 1]);
-                } else {
-                    head.appendChild(node);
-                }
-            }
-        }
-        return node;
-    };
-    // FUNCTION TO WRITE CSS STRING INTO COMMON FORMATED STRING.
-    TocmBuilder.writeCSS = function (object, isget) {
-        if (typeOf(object) === 'object' && object.hasOwnProperty('name')) {
-            var mediaInfo, cssString = '', property, pseudo;
-            var area = object.config.write_area, auto = object.config.write_auto, family = object.family, domid;
-        
-            if (object.media !== 'none') {
-                // GENERATING CLASS FROM MEDIA COLLECTIONS.
-                mediaInfo = $media(object.media);
-                if (typeOf(mediaInfo) === 'object') {
-                    // OPENING CSS SELECTOR.
-                    cssString += '\t\t' + object.name + ' {\n';
-                    // CREATING CSS STRING.
-                    cssString += TocmBuilder.generateCSS(object.properties, '\t\t\t');
-                    // CLOSING CSS SELECTOR.
-                    cssString += '\t\t}\n';
-                    // CREATING PSEUDO IF EXISTS.
-                    pseudo = object.pseudo;
-                    for (property in pseudo) {
-                        if (pseudo.hasOwnProperty(property)) {
-                            if (typeOf(pseudo[property]) === 'object' && Object.keys(pseudo[property]).length > 0) {
-                                cssString += '\t\t' + object.name + ':' + property + ' {\n';
-                                cssString += TocmBuilder.generateCSS(pseudo[property], '\t\t\t');
-                                cssString += '\t\t}\n';
-                            }
-                        }
-                    }
-                    // RETURNING THE GENERATED CSS STRING.
-                    return cssString;
-                }
-            } else {
-                // GENERATING CLASS FROM GLOBAL COLLECTIONS.
-                cssString += '\n\t' + object.name + ' {\n';
-                cssString += TocmBuilder.generateCSS(object.properties, '\t\t');
-                cssString += '\t}\n';
-
-                // CREATING PSEUDO IF EXISTS.
-                pseudo = object.pseudo;
-                for (property in pseudo) {
-                    if (pseudo.hasOwnProperty(property)) {
-                        if (typeOf(pseudo[property]) === 'object' && Object.keys(pseudo[property]).length > 0) {
-                            cssString += '\t' + object.name + ':' + property + ' {\n';
-                            cssString += TocmBuilder.generateCSS(pseudo[property], '\t\t');
-                            cssString += '\t}\n';
-                        }
-                    }
-                }
-                // RETURNING THE GENERATED CSS STRING.
-                return cssString;
-            }
-        }
-    };
-    // FUNCTION TO WRITE READY STRIG TO HANDLER.
-    TocmBuilder.writeSCS = function () {
-        var defaultClass = TocmDefClass, mediaClass = TocmMedClass, name, fml, className, dstr = '', mstr = '';
-        var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
-        // ENUMERATING DEFAULT CLASSES.
-        if (TocmConfig.sortclass === true) {
-            defaultClass = TocmDefClass.sort();
-        }
-        for (name in defaultClass) {
-            if (defaultClass.hasOwnProperty(name)) {
-                area = defaultClass[name].config.write_area; family = defaultClass[name].family;
-                if (area === 'family') {
-                    if (typeOf(pdstr[family]) !== 'string') {
-                        pdstr[family] = '';
-                    }
-                    pdstr[family] += TocmBuilder.writeCSS(defaultClass[name], true);
-                } else {
-                    dstr += TocmBuilder.writeCSS(defaultClass[name], true);
-                }
-            }
-        }
-
-        // WRITING GLOBAL CLASSES.
-        if (dstr !== '') {
-            TocmBuilder.writeDOM('Global Class', 'universal', dstr);
-        }
-        // WRITING PRIVATE CLASSES.
-        for (fml in pdstr) {
-            if (pdstr.hasOwnProperty(fml)) {
-                TocmBuilder.writeDOM(fml, 'universal', pdstr[fml]);
-            }
-        }
-
-        // ENUMERATING MEDIA CLASSES.
-        if (TocmConfig.sortclass === true) {
-            mediaClass = TocmMedClass.sort();
-        }
-        for (name in mediaClass) {
-            if (mediaClass.hasOwnProperty(name)) {
-                if (TocmConfig.sortclass === true) {
-                    mediaClass[name] = mediaClass[name].sort();
-                }
-                for (className in mediaClass[name]) {
-                    if (mediaClass[name].hasOwnProperty(className)) {
-                        area = mediaClass[name][className].config.write_area; family = mediaClass[name][className].family;
-                        if (area === 'family') {
-                            if (typeOf(pmdstr[family]) !== 'string') {
-                                pmdstr[family] = '';
-                            }
-                            pmdstr[family] += TocmBuilder.writeCSS(mediaClass[name][className], true);
-                        } else {
-                            mstr += TocmBuilder.writeCSS(mediaClass[name][className], true);
-                        }
-                    }
-                }
-                // WRITING GLOBAL CLASSES.
-                if (mstr !== '') {
-                    // GETTING MEDIA INFO.
-                    minfo = $media(name); gcstr = '';
-                    // OPENING MEDIA QUERIES.
-                    gcstr += '\n\t@media ' + minfo.value + ' {\n';
-                    // ADDING CSS STRING.
-                    gcstr += mstr;
-                    // CLOSING MEDIA QUERIES.
-                    gcstr += '\t}\n';
-                    TocmBuilder.writeDOM('Global Class', name, gcstr);
-                    mstr = '';
-                }
-                // WRITING PRIVATE CLASSES.
-                for (fml in pmdstr) {
-                    if (pmdstr.hasOwnProperty(fml)) {
-                        minfo = $media(name); fmcstr = '';
-                        // OPENING MEDIA QUERIES.
-                        fmcstr += '\n\t@media ' + minfo.value + ' {\n';
-                        // ADDING CSS STRING.
-                        fmcstr += pmdstr[fml];
-                        // CLOSING MEDIA QUERIES.
-                        fmcstr += '\t}\n';
-                        TocmBuilder.writeDOM(fml, name, fmcstr);
-                    }
-                }
-                pmdstr = {};
-            }
-        }
-    };
-
-    // ATTACHING CSS STRING BUILDER TO WINDOW OBJECT.
-    window.TocmBuilder = TocmBuilder;
-})(window);
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
 
 // CREATING TOCM CONSTRUCTOR.
 (function (window) {
@@ -1114,3 +1134,578 @@ writing or editing the css file. All css script is created on the fly. You doesn
         });
     }
 })(Tocm);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+// CREATING GLOBAL REFERENCES.
+(function (window) {
+    'use strict';
+    window.rgb = function (hexColor, opacity, rtype) {
+        var shorthandRegex, result, objRgb, isPrs;
+
+        // Expand shorthand form (e.g. '03F') to full form (e.g. '0033FF')
+        shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hexColor = hexColor.replace(shorthandRegex, function (m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+
+        result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexColor);
+
+        objRgb = {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        };
+
+        if (opacity && typeOf(opacity) === 'string') {
+            isPrs = opacity.search('%');
+
+            if (isPrs !== -1) {
+                opacity = opacity.replace('%', '');
+                opacity = Number(opacity) / 100;
+            }
+            objRgb.o = opacity;
+        } else if (opacity && typeOf(opacity) === 'number') {
+            objRgb.o = opacity;
+        }
+
+        if (!rtype || rtype !== 'object') {
+            result = objRgb.r + ', ' + objRgb.g + ', ' + objRgb.b;
+            if (objRgb.o) {
+                result = 'rgba(' + result + ', ' + objRgb.o + ')';
+            } else {
+                result = 'rgb(' + result + ')';
+            }
+
+            return result;
+        } else {
+            return objRgb;
+        }
+    };
+    var Gradient = function (value, mode) {
+        var gstr = '', vendor = TocmRef.vendor, type;
+        if (typeOf('mode') === 'string') {
+            mode += '-gradient';
+            gstr += mode + '(' + value + '); ';
+        } else {
+            mode = 'gradient';
+        }
+        if (typeOf(value) === 'string') {
+            for (var i = 0; i < vendor.length; ++i) {
+                gstr += vendor[i] + mode + '(' + value + '); ';
+            }
+            return gstr;
+        } else {
+            return 'none';
+        }
+    };
+    window.gradient = Gradient;
+    window.linear_gradient = function (value) {
+        return gradient(value, 'linear');
+    };
+    window.radial_gradient = function (value) {
+        return gradient(value, 'radial');
+    };
+})(window);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+// CREATING CONFIGURATION AND COLLECTIONS.
+(function (window) {
+    'use strict';
+    window.TocmTimeline = {};
+    if (!TocmConfig) {
+        window.TocmConfig = {};
+    }
+    TocmConfig.animation = {
+        duration: 0,
+        timing: 'linear',
+        delay: 0,
+        repeat: 1,
+        direction: 'normal',
+        state: 'running',
+        inherit: true
+    };
+})(window);
+
+// CREATING CONSTRUCTOR.
+(function (window) {
+    'use strict';
+    // CREATING ENUMERATOR.
+    var _writeAnimation = function (name, property, preconf, timeline) {
+        if (typeOf(name) === 'string' && typeOf(property) === 'object') {
+            // GETTING CONFIGURATIONS.
+            var conf        = Object.keys(TocmConfig.animation),
+                config      = TocmConfig.animation;
+            
+            // CREATING USABLE VARIABLES.
+            var csstring = '',
+                keyframe = '',
+                cssclass = '';
+            var atab = '\t',
+                btab = '\t\t',
+                ctab = '\t\t\t',
+                open = ' {\n',
+                line = ';\n',
+                close = '}\n';
+            
+            // CREATING ANIMATION OBJECT.
+            var animation = property, inherited = {}, selftimeline = {};
+            
+            // CREATING ANIMATION CONFIGURATIONS.
+            if (!animation.duration) {
+                if (typeOf(preconf) === 'object') {
+                    animation.duration = preconf.duration;
+                } else {
+                    animation.duration = config.duration;
+                }
+            }
+            if (!animation.timing) {
+                if (typeOf(preconf) === 'object') {
+                    animation.timing = preconf.timing;
+                } else {
+                    animation.timing = config.timing;
+                }
+            }
+            if (!animation.delay) {
+                if (typeOf(preconf) === 'object') {
+                    animation.delay = preconf.delay;
+                } else {
+                    animation.delay = config.delay;
+                }
+            }
+            if (!animation.repeat) {
+                if (typeOf(preconf) === 'object') {
+                    animation.repeat = preconf.repeat;
+                } else {
+                    animation.repeat = config.repeat;
+                }
+            }
+            if (!animation.direction) {
+                if (typeOf(preconf) === 'object') {
+                    animation.direction = preconf.direction;
+                } else {
+                    animation.direction = config.direction;
+                }
+            }
+            if (!animation.state) {
+                if (typeOf(preconf) === 'object') {
+                    animation.state = preconf.state;
+                } else {
+                    animation.state = config.state;
+                }
+            }
+            if (typeOf(animation.inherit) !== 'boolean') {
+                if (typeOf(preconf) === 'object') {
+                    animation.inherit = preconf.inherit;
+                } else {
+                    animation.inherit = config.inherit;
+                }
+            }
+            
+            // CREATING TIMELINE.
+            if (typeOf(timeline) === 'object' && animation.inherit === true) {
+                for (var x in timeline) {
+                    if (timeline.hasOwnProperty(x)) {
+                        selftimeline[x] = timeline[x];
+                    }
+                }
+            }
+            for (var time in animation) {
+                if (animation.hasOwnProperty(time) && time.match(/\%/g)) {
+                    selftimeline[time] = animation[time];
+                }
+            }
+
+            // CREATING CSS KEYFRAMES STRING.
+            // Opening keyframes.
+            keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
+            // Adding keyframes properties.
+            for (time in selftimeline) {
+                if (selftimeline.hasOwnProperty(time) && time.match(/\%/g)) {
+                    inherited[time] = selftimeline[time];
+                    
+                    keyframe += btab + time + open;
+                    keyframe += TocmBuilder.generateCSS(selftimeline[time], ctab);
+                    keyframe += btab + close;
+                }
+            }
+            // Closing keyframes.
+            keyframe += atab + close;
+            // Opening keyframes.
+            keyframe += atab + '@-webkit-keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
+            // Adding keyframes properties.
+            for (time in selftimeline) {
+                if (selftimeline.hasOwnProperty(time) && time.match(/\%/g)) {
+                    keyframe += btab + time + open;
+                    keyframe += TocmBuilder.generateCSS(selftimeline[time], ctab);
+                    keyframe += btab + close;
+                }
+            }
+            // Closing keyframes.
+            keyframe += atab + close;
+
+            // CREATING CSS CLASS STRING.
+            // Opening selector.
+            cssclass += atab + name + open;
+            // Adding animation properties.
+            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + 'animation-play-state: ' + animation.state + ';\n';
+            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + '-webkit-animation-play-state: ' + animation.state + ';\n';
+            // Closing selector
+            cssclass += atab + close;
+            
+            // ADDING GENERATED CLASS AND KEYFRAME TO CSS STRING.
+            csstring += keyframe + '\n' + cssclass + '\n';
+            
+            // ITERATING CHILD ANIMATIONS.
+            for (var child in animation) {
+                if (animation.hasOwnProperty(child) && child.match(/\%/g) === null && conf.indexOf(child) < 0) {
+                    csstring += _writeAnimation(name + ' ' + child, animation[child], {
+                        duration: animation.duration,
+                        timing: animation.timing,
+                        delay: animation.delay,
+                        repeat: animation.repeat,
+                        direction: animation.direction,
+                        state: animation.state,
+                        inherit: animation.inherit
+                    }, inherited);
+                }
+            }
+            return csstring;
+        } else {
+            return '';
+        }
+    };
+    
+    // CREATING CORE CONSTRUCTOR.
+    var TocmAnimation = function (name, properties) {
+        if (typeOf(name) === 'string') {
+            if (typeOf(properties) === 'object') {
+                this.name = name;
+                for (var key in properties) {
+                    if (properties.hasOwnProperty(key)) {
+                        this[key] = properties[key];
+                    }
+                }
+                this.apply();
+                return this;
+            } else {
+                return TocmTimeline[name];
+            }
+        }
+    };
+    
+    // REGISTERING TO WINDOW OBJECT AND CREATING MODULE WRAPPER.
+    window.$animation = window.TocmAnimation = function (name, properties) {
+        return new TocmAnimation(name, properties);
+    };
+    window.$animation.module = TocmAnimation.prototype = {
+        apply: function () {
+            TocmTimeline[this.name] = this;
+            TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation(this.name, JSON.parse(JSON.stringify(this))));
+            return this;
+        }
+    };
+})(window);
+
+// CREATING MODULES.
+(function ($module) {
+    'use strict';
+    // FUNCTION TO ADD CHILD ANIMATION.
+    $module.add = function (name, properties) {
+        if (typeOf(name) === 'string' && typeOf(properties) === 'object') {
+            this[name] = properties;
+            this.apply();
+            return this;
+        }
+    };
+    // FUNCTION TO PAUSE ANIMATION.
+    $module.pause = function (delay) {
+        this.state = 'paused';
+        this.apply();
+        var target = this;
+        if (typeOf(delay) === 'number') {
+            setTimeout(function () {
+                target.play();
+            }, (delay * 1000));
+        }
+        return this;
+    };
+    // FUNCTION TO CONTINUE ANIMATION.
+    $module.play = function () {
+        this.state = 'running';
+        this.apply();
+        return this;
+    };
+    // FUNCTION TO SET PROPERTIES OR CONFIGURATIONS.
+    $module.set = function (property, value) {
+        if (typeOf(property) === 'string') {
+            var recset = function (object, prop) {
+                for (var key in prop) {
+                    if (prop.hasOwnProperty(key)) {
+                        console.log(prop[key]);
+                        if (typeOf(prop[key]) === 'object') {
+                            if (!object[key]) {
+                                object[key] = {};
+                            }
+                            recset(object[key], prop[key]);
+                        } else {
+                            object[key] = prop[key];
+                        }
+                    }
+                }
+            };
+            
+            if (typeOf(value) === 'object') {
+                recset(this[property], value);
+            } else {
+                this[property] = value;
+            }
+            this.apply();
+        } else if (typeOf(property) === 'object') {
+            for (var name in property) {
+                if (property.hasOwnProperty(name)) {
+                    this.set(name, property[name]);
+                }
+            }
+        }
+        return this;
+    };
+    
+    // HIDING MODULES.
+    var mod = Object.keys($module);
+    for (var i = 0; i < mod.length; ++i) {
+        Object.defineProperty(TocmAnimation.module, mod[i], {enumerable: false});
+    }
+})(TocmAnimation.module);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+// CREATING REGISTRY.
+(function (window) {
+    'use strict';
+    window.TocmQuery = {};
+})(window);
+
+// CREATING SELECTOR.
+(function(window) {
+    'use strict';
+    // CREATING XPATH SELECTOR.
+    var XPathSelector = function (pattern, doc) {
+        var item, search, result = [];
+        if (typeOf(pattern) === 'string') {
+            search = document.evaluate(pattern, doc, null, XPathResult.ANY_TYPE, null);
+            while (item = search.iterateNext()) {
+                result.push(item);
+            }
+        }
+        return result;
+    };
+    
+    // CREATING CORE SELECTOR.
+    var TocmQuery = function (pattern, from) {
+        var doms = [], i;
+        if (!from) {
+            this.selectfrom = document;
+        } else {
+            this.selectfrom = from;
+        }
+        // GETTING PATTERN TYPE.
+        if (typeOf(pattern) === 'string') {
+            // Adding global select (//) if not defined.
+            var subs = pattern.substr(0,1);
+            if (subs !== '/' && subs !== '//') {
+                pattern =  '//' + pattern;
+            }
+            // Fixing slash-space.
+            pattern = pattern.replace(/\s?\/\s?/g, '/');
+            pattern = pattern.replace(/\s?\|\s?/g, '| ');
+            // Replacing space with global select (//).
+            pattern = pattern.replace(/\s/g, '//');
+            
+            // Creating RegExp Pattern.
+            var pregmatch = [
+                /(\@)([a-zA-Z\d\-\_]+)(\=)([a-zA-Z\d\-\_]+)/, // Attribute Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(\?)([a-zA-Z\d\-\_]+)/, // Attribute Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\!)([a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
+
+                /(\#)([a-zA-Z\d\-\_]+)/, // ID Contains.
+                /(\.)([a-zA-Z\d\-\_]+)/, // Class Contains.
+                /(\@)([a-zA-Z\d\-\_]+)/, // Name Contains.
+                /(\:)([\d]+)/, // Index Number.
+                
+                /(#!)([a-zA-Z\d\-\_]+)/, // ID NOT Contains.
+                /(.!)([a-zA-Z\d\-\_]+)/, // Class NOT Contains.
+                /(@!)([a-zA-Z\d\-\_]+)/ // Name NOT Contains.
+            ];
+            // Creating Pattern Replace to meet with XPath Pattern.
+            var pregrepl = [
+                '[^$2="$4"]',
+                '[contains(^$2, "$4")]',
+                '[not(contains(^$2, "$4"))]',
+
+                '[contains(concat(" ", ^id, " "), " $2 ")]',
+                '[contains(concat(" ", ^class, " "), " $2 ")]',
+                '[contains(concat(" ", ^name, " "), " $2 ")]',
+                '[$2]',
+
+                '[not(contains(concat(" ", ^id, " "), " $2 "))]',
+                '[not(contains(concat(" ", ^class, " "), " $2 "))]',
+                '[not(contains(concat(" ", ^class, " "), " $2 "))]'
+            ];
+            // Creating XPath Pattern.
+            for (i = 0; i < pregmatch.length; ++i) {
+                if (pattern.match(pregmatch[i])) {
+                    pattern = pattern.preg_replace(pregmatch[i], pregrepl[i]);
+                }
+            }
+            // Replacing temp '^' to '@'.
+            pattern = pattern.replace(/\^/g, '@');
+            // Replacing '/[' to '/*[' to fix XPath String.
+            pattern = pattern.replace(/\/\[/g, '/*[');
+            // Replacing triple slash '///' to fix XPath String.
+            pattern = pattern.replace(/\/\/\//g, '//');
+            //console.log(pattern);
+            
+            // Selecting Dom Element.
+            doms = new XPathSelector(pattern, this.selectfrom);
+        }
+        // IF SELECTOR IS ARRAY.
+        else if (typeOf(pattern) === 'array') {
+            for (i = 0; i < pattern.length; ++i) {
+                var ndom = new TocmQuery(pattern[i]);
+                doms = doms.concat(ndom.lists);
+            }
+        }
+        // IF SELECTOR IS TOCMQUERY OBJECT.
+        else if (typeOf(pattern) === 'object' && pattern.type === 'tocmnodelist') {
+            return pattern;
+        }
+        else if (typeOf(pattern).match('html') !== null) {
+            doms.push(pattern);
+        }
+
+        // Configuring Object.
+        this.type = 'tocmnodelist';
+        this.lists = doms;
+        
+        // Adding nodes to this.
+        this.apply();
+        // Returning object.
+        return this;
+    };
+    
+    // CREATING OBJECT WRAPPER.
+    var tocmQuery = function (selector, from) {
+        return new TocmQuery(selector, from);
+    };
+    
+    // CREATING MODULE WRAPPER.
+    TocmQuery.prototype = {
+        apply: function () {
+            for (var i = 0; i < this.lists.length; ++i) {
+                this[i] = this.lists[i];
+            }
+            this.length = this.lists.length;
+            // Hiding Configurations.
+            var hide = ['type', 'length', 'lists', 'selectfrom'];
+            for (i = 0; i < hide.length; ++i) {
+                Object.defineProperty(this, hide[i], {enumerable: false});
+            }
+            return this;
+        }
+    };
+    Object.defineProperty(TocmQuery.prototype, 'apply', {enumerable: false, writable: false});
+    
+    // CREATING MODULE EXTENDER.
+    tocmQuery.extend = function (modulename, func) {
+        if (typeOf(modulename) === 'string' && modulename.match(/[a-zA-Z\d\_]+/) && typeOf(func) === 'function') {
+            TocmQuery.prototype[modulename] = func;
+            Object.defineProperty(TocmQuery.prototype, modulename, {enumerable: false});
+        } else if (typeOf(modulename === 'object')) {
+            for (var name in modulename) {
+                if (modulename.hasOwnProperty(name)) {
+                    tocmQuery.extend(name, modulename[name]);
+                }
+            }
+        }
+    };
+    
+    // ADDING TOCMQUERY TO WINDOW.
+    window.$path = window.TocmQuery = tocmQuery;
+    if (!window.jQuery) {
+        window.$ = tocmQuery;
+    }
+})(window);
+
+/*jshint strict:true*/
+/*jshint boss:true*/
+/*jshint undef:false*/
+
+// EXTENDING MODULE.
+(function ($) {
+    'use strict';
+    $.extend({
+        // FUNCTION TO ADD CLASS.
+        addClass: function (stclass) {
+            for (var i = 0; i < this.length; ++i) {
+                this[i].setAttribute('class', this[i].getAttribute('class') + ' ' + stclass);
+            }
+            return this;
+        },
+        // FUNCTION TO REMOVE CLASS.
+        remClass: function (stclass) {
+            for (var i = 0; i < this.length; ++i) {
+                var curn = this[i].getAttribute('class');
+                curn = curn.replace(' ' + stclass, '');
+                this[i].setAttribute('class', curn);
+            }
+            return this;
+        },
+        // FUNCTION TO SET/GET ATTRIBUTE.
+        attr: function (name, value) {
+            if (typeOf(name) === 'string') {
+                if (typeOf(value) === 'string') {
+                    for (var i = 0; i < this.length; ++i) {
+                        this[i].setAttribute(name, value);
+                    }
+                } else {
+                    return this[0].getAttribute(name);
+                }
+            }
+            return this;
+        },
+        del: function (index) {
+            if (this.length > 0) {
+                var parent = this[0].parentNode;
+                
+                if (typeOf(index) === 'number') {
+                    this[index].parentNode.removeChild(this[index]);
+                    this.lists = this.lists.delete(index);
+                } else {
+                    for (var i = 0; i < this.length; ++i) {
+                        this[i].parentNode.removeChild(this[i]);
+                    }
+                    this.lists = [parent];
+                }
+                
+                for (var x = 0; x < this.length; ++x) {
+                    delete this[x];
+                }
+                
+                this.apply();
+                return this;
+            }
+            return this;
+        }
+    });
+})(TocmQuery);
+

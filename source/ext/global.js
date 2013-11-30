@@ -72,3 +72,4 @@
         return gradient(value, 'radial');
     };
 })(window);
+
