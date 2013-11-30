@@ -1,6 +1,6 @@
 /**
 TOCM - TOCL CSS MAGIC
-v.1.0.1
+v.1.1
 © 2013 Siriussoft Corporation.
 Developed bay Nanang - mahdaen@hotmail.com
 

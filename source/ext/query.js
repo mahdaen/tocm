@@ -12,24 +12,61 @@
 (function(window) {
     'use strict';
     // CREATING CORE SELECTOR.
-    var TocmPath = function (pattern, node) {
-        
+    var tQuery = function (pattern, from) {
+        return new TocmQuery(pattern, from);
     };
-    var TocmQuery = function (pattern) {
+    var TocmQuery = function (pattern, from) {
         // GETTING PATTERN TYPE.
         if (typeOf(pattern) === 'string') {
-            // GETTING SELECTOR TYPE. IF CONTAINS '/' and '@', then use xpath selector.
-            if (pattern.match(/^[\/]+||[\@]+$/g)) {
+            // Creating RegExp Pattern.
+            var preg = [
+                /(\#)([a-zA-Z\-\_]+)/, // ID Contains.
+                /(\.)([a-zA-Z\-\_]+)/, // Class Contains.
+                /(\@)([a-zA-Z\-\_]+)/, // Name Contains.
                 
+                /(\#\!)([a-zA-Z\-\_]+)/, // ID NOT Contains.
+                /(\.\!)([a-zA-Z\-\_]+)/, // Class NOT Contains.
+                /(\@\!)([a-zA-Z\-\_]+)/, // Name NOT Contains.
+
+                /(\@)([a-zA-Z\-\_]+)(\=)([a-zA-Z\-\_]+)/, // Attribute Equal To.
+                /(\@)([a-zA-Z\-\_]+)(\?)([a-zA-Z\-\_]+)/, // Attribute Contains.
+                /(\@)([a-zA-Z\-\_]+)(\!)([a-zA-Z\-\_]+)/ // Attribute Not Contains.
+            ];
+            // Creating Pattern Replace to meet with XPath Pattern.
+            var repl = [
+                '[contains(^id, "$2")]',
+                '[contains(^class, "$2")]',
+                '[contains(^name, "$2")]',
+
+                '[not(contains(^id, "$2"))]',
+                '[not(contains(^class, "$2"))]',
+                '[not(contains(^name, "$2"))]',
+
+                '[^$2="$4"]',
+                '[contains(^$2, "$4")]',
+                '[not(contains(^$2, "$4"))]'
+            ];
+            // Creating XPath Pattern.
+            for (var i = 0; i < 3; ++i) {
+                if (pattern.match(preg[i])) {
+                    pattern = pattern.preg_replace(preg[i], repl[i]);
+                }
             }
-        } else if (typeOf(pattern) === 'array') {
-            
-        } else if (typeOf(pattern) === 'object') {
-            
+            pattern = pattern.replace(/\^/g, '@');
+            return 'pattern';
+        }
+        // IF SELECTOR IS ARRAY.
+        else if (typeOf(pattern) === 'array') {
+        }
+        else if (typeOf(pattern).match('html') !== null) {
         } else {
             return [];
         }
     };
+    
+    tQuery.module = TocmQuery.constructor.prototype;
+    window.$query = tQuery;
+    
     var XPathSelector = function (pattern) {
         var item, search, result = [];
         if (typeOf(pattern) === 'string') {
@@ -43,37 +80,11 @@
     window.$path = function (pattern) {
         return new XPathSelector(pattern);
     };
-    window.$path.module = XPathSelector.prototype = {};
+    window.$path.module = XPathSelector.constructor.prototype;
     
 })(window);
 
-$module('log', function () {
+$path.module('log', function () {
     'use strict';
     console.log(this);
 });
-
-// PATTERN PLAN -->
-// MAIN PATTERN -->
-$('*'); // All selector.
-$('div'); // Tag Selector.
-$('#content'); // ID Selector.
-$('.clearfix'); // Class Selector.
-
-// ATTRIBUTE PATTERN -->
-$('@name=test'); // Attribute name equal to test.
-$('@name!test'); // Attribute name not equal to test.
-$('@name==test'); // Attribute name contains test.
-$('@name!!test'); // Attribute name not contains test.
-
-// COMBINED PATTERN -->
-$('div#content'); // Select element with Tag and Id.
-$('div.clearfix'); // Select element with Tag and Class.
-$('div@name=test'); // Select element with Tag and Attribute.
-
-// MULTI COMBINED PATTERN -->
-$('#content.clearfix'); // Select element with ID and Class.
-$('div#content.clearfix'); // Select element with Tag, ID, and Class.
-$('div#content.clearfix@name=test'); // Select element with Tag, ID, Class, and Attribute.
-
-// PATH PATTERN -->
-$('div/#content/@name=test'); // Select all div, child with ID content, child with attribute name equal to test.
