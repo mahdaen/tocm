@@ -10,6 +10,7 @@ writing or editing the css file. All css script is created on the fly. You doesn
 -----------------------------------------------------------------------------------------------------------------
 **/
 
+/*jshint -W065 */
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
