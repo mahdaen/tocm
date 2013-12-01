@@ -11,7 +11,7 @@
         // Ensure the given name is in valid format.
         if (typeOf(name) === 'string') {
             // Specifying where the class object will be selected.
-            if (typeOf(media) === 'string' && media !== 'none' && $media(media).hasOwnProperty('name')) {
+            if (typeOf(media) === 'string' && media !== 'none' && new TocmMedia(media).hasOwnProperty('name')) {
                 // Ensure the given media is exist on TocmMedia Registry.
                 if (typeOf(TocmMedClass[media]) === 'object') {
                     obj = TocmMedClass[media][name];
@@ -45,7 +45,7 @@
             this.parent = {};
             
             // ADDING TO MEDIA SPESIFIC COLLECTION IF 'media' WAS DEFINED AND ENSURE THE MEDIA HAS BEEN REGISTERED.
-            if (typeOf(media) === 'string' && media !== 'none' && $media(media).hasOwnProperty('name')) {
+            if (typeOf(media) === 'string' && media !== 'none' && new TocmMedia(media).hasOwnProperty('name')) {
                 this.media = media;
                 
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.

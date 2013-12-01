@@ -22,6 +22,9 @@
             }
             return this;
         },
+        addAnimation: function (name, prop) {
+            
+        },
         // FUNCTION TO SET/GET ATTRIBUTE.
         attr: function (name, value) {
             if (typeOf(name) === 'string') {
@@ -35,7 +38,7 @@
             }
             return this;
         },
-        del: function (index) {
+        remove: function (index) {
             if (this.length > 0) {
                 var parent = this[0].parentNode;
                 

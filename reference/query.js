@@ -2,6 +2,12 @@
 /*jshint boss:true*/
 /*jshint undef:false*/
 
+// CREATING REGISTRY.
+(function (window) {
+    'use strict';
+    window.TocmQuery = {};
+})(window);
+
 // CREATING SELECTOR.
 (function(window) {
     'use strict';
@@ -84,11 +90,80 @@
             
             // Selecting Dom Element.
             doms = new XPathSelector(pattern, this.selectfrom);
-            return jQuery(doms);
-        } else {
-            return jQuery('');
+        }
+        // IF SELECTOR IS ARRAY.
+        else if (typeOf(pattern) === 'array') {
+            for (i = 0; i < pattern.length; ++i) {
+                var ndom = new TocmQuery(pattern[i]);
+                doms = doms.concat(ndom.lists);
+            }
+        }
+        // IF SELECTOR IS TOCMQUERY OBJECT.
+        else if (typeOf(pattern) === 'object' && pattern.type === 'tocmnodelist') {
+            return pattern;
+        }
+        else if (typeOf(pattern).match('html') !== null) {
+            doms.push(pattern);
+        }
+
+        // Configuring Object.
+        this.type = 'tocmnodelist';
+        this.lists = doms;
+        
+        // Adding nodes to this.
+        this.apply();
+        // Returning object.
+        return this;
+    };
+    
+    // CREATING OBJECT WRAPPER.
+    var tocmQuery = function (selector, from) {
+        return new TocmQuery(selector, from);
+    };
+    
+    // CREATING MODULE WRAPPER.
+    TocmQuery.prototype = {
+        apply: function () {
+            for (var i = 0; i < this.lists.length; ++i) {
+                this[i] = this.lists[i];
+            }
+            this.length = this.lists.length;
+            this.splice = this.lists.splice;
+            // Hiding Configurations.
+            var hide = ['type', 'length', 'lists', 'selectfrom', 'splice'];
+            for (i = 0; i < hide.length; ++i) {
+                Object.defineProperty(this, hide[i], {enumerable: false});
+            }
+            return this;
         }
     };
+    Object.defineProperty(TocmQuery.prototype, 'apply', {enumerable: false, writable: false});
+    
+    // CREATING MODULE EXTENDER.
+    tocmQuery.extend = function (modulename, func) {
+        if (typeOf(modulename) === 'string' && modulename.match(/[a-zA-Z\d\_]+/) && typeOf(func) === 'function') {
+            TocmQuery.prototype[modulename] = func;
+            Object.defineProperty(TocmQuery.prototype, modulename, {enumerable: false});
+        } else if (typeOf(modulename === 'object')) {
+            for (var name in modulename) {
+                if (modulename.hasOwnProperty(name)) {
+                    tocmQuery.extend(name, modulename[name]);
+                }
+            }
+        }
+    };
+    
     // ADDING TOCMQUERY TO WINDOW.
-    window.$path = window.TocmQuery = TocmQuery;
+    window.$path = window.TocmQuery = tocmQuery;
 })(window);
+
+// EXTENDING JQUERY IDENTIFIER ($).
+(function($) {
+    'use strict';
+    $.anime = TocmAnimation;
+    $.class = Tocm;
+    $.media = TocmMedia;
+    $.path = TocmQuery;
+    $.font = TocmFont;
+    $.keyframe = TocmKeyframe;
+})(jQuery);

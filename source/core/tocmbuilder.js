@@ -86,7 +86,7 @@
         
             if (object.media !== 'none') {
                 // GENERATING CLASS FROM MEDIA COLLECTIONS.
-                mediaInfo = $media(object.media);
+                mediaInfo = new TocmMedia(object.media);
                 if (typeOf(mediaInfo) === 'object') {
                     // OPENING CSS SELECTOR.
                     cssString += '\t\t' + object.name + ' {\n';
@@ -188,7 +188,7 @@
                 // WRITING GLOBAL CLASSES.
                 if (mstr !== '') {
                     // GETTING MEDIA INFO.
-                    minfo = $media(name); gcstr = '';
+                    minfo = new TocmMedia(name); gcstr = '';
                     // OPENING MEDIA QUERIES.
                     gcstr += '\n\t@media ' + minfo.value + ' {\n';
                     // ADDING CSS STRING.
@@ -201,7 +201,7 @@
                 // WRITING PRIVATE CLASSES.
                 for (fml in pmdstr) {
                     if (pmdstr.hasOwnProperty(fml)) {
-                        minfo = $media(name); fmcstr = '';
+                        minfo = new TocmMedia(name); fmcstr = '';
                         // OPENING MEDIA QUERIES.
                         fmcstr += '\n\t@media ' + minfo.value + ' {\n';
                         // ADDING CSS STRING.

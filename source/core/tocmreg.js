@@ -15,7 +15,7 @@
     // CREATING COLLECTIONS OF MEDIA SPESIFIC CLASS.
     window.TocmMedClass = {};
     // CREATING MEDIA COLLECTIONS.
-    window.TocmMedia = {};
+    window.TocmMedias = {};
     // CREATING KEYFRAMES COLLECTIONS.
     window.TocmKeyframes = {};
     // CREATING FONTS COLLECTIONS.

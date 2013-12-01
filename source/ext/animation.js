@@ -99,25 +99,28 @@
             if (typeOf(timeline) === 'object' && animation.inherit === true) {
                 for (var x in timeline) {
                     if (timeline.hasOwnProperty(x)) {
-                        selftimeline[x] = timeline[x];
+                        selftimeline[x.replace(/\%/g, '')] = timeline[x];
                     }
                 }
             }
             for (var time in animation) {
                 if (animation.hasOwnProperty(time) && time.match(/\%/g)) {
-                    selftimeline[time] = animation[time];
+                    selftimeline[time.replace(/\%/g, '')] = animation[time];
                 }
             }
-
+            
+            // SORTING TIMELINE.
+            selftimeline = selftimeline.sort('STH');
+            
             // CREATING CSS KEYFRAMES STRING.
             // Opening keyframes.
             keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
             // Adding keyframes properties.
             for (time in selftimeline) {
-                if (selftimeline.hasOwnProperty(time) && time.match(/\%/g)) {
+                if (selftimeline.hasOwnProperty(time)) {
                     inherited[time] = selftimeline[time];
                     
-                    keyframe += btab + time + open;
+                    keyframe += btab + time + '%' + open;
                     keyframe += TocmBuilder.generateCSS(selftimeline[time], ctab);
                     keyframe += btab + close;
                 }
@@ -128,8 +131,8 @@
             keyframe += atab + '@-webkit-keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
             // Adding keyframes properties.
             for (time in selftimeline) {
-                if (selftimeline.hasOwnProperty(time) && time.match(/\%/g)) {
-                    keyframe += btab + time + open;
+                if (selftimeline.hasOwnProperty(time)) {
+                    keyframe += btab + time + '%' + open;
                     keyframe += TocmBuilder.generateCSS(selftimeline[time], ctab);
                     keyframe += btab + close;
                 }
@@ -237,7 +240,6 @@
             var recset = function (object, prop) {
                 for (var key in prop) {
                     if (prop.hasOwnProperty(key)) {
-                        console.log(prop[key]);
                         if (typeOf(prop[key]) === 'object') {
                             if (!object[key]) {
                                 object[key] = {};
@@ -251,6 +253,9 @@
             };
             
             if (typeOf(value) === 'object') {
+                if (!this[property]) {
+                    this[property] = {};
+                }
                 recset(this[property], value);
             } else {
                 this[property] = value;
@@ -263,6 +268,7 @@
                 }
             }
         }
+        this.pause(0.01);
         return this;
     };
     

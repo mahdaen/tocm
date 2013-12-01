@@ -94,7 +94,7 @@
         enumerable: false
     });
     // TocmKeyframe Wrapper.
-    window.$keyframes = function (name, position, propertis) {
+    window.$keyframes = window.TocmKeyframe = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
     };
 })(window);
@@ -206,7 +206,7 @@
         enumerable: false
     });
     // TocmFont Wrapper.
-    window.$fonts = function (name, src, opt) {
+    window.$fonts = window.TocmFont = function (name, src, opt) {
         return new TocmFont(name, src, opt);
     };
 })(window);
@@ -219,7 +219,7 @@
         var media;
         if (typeOf(name) === 'string') {
             if (typeOf(value) === 'string') {
-                window.TocmMedia[name] = {
+                window.TocmMedias[name] = {
                     name: name,
                     value: value
                 };
@@ -227,7 +227,7 @@
                 this.value = value;
                 return this;
             } else {
-                media = window.TocmMedia[name];
+                media = window.TocmMedias[name];
                 if (typeOf(media) === 'object') {
                     this.name = media.name;
                     this.value = media.value;
@@ -240,7 +240,7 @@
     };
 
     // TocmMedia Wrapper.
-    window.$media = function (name, value) {
+    window.$media = window.TocmMedia = function (name, value) {
         return new TocmMedia(name, value);
     };
 })(window);
