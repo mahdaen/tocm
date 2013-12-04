@@ -144,7 +144,7 @@
                 for (i = 1; i <= 31; ++i) {
                     if (Number(gjd.toDate('w')) === Number(week) && Number(gjd.toDate('M')-1) == this.getMonth()) {
                         dow.push(i);
-                        don.push(gjd.toDate('ds'));
+                        don.push(gjd.toDate('dn'));
                     }
                     gjd = gjd + 1;
                 }

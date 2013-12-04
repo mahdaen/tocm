@@ -10,8 +10,8 @@
         window.TocmConfig = {};
     }
     
-    window.$log = window.TocmLogger = function (context, message, color) {
-        if (TocmConfig.showdebug === true && typeOf(context) === 'string' && typeOf(message) === 'string') {
+    window.$log = window.TocmLogger = function (context, message, color, force) {
+        if (TocmConfig.showdebug === true && typeOf(context) === 'string' && typeOf(message) === 'string' || force === true) {
             var date = new Date().format('%D-%M-%Y %h:%m:%s');
             
             if (typeOf(color) === 'string') {

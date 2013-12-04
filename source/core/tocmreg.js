@@ -9,7 +9,7 @@
     window.TocmConfig = {
         autowrite: true,
         sortclass: false,
-        showdebug: true,
+        showdebug: false,
         date: {
             dayname: ['', 'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu'],
             monname: ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],

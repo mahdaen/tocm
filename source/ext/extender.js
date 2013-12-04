@@ -8,4 +8,5 @@
     $.path = TocmQuery;
     $.font = TocmFont;
     $.keyframe = TocmKeyframe;
+    $.task = TocmTask;
 })(jQuery);

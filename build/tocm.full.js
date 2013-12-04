@@ -8918,7 +8918,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 for (i = 1; i <= 31; ++i) {
                     if (Number(gjd.toDate('w')) === Number(week) && Number(gjd.toDate('M')-1) == this.getMonth()) {
                         dow.push(i);
-                        don.push(gjd.toDate('ds'));
+                        don.push(gjd.toDate('dn'));
                     }
                     gjd = gjd + 1;
                 }
@@ -9198,7 +9198,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     window.TocmConfig = {
         autowrite: true,
         sortclass: false,
-        showdebug: true,
+        showdebug: false,
         date: {
             dayname: ['', 'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu'],
             monname: ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
@@ -9478,8 +9478,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         window.TocmConfig = {};
     }
     
-    window.$log = window.TocmLogger = function (context, message, color) {
-        if (TocmConfig.showdebug === true && typeOf(context) === 'string' && typeOf(message) === 'string') {
+    window.$log = window.TocmLogger = function (context, message, color, force) {
+        if (TocmConfig.showdebug === true && typeOf(context) === 'string' && typeOf(message) === 'string' || force === true) {
             var date = new Date().format('%D-%M-%Y %h:%m:%s');
             
             if (typeOf(color) === 'string') {
@@ -10875,7 +10875,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             task.status = 'failed';
             if (typeOf(task.onFail) === 'function') task.onFail(task);
             
-            new TocmLogger('TocmTask', e.message, 'red');
+            new TocmLogger('TocmTask', e.message, 'red', true);
         } finally {
             if (task.status !== 'failed') {
                 task.status = 'ready';
@@ -10950,7 +10950,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
     // Handling scheduled task.
     var scheduledHandler = function (task) {
-        var nextRun;
+        var nextRun, lowTime, higTime;
         var nextDay = Number(new Date().toJulian().toDate('D')) + 1;
         var curTime = new Date().getTime();
         
@@ -10964,7 +10964,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                         if (!trigarr[2].match(/[\d]+\:[\d]+$/)) {
                             task.nextRun = 0;
                             task.status = 'failed';
-                            new TocmLogger('TocmTask', 'Invalid time format "' + trigarr[2] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red');
+                            new TocmLogger('TocmTask', 'Invalid time format "' + trigarr[2] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                             break;
                         }
                         
@@ -10979,15 +10979,15 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                         task.status = 'ready';
                     } else if (trigarr[1] === 'between') {
                         // Handling invalid time format.
-                        if (!trigarr[2].match(/[\d]+\:[\d]+$/) || trigarr[3] !== 'and' && !trigarr[4].match(/[\d]+\:[\d]+$/)) {
+                        if (!trigarr[2].match(/^[\d]{2}\:[\d]{2}$/) || trigarr[3] !== 'and' || !trigarr[4].match(/^[\d]{2}\:[\d]{2}$/)) {
                             task.nextRun = 0;
                             task.status = 'failed';
-                            new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red');
+                            new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                             break;
                         }
                         
-                        var lowTime = new Date(new Date().format('%M-%D-%Y ' + trigarr[2]));
-                        var higTime = new Date(new Date().format('%M-%D-%Y ' + trigarr[4]));
+                        lowTime = new Date(new Date().format('%M-%D-%Y ' + trigarr[2]));
+                        higTime = new Date(new Date().format('%M-%D-%Y ' + trigarr[4]));
                         
                         if (curTime > higTime.getTime()) {
                             // Schedule time to next day if current time is higher than max range time.
@@ -10999,7 +10999,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                             // Convert it to realtime task if current time is in time range.
                             nextRun = 15;
                         }
-                        
 
                         if (typeOf(nextRun) === 'date') {
                             task.nextRun = nextRun.format('dn mn %D, %Y %h:%m:%s');
@@ -11008,11 +11007,82 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                         }
 
                         task.status = 'ready';
+                    } else {
+                        new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                     }
                     break;
                 case 'weekly':
+                    // Creating the day of week.
+                    var weekDay;
+                    var week = new Date().toJulian().toDate('w');
+                    if (trigarr[1] === 'on') {
+                        weekDay = trigarr[2];
+                    } else {
+                        weekDay = 'Sun';
+                    }
+                    // Getting date on week by the day.
+                    var tgTime = new Date().dateOfWeek(week, weekDay);
+                    // Forward for next week if current date has left the target date.
+                    if (new Date(curTime).getDate() > tgTime.getDate()) {
+                        tgTime = new Date().dateOfWeek((week + 1), weekDay);
+                    }
+                    
+                    if (trigarr[3] === 'at') {
+                        // Handling invalid time format.
+                        if (!trigarr[4].match(/[\d]+\:[\d]+$/)) {
+                            task.nextRun = 0;
+                            task.status = 'failed';
+                            new TocmLogger('TocmTask', 'Invalid time format "' + trigarr[4] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                            break;
+                        }
+                        
+                        // Trying schedule time for today.
+                        nextRun = new Date(tgTime.format('%M-%D-%Y ' + trigarr[4]));
+                        // If time now is higher than scheduled time, then reschedule time for next day.
+                        if (nextRun.getTime() <= curTime) {
+                            tgTime = new Date().dateOfWeek((week + 1), weekDay);
+                            nextRun = new Date(tgTime.format('%M-%D-%Y ' + trigarr[4]));
+                        }
+                        
+                        task.nextRun = nextRun.format('dn mn %D, %Y %h:%m:%s');
+                        task.status = 'ready';
+                    } else if (trigarr[3] === 'between') {
+                        // Handling invalid time format.
+                        if (!trigarr[4].match(/^[\d]{2}\:[\d]{2}$/) || trigarr[5] !== 'and' || !trigarr[6].match(/^[\d]{2}\:[\d]{2}$/)) {
+                            task.nextRun = 0;
+                            task.status = 'failed';
+                            new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                            break;
+                        }
+                        
+                        lowTime = new Date(tgTime.format('%M-%D-%Y ' + trigarr[4]));
+                        higTime = new Date(tgTime.format('%M-%D-%Y ' + trigarr[6]));
+                        
+                        if (curTime > higTime.getTime()) {
+                            // Schedule time to next day if current time is higher than max range time.
+                            tgTime = new Date().dateOfWeek((week + 1), weekDay);
+                            nextRun = new Date(tgTime.format('%M-%D-%Y ' + trigarr[4]));
+                        } else if (curTime < lowTime.getTime()) {
+                            // Schedule time to today if current time is lower than min range time.
+                            nextRun = new Date(tgTime.format('%M-%D-%Y ' + trigarr[4]));
+                        } else if (curTime >= lowTime.getTime() && curTime <= higTime.getTime()) {
+                            // Convert it to realtime task if current time is in time range.
+                            nextRun = 15;
+                        }
+
+                        if (typeOf(nextRun) === 'date') {
+                            task.nextRun = nextRun.format('dn mn %D, %Y %h:%m:%s');
+                        } else if (typeOf(nextRun) === 'number') {
+                            task.nextRun = nextRun;
+                        }
+
+                        task.status = 'ready';
+                    } else {
+                        new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                    }
                     break;
-                case 'monthly':
+                default:
+                    new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                     break;
             }
         }
@@ -11141,4 +11211,5 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     $.path = TocmQuery;
     $.font = TocmFont;
     $.keyframe = TocmKeyframe;
+    $.task = TocmTask;
 })(jQuery);
