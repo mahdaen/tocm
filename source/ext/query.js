@@ -6,10 +6,10 @@
 (function(window) {
     'use strict';
     // CREATING XPATH SELECTOR.
-    var XPathSelector = function (pattern, doc) {
+    var XPathSelector = function (pattern) {
         var item, search, result = [];
         if (typeOf(pattern) === 'string') {
-            search = document.evaluate(pattern, doc, null, XPathResult.ANY_TYPE, null);
+            search = document.evaluate(pattern, document, null, XPathResult.ANY_TYPE, null);
             while (item = search.iterateNext()) {
                 result.push(item);
             }
@@ -18,13 +18,8 @@
     };
     
     // CREATING CORE SELECTOR.
-    var TocmQuery = function (pattern, from) {
+    var TocmQuery = function (pattern) {
         var doms = [], i;
-        if (!from) {
-            this.selectfrom = document;
-        } else {
-            this.selectfrom = from;
-        }
         // GETTING PATTERN TYPE.
         if (typeOf(pattern) === 'string') {
             // Adding global select (//) if not defined.
@@ -40,9 +35,10 @@
             
             // Creating RegExp Pattern.
             var pregmatch = [
-                /(\@)([a-zA-Z\d\-\_]+)(\=)([a-zA-Z\d\-\_]+)/, // Attribute Equal To.
-                /(\@)([a-zA-Z\d\-\_]+)(\?)([a-zA-Z\d\-\_]+)/, // Attribute Contains.
-                /(\@)([a-zA-Z\d\-\_]+)(\!)([a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\=)([\#\a-zA-Z\d\-\_]+)/, // Attribute Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(!=)([\#\a-zA-Z\d\-\_]+)/, // Attribute Not Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(\?)([\#\a-zA-Z\d\-\_]+)/, // Attribute Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\!)([\#\a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
 
                 /(\#)([a-zA-Z\d\-\_]+)/, // ID Contains.
                 /(\.)([a-zA-Z\d\-\_]+)/, // Class Contains.
@@ -56,6 +52,7 @@
             // Creating Pattern Replace to meet with XPath Pattern.
             var pregrepl = [
                 '[^$2="$4"]',
+                '[^$2!="$4"]',
                 '[contains(^$2, "$4")]',
                 '[not(contains(^$2, "$4"))]',
 
@@ -83,7 +80,7 @@
             //console.log(pattern);
             
             // Selecting Dom Element.
-            doms = new XPathSelector(pattern, this.selectfrom);
+            doms = new XPathSelector(pattern);
             return jQuery(doms);
         } else {
             return jQuery('');

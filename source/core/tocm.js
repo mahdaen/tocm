@@ -35,6 +35,8 @@
     var TocmClass = function (name, props, media, delayed) {
         if (typeOf(name) === 'string' && typeOf(props) === 'object') {
             // COLLECTING CSS PROPERTIES.
+            new TocmLogger('TocmClass', 'Creating new class "' + name + '".');
+
             this.name = this.family = name;
             this.properties = props;
             this.pseudo = {};
@@ -49,6 +51,8 @@
                 this.media = media;
                 
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.
+                new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "' + media + '".', 'purple');
+
                 if (typeOf(TocmMedClass[media]) === 'object') {
                     TocmMedClass[media][name] = this;
                 } else {
@@ -56,6 +60,8 @@
                     TocmMedClass[media][name] = this;
                 }
             } else {
+                new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "universal".', 'purple');
+
                 this.media = 'none';
                 TocmDefClass[name] = this;
             }
@@ -131,6 +137,8 @@
                                 family = name;
                             }
                             // CREATING NEW CLASS INHERITING TO THIS CLASS.
+                            new TocmLogger('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
+
                             TocmConfig.autowrite = false;
                             subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
                         } else {
@@ -227,6 +235,7 @@
                     TocmDefClass[this.name] = this;
                 }
                 if (TocmConfig.autowrite === true) {
+                    new TocmLogger('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
                     TocmBuilder.writeSCS(this);
                 }
             }

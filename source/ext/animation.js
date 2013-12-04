@@ -16,7 +16,9 @@
         repeat: 1,
         direction: 'normal',
         state: 'running',
-        inherit: true
+        inherit: true,
+        endNode: '',
+        endTime: 0
     };
 })(window);
 
@@ -114,7 +116,7 @@
             
             // CREATING CSS KEYFRAMES STRING.
             // Opening keyframes.
-            keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
+            keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + open;
             // Adding keyframes properties.
             for (time in selftimeline) {
                 if (selftimeline.hasOwnProperty(time)) {
@@ -128,7 +130,7 @@
             // Closing keyframes.
             keyframe += atab + close;
             // Opening keyframes.
-            keyframe += atab + '@-webkit-keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
+            keyframe += atab + '@-webkit-keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + open;
             // Adding keyframes properties.
             for (time in selftimeline) {
                 if (selftimeline.hasOwnProperty(time)) {
@@ -144,9 +146,9 @@
             // Opening selector.
             cssclass += atab + name + open;
             // Adding animation properties.
-            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
             cssclass += btab + 'animation-play-state: ' + animation.state + ';\n';
-            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
             cssclass += btab + '-webkit-animation-play-state: ' + animation.state + ';\n';
             // Closing selector
             cssclass += atab + close;
@@ -176,8 +178,9 @@
     
     // CREATING CORE CONSTRUCTOR.
     var TocmAnimation = function (name, properties) {
-        if (typeOf(name) === 'string') {
+        if (typeOf(name) === 'string' && !name.match(/[\!\@\#\$\%\^\&\*\.\,\:\;]+/)) {
             if (typeOf(properties) === 'object') {
+                new TocmLogger('TocmAnimation', 'Creating new animation "' + name + '".');
                 this.name = name;
                 for (var key in properties) {
                     if (properties.hasOwnProperty(key)) {
@@ -196,20 +199,124 @@
     window.$animation = window.TocmAnimation = function (name, properties) {
         return new TocmAnimation(name, properties);
     };
-    window.$animation.module = TocmAnimation.prototype = {
+    window.TocmAnimation.module = TocmAnimation.prototype = {
         apply: function () {
+            // Getting the larger runtime.
+            this.last();
+            // Hiding Properties.
+            var x = ['endNode', 'endTime', 'name'];
+            for (var i = 0; i < x.length; ++i) {
+                if (this.hasOwnProperty(x[i])) {
+                    Object.defineProperty(this, x[i], {enumerable: false});
+                }
+            }
+            // Adding animation object to Timeline.
             TocmTimeline[this.name] = this;
-            TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation(this.name, JSON.parse(JSON.stringify(this))));
+            // Build the animation.
+            new TocmLogger('TocmAnimation', 'Writing animation "' + this.name + '" to style node.', 'orange');
+            TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation('.' + this.name, JSON.parse(JSON.stringify(this))));
+            return this;
+        },
+        // FUNCTION TO GET LAST ANIMATED CLASS.
+        last: function () {
+            var conf = Object.keys(TocmConfig.animation),
+                config = TocmConfig.animation;
+            
+            var endTime = config.endTime,
+                endNode = config.endNode;
+            
+            var inherit = function (animation, preconf) {
+                if (typeOf(animation) === 'object') {
+                    // CREATING ANIMATION CONFIGURATIONS.
+                    if (!animation.duration) {
+                        if (typeOf(preconf) === 'object') {
+                            animation.duration = preconf.duration;
+                        } else {
+                            animation.duration = config.duration;
+                        }
+                    }
+                    if (!animation.delay) {
+                        if (typeOf(preconf) === 'object') {
+                            animation.delay = preconf.delay;
+                        } else {
+                            animation.delay = config.delay;
+                        }
+                    }
+                    if (!animation.repeat) {
+                        if (typeOf(preconf) === 'object') {
+                            animation.repeat = preconf.repeat;
+                        } else {
+                            animation.repeat = config.repeat;
+                        }
+                    }
+                }
+                return animation;
+            };
+
+            var nobj = JSON.parse(JSON.stringify(this));
+            nobj = inherit(nobj);
+            
+            var gLast = function (obj) {
+                if (typeOf(obj) !== 'object') return;
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        if (key === 'duration') {
+                            var hX = obj.duration;
+                            if (obj.hasOwnProperty('delay') && hX > 0) {
+                                hX += obj.delay;
+                            }
+                            if (hX > endTime) {
+                                if (obj.hasOwnProperty('repeat')) {
+                                    if (obj.repeat === 'infinite') {
+                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": using infinite play and it\'s mean never stoped. Now skipping end-point node.', 'purple');
+                                        endTime = 0;
+                                        endNode = '';
+                                    } else if (obj.repeat > 0) {
+                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + (hX * obj.repeat) + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                        endTime = hX * obj.repeat;
+                                        endNode = obj.name;
+                                    }
+                                } else {
+                                    new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                    endTime = hX;
+                                    endNode = obj.name;
+                                }
+                            } else {
+                                new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s smaller or equal to current largest time: "' + endTime + 's". Now skip it.', 'purple');
+                            }
+                        } else if (typeOf(obj[key]) === 'object' && !key.match(/\%/g) && conf.indexOf(key) < 0) {
+                            var xobj = obj[key];
+                            xobj.name = key;
+                            xobj = inherit(xobj, obj);
+                            gLast(xobj);
+                        }
+                    }
+                }
+            };
+            
+            gLast(nobj);
+            
+            this.endNode = endNode;
+            this.endTime = endTime;
+            
             return this;
         }
     };
 })(window);
+
+// CREATING EVENT.
+(function ($event) {
+    'use strict';
+    $event.onRun = [];
+    $event.onEnd = [];
+})(TocmAnimation.module);
 
 // CREATING MODULES.
 (function ($module) {
     'use strict';
     // FUNCTION TO ADD CHILD ANIMATION.
     $module.add = function (name, properties) {
+        new TocmLogger('TocmAnimation', 'Adding new animation "' + name + '" to parent animation "' + this.name + '".');
         if (typeOf(name) === 'string' && typeOf(properties) === 'object') {
             this[name] = properties;
             this.apply();
@@ -218,6 +325,7 @@
     };
     // FUNCTION TO PAUSE ANIMATION.
     $module.pause = function (delay) {
+        new TocmLogger('TocmAnimation', 'Pausing animation "' + this.name + '".');
         this.state = 'paused';
         this.apply();
         var target = this;
@@ -230,12 +338,14 @@
     };
     // FUNCTION TO CONTINUE ANIMATION.
     $module.play = function () {
+        new TocmLogger('TocmAnimation', 'Playing animation "' + this.name + '".');
         this.state = 'running';
         this.apply();
         return this;
     };
     // FUNCTION TO SET PROPERTIES OR CONFIGURATIONS.
     $module.set = function (property, value) {
+        new TocmLogger('TocmAnimation', 'Setting property to animation "' + this.name + '".', 'green');
         if (typeOf(property) === 'string') {
             var recset = function (object, prop) {
                 for (var key in prop) {
@@ -260,6 +370,7 @@
             } else {
                 this[property] = value;
             }
+            new TocmLogger('TocmAnimation', 'Applying changes to animation "' + this.name + '".', 'purple');
             this.apply();
         } else if (typeOf(property) === 'object') {
             for (var name in property) {
@@ -271,6 +382,14 @@
         this.pause(0.01);
         return this;
     };
+    // FUNCTION TO DELETE ANIMATION.
+    $module.remove = function () {
+        new TocmLogger('TocmAnimation', 'Removing animation "' + this.name + '".', 'red');
+        delete TocmTimeline[this.name];
+        var node = $.path('#' + this.name.replace(/\./g, ''))[0];
+        node.parentNode.removeChild(node);
+        return [];
+    };
     
     // HIDING MODULES.
     var mod = Object.keys($module);
@@ -279,3 +398,49 @@
     }
 })(TocmAnimation.module);
 
+// CREATING JQUERY PLUGIN.
+(function ($) {
+    'use strict';
+    $.fn.addAnimation = function (name) {
+        if (typeOf(name) === 'string') {
+            var runNode = this;
+            runNode.addClass(name.replace(/\./g, ''));
+            
+            var anim = $.anime(name);
+            var pfx = ["webkit", "moz", "MS", "o", ""], i, x;
+            
+            if (typeOf(anim.onRun) === 'function' && anim.endNode !== '') {
+                for (x = 0; x < runNode.length; ++x) {
+                    for (i = 0; i < pfx.length; ++i) {
+                        runNode[x].addEventListener(pfx[i] + 'AnimationStart', anim.onRun, false);
+                    }
+                }
+            }
+            if (typeOf(anim.onEnd) === 'function' && anim.endNode !== '') {
+                for (x = 0; x < runNode.length; ++x) {
+                    for (i = 0; i < pfx.length; ++i) {
+                        runNode[x].addEventListener(pfx[i] + 'AnimationEnd', anim.onEnd, false);
+                    }
+                }
+            }
+            // Automaticaly remove animation when animation endded.
+            if (anim.endNode !== '') {
+                var remAnim = function () {
+                    runNode.removeClass(name.replace(/\./g, ''));
+                };
+                for (x = 0; x < runNode.length; ++x) {
+                    for (i = 0; i < pfx.length; ++i) {
+                        runNode[x].addEventListener(pfx[i] + 'AnimationEnd', remAnim, false);
+                    }
+                }
+            }
+        }
+        return this;
+    };
+    $.fn.remAnimation = function (name) {
+        if (typeOf(name) === 'string') {
+            this.removeClass(name.replace(/\./g, ''));
+        }
+        return this;
+    };
+})(jQuery);

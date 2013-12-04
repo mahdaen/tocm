@@ -46,9 +46,10 @@
             
             // Creating RegExp Pattern.
             var pregmatch = [
-                /(\@)([a-zA-Z\d\-\_]+)(\=)([a-zA-Z\d\-\_]+)/, // Attribute Equal To.
-                /(\@)([a-zA-Z\d\-\_]+)(\?)([a-zA-Z\d\-\_]+)/, // Attribute Contains.
-                /(\@)([a-zA-Z\d\-\_]+)(\!)([a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\=)([\#\a-zA-Z\d\-\_]+)/, // Attribute Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(!=)([\#\a-zA-Z\d\-\_]+)/, // Attribute Not Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(\?)([\#\a-zA-Z\d\-\_]+)/, // Attribute Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\!)([\#\a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
 
                 /(\#)([a-zA-Z\d\-\_]+)/, // ID Contains.
                 /(\.)([a-zA-Z\d\-\_]+)/, // Class Contains.
@@ -62,8 +63,9 @@
             // Creating Pattern Replace to meet with XPath Pattern.
             var pregrepl = [
                 '[^$2="$4"]',
-                '[contains(^$2, "$4")]',
-                '[not(contains(^$2, "$4"))]',
+                '[^$2!="$4"]',
+                '[contains(concat(" ", ^$2, " ", " $4 ")]',
+                '[not(contains(concat(" ", ^$2, " ")," $4 "))]',
 
                 '[contains(concat(" ", ^id, " "), " $2 ")]',
                 '[contains(concat(" ", ^class, " "), " $2 ")]',

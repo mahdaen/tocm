@@ -1,3 +1,6 @@
+/*jshint boss:true*/
+/*jshint undef:false*/
+
 $class('.page', {
     padding: 20, background_color: '#ccc',
     
@@ -6,8 +9,8 @@ $class('.page', {
     }
 });
 
-$animation('.test-slide', {
-    repeat: 'infinite',
+$animation('test-slide', {
+    repeat: 3,
     
     '40%': {
         left: 0, font_size: '2em'
@@ -19,7 +22,7 @@ $animation('.test-slide', {
         left: '100%'
     },
     
-    '.test': {
+    '#test': {
         duration: 5,
         delay: 0.3,
         
@@ -29,9 +32,9 @@ $animation('.test-slide', {
     }
 });
 
-document.onreadystatechange = function (e) {
-    if (e.readyState === 'complete') {
-        var doc = document.getElementById('page');
-        doc.setAttribute('class', 'page test-slide');
-    }
+$animation('.test-slide').onRun = function (e) {
+    $log('TEST', 'Animation "' + e.animationName + '" Started.');
+};
+$animation('.test-slide').onEnd = function (e) {
+    $log('TEST', 'Animation "' + e.animationName + '" Endded.');
 };

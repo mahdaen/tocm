@@ -8821,6 +8821,238 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
 })(window);
 
+// Extend Date.
+(function (Date) {
+    'use strict';
+    // CONVERT DATE TO JULIAN.
+    if (!Date.prototype.toJulian) {
+        Date.prototype.toJulian = function () {
+            var MM = this.getUTCMonth() + 1;
+            var DD = this.getUTCDate();
+            var YY = this.getUTCFullYear();
+            var HR = this.getUTCHours();
+            var MN = this.getUTCMinutes();
+            var SC = this.getUTCSeconds();
+
+            HR = HR + (MN / 60) + (SC/3600);
+            var GGG = 1;
+            if (YY <= 1585) {
+                GGG = 0;
+            }
+            
+            var jDate = -1 * Math.floor(7 * (Math.floor((MM + 9) / 12) + YY) / 4);
+            
+            var S = 1;
+            if ((MM - 9)<0) {
+                S = -1;
+            }
+            var A = Math.abs(MM - 9);
+            
+            var J1 = Math.floor(YY + S * Math.floor(A / 7));
+            J1 = -1 * Math.floor((Math.floor(J1 / 100) + 1) * 3 / 4);
+            jDate = jDate + Math.floor(275 * MM / 9) + DD + (GGG * J1);
+            jDate = jDate + 1721027 + 2 * GGG + 367 * YY - 0.5;
+            jDate = jDate + (HR / 24);
+            
+            return jDate;
+        };
+    }
+    if (!Date.prototype.dateOfMonth) {
+        Date.prototype.dateOfMonth = function () {
+            var jdate = new Date(this.getFullYear(), this.getMonth, 1).toJulian();
+            var month = this.getMonth();
+            
+            var daycount = 0;
+            
+            for (var i = 1; i <= 31; ++i) {
+                if ((new Date(this.getFullYear(), this.getMonth(), i).getMonth()) === month) {
+                    daycount++;
+                }
+                jdate = jdate + 1;
+            }
+            return daycount;
+        };
+    }
+    // GET WEEK OF YEAR.
+    if (!Date.prototype.weekOfYear) {
+        Date.prototype.weekOfYear = function(){
+            var date = new Date(+this);
+            date.setHours(0,0,0);
+            date.setDate(date.getDate()+4-(date.getDay()||7));
+            return Math.ceil((((date-new Date(date.getFullYear(),0,1))/8.64e7)+1)/7);
+        };
+    }
+    // GET WEEK OF MONTH.
+    if (!Date.prototype.getWeek) {
+        Date.prototype.getWeek = function () {
+            var year = this.getFullYear();
+            var mont = this.getMonth();
+            var date = this.getDate();
+            
+            var lmonth  = mont - 1;
+            if (mont === 0) lmonth = 11;
+            var ndat = new Date(year, lmonth);
+            
+            var week = 0;
+            for (var i = (ndat.dateOfMonth() - 7); i <= ndat.dateOfMonth(); ++i) {
+                var cdate = new Date(year, lmonth, i);
+                if (cdate.getDay() === 0) week++;
+            }
+            if (new Date(year, mont, 1).getDay() === 0) week = 0;
+            for (var j = 1; j <= date; ++j) {
+                var xdate = new Date(year, mont, j);
+                if (xdate.getDay() === 0) week++;
+            }
+            return week;
+        };
+    }
+    // GET DATE ON WEEK WITH/WITHOUT SPESIFIC DAY.
+    if (!Date.prototype.dateOfWeek) {
+        Date.prototype.dateOfWeek = function (week, day) {
+            if (typeOf(week) === 'number') {
+                var i, j, w;
+                var gjd = new Date(this.getFullYear(), this.getMonth(), 1).toJulian();
+                
+                var dow = [];
+                var don = [];
+                for (i = 1; i <= 31; ++i) {
+                    if (Number(gjd.toDate('w')) === Number(week) && Number(gjd.toDate('M')-1) == this.getMonth()) {
+                        dow.push(i);
+                        don.push(gjd.toDate('ds'));
+                    }
+                    gjd = gjd + 1;
+                }
+                if (typeOf(day) === 'string') {
+                    return new Date(this.getFullYear(), this.getMonth(), dow[don.indexOf(day)]);
+                }
+                return dow;
+            }
+        };
+    }
+    // DATE FORMATTING.
+    if (!Date.prototype.format) {
+        Date.prototype.format = function (format) {
+            var jdate = this.toJulian();
+            var drepl = ['Y', 'M', 'D', 'd', 'h', 'm', 's', 't', 'W', 'dn', 'mn', 'w', 'wn'];
+            for (var i = 0; i < drepl.length; ++i) {
+                var reg = new RegExp('%' + drepl[i], 'g');
+                if (drepl[i].length > 1) {
+                    reg = new RegExp(drepl[i], 'g');
+                }
+                format = format.replace(reg, jdate.toDate(drepl[i]));
+            }
+            return format;
+        };
+    }
+    // CONVERT JULIAN NUMBER TO DATE.
+    if (!Number.prototype.toDate) {
+        Number.prototype.toDate = function (as) {
+            var X = parseFloat(this)+0.5;
+            var Z = Math.floor(X); //Get day without time
+            var F = X - Z; //Get time
+            var Y = Math.floor((Z-1867216.25)/36524.25);
+            var A = Z+1+Y-Math.floor(Y/4);
+            var B = A+1524;
+            var C = Math.floor((B-122.1)/365.25);
+            var D = Math.floor(365.25*C);
+            var G = Math.floor((B-D)/30.6001);
+            //must get number less than or equal to 12)
+            var month = (G<13.5) ? (G-1) : (G-13);
+            //if Month is January or February, or the rest of year
+            var year = (month<2.5) ? (C-4715) : (C-4716);
+            month -= 1; //Handle JavaScript month format
+            var UT = B-D-Math.floor(30.6001*G)+F;
+            var day = Math.floor(UT);
+            //Determine time
+            UT -= Math.floor(UT);
+            UT *= 24;
+            var hour = Math.floor(UT);
+            UT -= Math.floor(UT);
+            UT *= 60;
+            var minute = Math.floor(UT);
+            UT -= Math.floor(UT);
+            UT *= 60;
+            var second = Math.round(UT);
+            
+            var newdate = new Date(Date.UTC(year, month, day, hour, minute, second));
+            
+            var zyear = newdate.getFullYear();
+            var zmonth = newdate.getMonth() + 1;
+            if (zmonth < 10) zmonth = '0' + zmonth;
+            
+            var zdate = newdate.getDate();
+            if (zdate < 10) zdate = '0' + zdate;
+
+            var zhour = newdate.getHours();
+            if (zhour < 10) zhour = '0' + zhour;
+            
+            var zminute = newdate.getMinutes();
+            if (zminute < 10) zminute = '0' + zminute;
+            
+            var zsecond = newdate.getSeconds();
+            if (zsecond < 10) zsecond = '0' + zsecond;
+            
+            var ztime = newdate.getTime();
+            var zday = newdate.getDay() + 1;
+            var zweek = newdate.weekOfYear();
+            var wmont = newdate.getWeek();
+
+            var stday = ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            //if (TocmConfig.date.dayname) stday = TocmConfig.date.dayname;
+            var smont = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            //if (TocmConfig.date.monname) smont = TocmConfig.date.monname;
+            var sweek = ['', 'First', 'Second', 'Third', 'Fourth', 'Fifth'];
+            //if (TocmConfig.date.wekname) sweek = TocmConfig.date.wekname;
+            
+            if (typeOf(as) === 'string') {
+                if (as === 'month' || as === 'M') {
+                    return zmonth;
+                } else if (as === 'date' || as === 'D') {
+                    return zdate;
+                } else if (as === 'year' || as === 'Y') {
+                    return zyear;
+                } else if (as === 'hour' || as === 'h') {
+                    return zhour;
+                } else if (as === 'minute' || as === 'm') {
+                    return zminute;
+                } else if (as === 'second' || as === 's') {
+                    return zsecond;
+                } else if (as === 'time' || as === 't') {
+                    return ztime;
+                } else if (as === 'week' || as === 'W') {
+                    return zweek;
+                } else if (as === 'day' || as === 'd') {
+                    return zday;
+                } else if (as === 'dayname' || as === 'dn') {
+                    return stday[zday];
+                } else if (as === 'monthname' || as === 'mn') {
+                    return smont[Number(zmonth)];
+                } else if (as === 'weekmonth' || as === 'w') {
+                    return wmont;
+                } else if (as === 'weekname' || as === 'wn') {
+                    return sweek[wmont];
+                } else if (as === 'object') {
+                    return {
+                        year: zyear,
+                        month: zmonth,
+                        date: zdate,
+                        
+                        hour: zhour,
+                        minute: zminute,
+                        second: zsecond,
+                        
+                        time: ztime,
+                        day: zday,
+                        week: zweek
+                    };
+                }
+            }
+            
+            return newdate;
+        };
+    }
+})(Date);
+
 // Extend Array.
 (function (Array) {
     'use strict';
@@ -8965,7 +9197,13 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
         autowrite: true,
-        sortclass: false
+        sortclass: false,
+        showdebug: true,
+        date: {
+            dayname: ['', 'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu'],
+            monname: ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+            wekname: ['', 'Pertama', 'Kedua', 'Ketiga', 'Keempat', 'Kelima']
+        }
     };
     // CREATING COLLECTIONS OF UNIVERSAL CLASS.
     window.TocmDefClass = {};
@@ -9233,6 +9471,26 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 })(window);
 
 // CREATING A TOCM CLASS SUPPORT.
+// CREATING DEBUGGER.
+(function (window) {
+    'use strict';
+    if (!window.TocmConfig) {
+        window.TocmConfig = {};
+    }
+    
+    window.$log = window.TocmLogger = function (context, message, color) {
+        if (TocmConfig.showdebug === true && typeOf(context) === 'string' && typeOf(message) === 'string') {
+            var date = new Date().format('%D-%M-%Y %h:%m:%s');
+            
+            if (typeOf(color) === 'string') {
+                console.log('%c[' + date + '][' + context + '] >> ' + message, 'color:' + color + ';');
+            } else {
+                console.log('%c[' + date + '][' + context + '] >> ' + message, 'color:blue;');
+            }
+        }
+    };
+})(window);
+
 // KEYFRAME COLLECTIONS.
 (function (window) {
     'use strict';
@@ -9243,6 +9501,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         if (typeOf(name) === 'string') {
             // CREATE KEYFRAMES IF ARGUMENT POSITION AND PROPERTIES ARE DEFINED, OR SELECT IF ONLY NAME THAT DEFINED.
             if (typeOf(position) === 'string' && typeOf(properties) === 'object') {
+                new TocmLogger('TocmKeyframe', 'Creating new keyframe "' + this.name + '".');
+                
                 this.name = name;
                 frame = TocmKeyframes[name];
                 if (typeOf(frame) !== 'object') {
@@ -9252,7 +9512,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
                 TocmKeyframes[name][position] = properties;
                 this[position] = properties;
+
                 // Writing the Keyframe CSS.
+                new TocmLogger('TocmKeyframe', 'Writing keyframe "' + this.name + '" to style node.', 'purple');
                 this.write();
             } else {
                 frame = TocmKeyframes[name];
@@ -9301,6 +9563,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         at: function (position, properties) {
             var key, current;
             if (this.hasOwnProperty('name') && typeOf(position) === 'string' && typeOf(properties) === 'object') {
+                new TocmLogger('TocmKeyframe', 'Adding timeline "' + position + '" to keyframe "' + this.name + '".', 'green');
                 if (typeOf(this[position]) !== 'object') {
                     this[position] = {};
                 }
@@ -9339,6 +9602,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             fonts = TocmFonts[name];
             if (typeOf(src) === 'string' || typeOf(src) === 'array') {
                 TocmFonts[name] = {};
+
+                new TocmLogger('TocmFont', 'Creating new font "' + name + '".');
+
                 this.name = name;
                 TocmFonts[name].src = src;
                 this.src = src;
@@ -9350,6 +9616,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                         }
                     }
                 }
+                new TocmLogger('TocmFont', 'Writing font "' + name + '" to style node.', 'orange');
                 this.write();
             } else {
                 if (typeOf(fonts) === 'object') {
@@ -9508,6 +9775,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     var TocmClass = function (name, props, media, delayed) {
         if (typeOf(name) === 'string' && typeOf(props) === 'object') {
             // COLLECTING CSS PROPERTIES.
+            new TocmLogger('TocmClass', 'Creating new class "' + name + '".');
+
             this.name = this.family = name;
             this.properties = props;
             this.pseudo = {};
@@ -9522,6 +9791,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 this.media = media;
                 
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.
+                new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "' + media + '".', 'purple');
+
                 if (typeOf(TocmMedClass[media]) === 'object') {
                     TocmMedClass[media][name] = this;
                 } else {
@@ -9529,6 +9800,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                     TocmMedClass[media][name] = this;
                 }
             } else {
+                new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "universal".', 'purple');
+
                 this.media = 'none';
                 TocmDefClass[name] = this;
             }
@@ -9604,6 +9877,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                                 family = name;
                             }
                             // CREATING NEW CLASS INHERITING TO THIS CLASS.
+                            new TocmLogger('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
+
                             TocmConfig.autowrite = false;
                             subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
                         } else {
@@ -9700,6 +9975,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                     TocmDefClass[this.name] = this;
                 }
                 if (TocmConfig.autowrite === true) {
+                    new TocmLogger('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
                     TocmBuilder.writeSCS(this);
                 }
             }
@@ -9959,7 +10235,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         repeat: 1,
         direction: 'normal',
         state: 'running',
-        inherit: true
+        inherit: true,
+        endNode: '',
+        endTime: 0
     };
 })(window);
 
@@ -10057,7 +10335,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             
             // CREATING CSS KEYFRAMES STRING.
             // Opening keyframes.
-            keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
+            keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + open;
             // Adding keyframes properties.
             for (time in selftimeline) {
                 if (selftimeline.hasOwnProperty(time)) {
@@ -10071,7 +10349,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             // Closing keyframes.
             keyframe += atab + close;
             // Opening keyframes.
-            keyframe += atab + '@-webkit-keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '') + open;
+            keyframe += atab + '@-webkit-keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + open;
             // Adding keyframes properties.
             for (time in selftimeline) {
                 if (selftimeline.hasOwnProperty(time)) {
@@ -10087,9 +10365,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             // Opening selector.
             cssclass += atab + name + open;
             // Adding animation properties.
-            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
             cssclass += btab + 'animation-play-state: ' + animation.state + ';\n';
-            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
             cssclass += btab + '-webkit-animation-play-state: ' + animation.state + ';\n';
             // Closing selector
             cssclass += atab + close;
@@ -10119,8 +10397,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     
     // CREATING CORE CONSTRUCTOR.
     var TocmAnimation = function (name, properties) {
-        if (typeOf(name) === 'string') {
+        if (typeOf(name) === 'string' && !name.match(/[\!\@\#\$\%\^\&\*\.\,\:\;]+/)) {
             if (typeOf(properties) === 'object') {
+                new TocmLogger('TocmAnimation', 'Creating new animation "' + name + '".');
                 this.name = name;
                 for (var key in properties) {
                     if (properties.hasOwnProperty(key)) {
@@ -10139,20 +10418,124 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     window.$animation = window.TocmAnimation = function (name, properties) {
         return new TocmAnimation(name, properties);
     };
-    window.$animation.module = TocmAnimation.prototype = {
+    window.TocmAnimation.module = TocmAnimation.prototype = {
         apply: function () {
+            // Getting the larger runtime.
+            this.last();
+            // Hiding Properties.
+            var x = ['endNode', 'endTime', 'name'];
+            for (var i = 0; i < x.length; ++i) {
+                if (this.hasOwnProperty(x[i])) {
+                    Object.defineProperty(this, x[i], {enumerable: false});
+                }
+            }
+            // Adding animation object to Timeline.
             TocmTimeline[this.name] = this;
-            TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation(this.name, JSON.parse(JSON.stringify(this))));
+            // Build the animation.
+            new TocmLogger('TocmAnimation', 'Writing animation "' + this.name + '" to style node.', 'orange');
+            TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation('.' + this.name, JSON.parse(JSON.stringify(this))));
+            return this;
+        },
+        // FUNCTION TO GET LAST ANIMATED CLASS.
+        last: function () {
+            var conf = Object.keys(TocmConfig.animation),
+                config = TocmConfig.animation;
+            
+            var endTime = config.endTime,
+                endNode = config.endNode;
+            
+            var inherit = function (animation, preconf) {
+                if (typeOf(animation) === 'object') {
+                    // CREATING ANIMATION CONFIGURATIONS.
+                    if (!animation.duration) {
+                        if (typeOf(preconf) === 'object') {
+                            animation.duration = preconf.duration;
+                        } else {
+                            animation.duration = config.duration;
+                        }
+                    }
+                    if (!animation.delay) {
+                        if (typeOf(preconf) === 'object') {
+                            animation.delay = preconf.delay;
+                        } else {
+                            animation.delay = config.delay;
+                        }
+                    }
+                    if (!animation.repeat) {
+                        if (typeOf(preconf) === 'object') {
+                            animation.repeat = preconf.repeat;
+                        } else {
+                            animation.repeat = config.repeat;
+                        }
+                    }
+                }
+                return animation;
+            };
+
+            var nobj = JSON.parse(JSON.stringify(this));
+            nobj = inherit(nobj);
+            
+            var gLast = function (obj) {
+                if (typeOf(obj) !== 'object') return;
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        if (key === 'duration') {
+                            var hX = obj.duration;
+                            if (obj.hasOwnProperty('delay') && hX > 0) {
+                                hX += obj.delay;
+                            }
+                            if (hX > endTime) {
+                                if (obj.hasOwnProperty('repeat')) {
+                                    if (obj.repeat === 'infinite') {
+                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": using infinite play and it\'s mean never stoped. Now skipping end-point node.', 'purple');
+                                        endTime = 0;
+                                        endNode = '';
+                                    } else if (obj.repeat > 0) {
+                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + (hX * obj.repeat) + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                        endTime = hX * obj.repeat;
+                                        endNode = obj.name;
+                                    }
+                                } else {
+                                    new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                    endTime = hX;
+                                    endNode = obj.name;
+                                }
+                            } else {
+                                new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s smaller or equal to current largest time: "' + endTime + 's". Now skip it.', 'purple');
+                            }
+                        } else if (typeOf(obj[key]) === 'object' && !key.match(/\%/g) && conf.indexOf(key) < 0) {
+                            var xobj = obj[key];
+                            xobj.name = key;
+                            xobj = inherit(xobj, obj);
+                            gLast(xobj);
+                        }
+                    }
+                }
+            };
+            
+            gLast(nobj);
+            
+            this.endNode = endNode;
+            this.endTime = endTime;
+            
             return this;
         }
     };
 })(window);
+
+// CREATING EVENT.
+(function ($event) {
+    'use strict';
+    $event.onRun = [];
+    $event.onEnd = [];
+})(TocmAnimation.module);
 
 // CREATING MODULES.
 (function ($module) {
     'use strict';
     // FUNCTION TO ADD CHILD ANIMATION.
     $module.add = function (name, properties) {
+        new TocmLogger('TocmAnimation', 'Adding new animation "' + name + '" to parent animation "' + this.name + '".');
         if (typeOf(name) === 'string' && typeOf(properties) === 'object') {
             this[name] = properties;
             this.apply();
@@ -10161,6 +10544,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
     // FUNCTION TO PAUSE ANIMATION.
     $module.pause = function (delay) {
+        new TocmLogger('TocmAnimation', 'Pausing animation "' + this.name + '".');
         this.state = 'paused';
         this.apply();
         var target = this;
@@ -10173,12 +10557,14 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
     // FUNCTION TO CONTINUE ANIMATION.
     $module.play = function () {
+        new TocmLogger('TocmAnimation', 'Playing animation "' + this.name + '".');
         this.state = 'running';
         this.apply();
         return this;
     };
     // FUNCTION TO SET PROPERTIES OR CONFIGURATIONS.
     $module.set = function (property, value) {
+        new TocmLogger('TocmAnimation', 'Setting property to animation "' + this.name + '".', 'green');
         if (typeOf(property) === 'string') {
             var recset = function (object, prop) {
                 for (var key in prop) {
@@ -10203,6 +10589,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             } else {
                 this[property] = value;
             }
+            new TocmLogger('TocmAnimation', 'Applying changes to animation "' + this.name + '".', 'purple');
             this.apply();
         } else if (typeOf(property) === 'object') {
             for (var name in property) {
@@ -10214,6 +10601,14 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         this.pause(0.01);
         return this;
     };
+    // FUNCTION TO DELETE ANIMATION.
+    $module.remove = function () {
+        new TocmLogger('TocmAnimation', 'Removing animation "' + this.name + '".', 'red');
+        delete TocmTimeline[this.name];
+        var node = $.path('#' + this.name.replace(/\./g, ''))[0];
+        node.parentNode.removeChild(node);
+        return [];
+    };
     
     // HIDING MODULES.
     var mod = Object.keys($module);
@@ -10222,14 +10617,61 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     }
 })(TocmAnimation.module);
 
+// CREATING JQUERY PLUGIN.
+(function ($) {
+    'use strict';
+    $.fn.addAnimation = function (name) {
+        if (typeOf(name) === 'string') {
+            var runNode = this;
+            runNode.addClass(name.replace(/\./g, ''));
+            
+            var anim = $.anime(name);
+            var pfx = ["webkit", "moz", "MS", "o", ""], i, x;
+            
+            if (typeOf(anim.onRun) === 'function' && anim.endNode !== '') {
+                for (x = 0; x < runNode.length; ++x) {
+                    for (i = 0; i < pfx.length; ++i) {
+                        runNode[x].addEventListener(pfx[i] + 'AnimationStart', anim.onRun, false);
+                    }
+                }
+            }
+            if (typeOf(anim.onEnd) === 'function' && anim.endNode !== '') {
+                for (x = 0; x < runNode.length; ++x) {
+                    for (i = 0; i < pfx.length; ++i) {
+                        runNode[x].addEventListener(pfx[i] + 'AnimationEnd', anim.onEnd, false);
+                    }
+                }
+            }
+            // Automaticaly remove animation when animation endded.
+            if (anim.endNode !== '') {
+                var remAnim = function () {
+                    runNode.removeClass(name.replace(/\./g, ''));
+                };
+                for (x = 0; x < runNode.length; ++x) {
+                    for (i = 0; i < pfx.length; ++i) {
+                        runNode[x].addEventListener(pfx[i] + 'AnimationEnd', remAnim, false);
+                    }
+                }
+            }
+        }
+        return this;
+    };
+    $.fn.remAnimation = function (name) {
+        if (typeOf(name) === 'string') {
+            this.removeClass(name.replace(/\./g, ''));
+        }
+        return this;
+    };
+})(jQuery);
+
 // CREATING SELECTOR.
 (function(window) {
     'use strict';
     // CREATING XPATH SELECTOR.
-    var XPathSelector = function (pattern, doc) {
+    var XPathSelector = function (pattern) {
         var item, search, result = [];
         if (typeOf(pattern) === 'string') {
-            search = document.evaluate(pattern, doc, null, XPathResult.ANY_TYPE, null);
+            search = document.evaluate(pattern, document, null, XPathResult.ANY_TYPE, null);
             while (item = search.iterateNext()) {
                 result.push(item);
             }
@@ -10238,13 +10680,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
     
     // CREATING CORE SELECTOR.
-    var TocmQuery = function (pattern, from) {
+    var TocmQuery = function (pattern) {
         var doms = [], i;
-        if (!from) {
-            this.selectfrom = document;
-        } else {
-            this.selectfrom = from;
-        }
         // GETTING PATTERN TYPE.
         if (typeOf(pattern) === 'string') {
             // Adding global select (//) if not defined.
@@ -10260,9 +10697,10 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             
             // Creating RegExp Pattern.
             var pregmatch = [
-                /(\@)([a-zA-Z\d\-\_]+)(\=)([a-zA-Z\d\-\_]+)/, // Attribute Equal To.
-                /(\@)([a-zA-Z\d\-\_]+)(\?)([a-zA-Z\d\-\_]+)/, // Attribute Contains.
-                /(\@)([a-zA-Z\d\-\_]+)(\!)([a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\=)([\#\a-zA-Z\d\-\_]+)/, // Attribute Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(!=)([\#\a-zA-Z\d\-\_]+)/, // Attribute Not Equal To.
+                /(\@)([a-zA-Z\d\-\_]+)(\?)([\#\a-zA-Z\d\-\_]+)/, // Attribute Contains.
+                /(\@)([a-zA-Z\d\-\_]+)(\!)([\#\a-zA-Z\d\-\_]+)/, // Attribute Not Contains.
 
                 /(\#)([a-zA-Z\d\-\_]+)/, // ID Contains.
                 /(\.)([a-zA-Z\d\-\_]+)/, // Class Contains.
@@ -10276,6 +10714,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             // Creating Pattern Replace to meet with XPath Pattern.
             var pregrepl = [
                 '[^$2="$4"]',
+                '[^$2!="$4"]',
                 '[contains(^$2, "$4")]',
                 '[not(contains(^$2, "$4"))]',
 
@@ -10303,7 +10742,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             //console.log(pattern);
             
             // Selecting Dom Element.
-            doms = new XPathSelector(pattern, this.selectfrom);
+            doms = new XPathSelector(pattern);
             return jQuery(doms);
         } else {
             return jQuery('');
@@ -10322,8 +10761,14 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             IOEvent: {}
         },
         TaskLibrary: {
-            Task: {},
-            Listener: {}
+            Task: {
+                length: 0,
+                splice: function () {}
+            },
+            Listener: {
+                length: 0,
+                splice: function() {}
+            }
         }
     };
 })(window);
@@ -10331,13 +10776,360 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 // CREATING TASK CONSTRUCTOR.
 (function (window) {
     'use strict';
+    // CREATING TASK LISTENER.
+    var listenTask = function (tsid, time) {
+        if (typeOf(tsid) === 'number') {
+            var listener = TocmRegistry.TaskLibrary.Listener,
+                tasklist = TocmRegistry.TaskLibrary.Task,
+                task = tasklist[tsid];
+            
+            if (typeOf(time) === 'number') {
+                listener[tsid] = setTimeout(function () {
+                    task.call();
+                }, time);
+                
+                listener.length++;
+            } else if (typeOf(task.nextRun === 'number') && task.nextRun > 0) {
+                listener[tsid] = setTimeout(function () {
+                    task.call();
+                }, task.nextRun);
+                
+                listener.length++;
+            } else if (typeOf(task.nextRun) === 'string') {
+                var nexd = new Date(task.nextRun).getTime();
+                var curd = new Date().getTime();
+                var tdur = nexd - curd;
+                
+                if (tdur > 0) {
+                    listener[tsid] = setTimeout(function () {
+                        task.call();
+                    }, tdur);
+                    
+                    listener.length++;
+                } else {
+                    task.status = 'stopped';
+                }
+            }
+        }
+    };
+    var unlistenTask = function (tsid) {
+        var listener = TocmRegistry.TaskLibrary.Listener;
+        
+        if (listener[tsid]) {
+            clearTimeout(listener[tsid]);
+            delete listener[tsid];
+            listener.length--;
+        }
+    };
     
-})(window);
+    // CREATING TASK BUILDER.
+    var TocmTask = function (name) {
+        var task = TocmRegistry.TaskLibrary.Task;
+        if (typeOf(name) === 'string') {
+            new TocmLogger('TocmTask', 'Creating new task "' + name + '".');
+            // Handle if task already exist.
+            for (var i = 0; i < task.length; ++i) {
+                if (task[i].name === name) {
+                    new TocmLogger('TocmTask', 'Task "' + name + '" is already exist. Now return it.', 'orange');
+                    return task[i];
+                }
+            }
+            // Increasing task length.
+            task.length++;
+            // Configuring new task.
+            this.name = name;
+            this.tsid = (task.length - 1);
+            this.status = 'init';
+            this.runtime = '';
+            this.nextRun = this.lastRun = this.trigger = '';
+            
+            this.actions = [];
+            
+            task[this.tsid] = this;
+            new TocmLogger('TocmTask', 'Task "' + name + '" has been created.', 'green');
+        }
+        return this;
+    };
+    
+    // CREATING TASK HANDLER.
+    // ------------------------------------------------------
+    // Handling actions.
+    var actionHandler = function (task) {
+        new TocmLogger('TocmTask', 'Running task "' + task.name + '".', 'orange');
+        task.status = 'running';
+        // Handling task onCall event.
+        if (typeOf(task.onCall) === 'function') task.onCall(task);
+        
+        // Getting the actions.
+        var action = task.actions;
+        // Enumerating actions.
+        try {
+            // Trying to trigger actions.
+            for (var i = 0; i < action.length; ++i) {
+                new TocmLogger('TocmTask', 'Triggering action "' + action[i].name + '".');
+                action[i](task);
+                new TocmLogger('TocmTask', 'Action "' + action[i].name + '" has been triggered.', 'green');
+            }
+        } catch(e) {
+            // If error occurs while triggering actions, then call the onFail handler and stop the task.
+            task.status = 'failed';
+            if (typeOf(task.onFail) === 'function') task.onFail(task);
+            
+            new TocmLogger('TocmTask', e.message, 'red');
+        } finally {
+            if (task.status !== 'failed') {
+                task.status = 'ready';
+                task.lastRun = new Date().format('dn mn %D, %Y %h:%m:%s');
+                
+                if (typeOf(task.onLoad) === 'function') task.onLoad(task);
+                
+                new TocmLogger('TocmTask', 'Task "' + task.name + '" finished running. Now it\'s ready for next run.', 'green');
+                task.init();
+                listenTask(task.tsid);
+            }
+        }
+    };
+    // Handling realtime task.
+    var realtimeHandler = function (task) {
+        // Set up the next run time.
+        task.nextRun = 5;
+        // Change task status.
+        task.status = 'ready';
 
-// CREATING TASK MODULE.
-(function (window) {
-    'use strict';
+        return task;
+    };
+    // Handling immediate task.
+    var immediateHandler = function (task) {
+        // Turn off task.
+        task.nextRun = 0;
+        // Change task status.
+        task.status= 'ready';
+
+        return task;
+    };
+    // Handling delayed task.
+    var delayedHandler = function (task) {
+        // Getting current date in milliseconds.
+        var curnMil = new Date().getTime();
+        var nextMil;
+        
+        // Getting trigger.
+        var trigger = task.trigger;
+        var trigarr = trigger.split(' ');
+        // Parsing trigger.
+        if (trigarr.length > 1 && trigarr[0] === 'every') {
+            var pat = trigarr[1].split(/([\d\.]+)/);
+            pat[1] = Number(pat[1]);
+            switch(pat[2]) {
+                case 's':
+                    nextMil = (pat[1] * 1000);
+                    break;
+                case 'm':
+                    nextMil = (pat[1] * 60 * 1000);
+                    break;
+                case 'h':
+                    nextMil = (pat[1] * 60 * 60 * 1000);
+                    break;
+                case 'd':
+                    nextMil = (pat[1] * 60 * 60 * 24 * 1000);
+                    break;
+                case 'w':
+                    nextMil = (pat[1] * 60 * 60 * 24 * 7 * 1000);
+                    break;
+                default:
+                    nextMil = 0;
+                    break;
+            }
+        }
+
+        task.nextRun = new Date(curnMil + nextMil).format('dn mn %D, %Y %h:%m:%s');
+        // Change task status.
+        task.status = 'ready';
+        
+        return task;
+    };
+    // Handling scheduled task.
+    var scheduledHandler = function (task) {
+        var nextRun;
+        var nextDay = Number(new Date().toJulian().toDate('D')) + 1;
+        var curTime = new Date().getTime();
+        
+        var trigger = task.trigger;
+        var trigarr = trigger.split(/\s/);
+        if (trigarr.length > 1) {
+            switch(trigarr[0]) {
+                case 'daily':
+                    if (trigarr[1] === 'at') {
+                        // Handling invalid time format.
+                        if (!trigarr[2].match(/[\d]+\:[\d]+$/)) {
+                            task.nextRun = 0;
+                            task.status = 'failed';
+                            new TocmLogger('TocmTask', 'Invalid time format "' + trigarr[2] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red');
+                            break;
+                        }
+                        
+                        // Trying schedule time for today.
+                        nextRun = new Date(new Date().format('%M-%D-%Y ' + trigarr[2]));
+                        // If time now is higher than scheduled time, then reschedule time for next day.
+                        if (nextRun.getTime() <= curTime) {
+                            nextRun = new Date(new Date().format('%M-' + nextDay + '-%Y ' + trigarr[2]));
+                        }
+                        
+                        task.nextRun = nextRun.format('dn mn %D, %Y %h:%m:%s');
+                        task.status = 'ready';
+                    } else if (trigarr[1] === 'between') {
+                        // Handling invalid time format.
+                        if (!trigarr[2].match(/[\d]+\:[\d]+$/) || trigarr[3] !== 'and' && !trigarr[4].match(/[\d]+\:[\d]+$/)) {
+                            task.nextRun = 0;
+                            task.status = 'failed';
+                            new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red');
+                            break;
+                        }
+                        
+                        var lowTime = new Date(new Date().format('%M-%D-%Y ' + trigarr[2]));
+                        var higTime = new Date(new Date().format('%M-%D-%Y ' + trigarr[4]));
+                        
+                        if (curTime > higTime.getTime()) {
+                            // Schedule time to next day if current time is higher than max range time.
+                            nextRun = new Date(new Date().format('%M-' + nextDay + '-%Y ' + trigarr[2]));
+                        } else if (curTime < lowTime.getTime()) {
+                            // Schedule time to today if current time is lower than min range time.
+                            nextRun = new Date(new Date().format('%M-%D-%Y ' + trigarr[2]));
+                        } else if (curTime >= lowTime.getTime() && curTime <= higTime.getTime()) {
+                            // Convert it to realtime task if current time is in time range.
+                            nextRun = 15;
+                        }
+                        
+
+                        if (typeOf(nextRun) === 'date') {
+                            task.nextRun = nextRun.format('dn mn %D, %Y %h:%m:%s');
+                        } else if (typeOf(nextRun) === 'number') {
+                            task.nextRun = nextRun;
+                        }
+
+                        task.status = 'ready';
+                    }
+                    break;
+                case 'weekly':
+                    break;
+                case 'monthly':
+                    break;
+            }
+        }
+        
+        return task;
+    };
     
+    // CREATING TASK MODULES.
+    TocmTask.prototype = {
+        // CREATING TASK INIT.
+        init: function () {
+            var task;
+            this.status = 'init';
+            
+            if (this.runtime === 'realtime') {
+                task = realtimeHandler(this);
+            } else if (this.runtime === 'immediate') {
+                task = immediateHandler(this);
+            } else if (this.runtime === 'delayed') {
+                task = delayedHandler(this);
+            } else if (this.runtime === 'scheduled') {
+                task = scheduledHandler(this);
+            } else {
+                this.status = 'failed';
+            }
+            return this;
+        },
+        call: function () {
+            if (this.status === 'ready') {
+                unlistenTask(this.tsid);
+                actionHandler(this);
+            }
+            return this;
+        },
+        // CREATING TASK STARTER.
+        run: function (exec) {
+            this.init();
+
+            if (exec === true) {
+                this.call();
+            } else {
+                listenTask(this.tsid);
+            }
+
+            return this;
+        },
+        // CREATING TASK STOPPER.
+        stop: function () {
+            new TocmLogger('TocmTask', 'Stopping task "' + this.name + '".');
+            this.status = 'stopped';
+            if (TocmRegistry.TaskLibrary.Listener[this.tsid]) {
+                clearTimeout(TocmRegistry.TaskLibrary.Listener[this.tsid]);
+            }
+            new TocmLogger('TocmTask', 'Task "' + this.name + '" has been stopped.');
+            return this;
+        },
+        // CREATING DELAY SETTER.
+        repeat: function (trigger) {
+            if (typeOf(trigger) === 'string') {
+                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as delayed task.');
+                unlistenTask(this.tsid);
+                this.runtime = 'delayed';
+                this.trigger = trigger;
+                this.init();
+            }
+            return this;
+        },
+        // CREATING REALTIME SETTER.
+        realtime: function () {
+            new TocmLogger('TocmTask', 'Set task "' + this.name + '" as realtime task.');
+            unlistenTask(this.tsid);
+            this.runtime = 'realtime';
+            this.trigger = '';
+            this.init();
+            return this;
+        },
+        schedule: function (trigger) {
+            if (typeOf(trigger) === 'string') {
+                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as scheduled task.');
+                unlistenTask(this.tsid);
+                this.runtime = 'scheduled';
+                this.trigger = trigger;
+                this.init();
+            }
+            return this;
+        },
+        immediate: function (time) {
+            this.runtime = 'immediate';
+            if (typeOf(time) === 'number') {
+                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as immediate task.');
+                this.init();
+                listenTask(this.tsid, time);
+            } else {
+                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as immediate task and run it immediately since no time defined.');
+                this.init();
+                this.call();
+            }
+            return this;
+        },
+        addAction: function (func) {
+            if (typeOf(func) === 'function') {
+                new TocmLogger('TocmTask', 'Adding action "' + func.name + '" to task "' + this.name + '".');
+                if (this.actions.indexOf(func) < 0) {
+                    this.actions.push(func);
+                } else {
+                    this.actions[this.actions.indexOf(func)] = func;
+                }
+                new TocmLogger('TocmTask', 'Action "' + func.name + '" has been added to task "' + this.name + '".', 'green');
+            }
+            return this;
+        }
+    };
+    
+    window.$task = window.TocmTask = function (name, runtime) {
+        return new TocmTask(name, runtime);
+    };
+    window.TocmTask.module = window.TocmTask.event = TocmTask.prototype;
 })(window);
 
 // EXTENDING JQUERY IDENTIFIER ($).
