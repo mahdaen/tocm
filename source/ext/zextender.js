@@ -3,8 +3,9 @@
 /*jshint undef:false*/
 
 // EXTENDING JQUERY IDENTIFIER ($).
-(function($) {
+(function() {
     'use strict';
+    var $ = {};
     $.anime = TocmAnimation;
     $.class = Tocm;
     $.media = TocmMedia;
@@ -12,7 +13,7 @@
     $.font = TocmFont;
     $.keyframe = TocmKeyframe;
     $.task = TocmTask;
-})(jQuery);
+})();
 
 
 // CREATING JQUERY PLUGIN.
@@ -60,4 +61,4 @@
         }
         return this;
     };
-})(jQuery);
+})(Zepto);

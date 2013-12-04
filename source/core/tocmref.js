@@ -32,7 +32,7 @@
         ],
         // RESTRICTED PROPERTIES FROM NUMBER AUTOMATIONS.
         noint: [
-            'opacity', 'z-index', 'font-weight', 'column-count'
+            'opacity', 'z-index', 'font-weight', 'column-count', 'line-height'
         ]
     };
 })(window);
