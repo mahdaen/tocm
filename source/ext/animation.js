@@ -29,9 +29,9 @@
     var _writeAnimation = function (name, property, preconf, timeline) {
         if (typeOf(name) === 'string' && typeOf(property) === 'object') {
             // GETTING CONFIGURATIONS.
-            var conf        = Object.keys(TocmConfig.animation),
-                config      = TocmConfig.animation;
-            
+            var conf = Object.keys(TocmConfig.animation),
+                config = TocmConfig.animation;
+
             // CREATING USABLE VARIABLES.
             var csstring = '',
                 keyframe = '',
@@ -42,10 +42,11 @@
                 open = ' {\n',
                 line = ';\n',
                 close = '}\n';
-            
+
             // CREATING ANIMATION OBJECT.
-            var animation = property, inherited = {}, selftimeline = {};
-            
+            var animation = property,
+                inherited = {}, selftimeline = {};
+
             // CREATING ANIMATION CONFIGURATIONS.
             if (!animation.duration) {
                 if (typeOf(preconf) === 'object') {
@@ -96,7 +97,7 @@
                     animation.inherit = config.inherit;
                 }
             }
-            
+
             // CREATING TIMELINE.
             if (typeOf(timeline) === 'object' && animation.inherit === true) {
                 for (var x in timeline) {
@@ -110,10 +111,10 @@
                     selftimeline[time.replace(/\%/g, '')] = animation[time];
                 }
             }
-            
+
             // SORTING TIMELINE.
-            selftimeline = selftimeline.sort('STH');
-            
+            selftimeline = sortObject(selftimeline);
+
             // CREATING CSS KEYFRAMES STRING.
             // Opening keyframes.
             keyframe += atab + '@keyframes ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + open;
@@ -121,7 +122,7 @@
             for (time in selftimeline) {
                 if (selftimeline.hasOwnProperty(time)) {
                     inherited[time] = selftimeline[time];
-                    
+
                     keyframe += btab + time + '%' + open;
                     keyframe += TocmBuilder.generateCSS(selftimeline[time], ctab);
                     keyframe += btab + close;
@@ -146,16 +147,16 @@
             // Opening selector.
             cssclass += atab + name + open;
             // Adding animation properties.
-            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + 'animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' ' + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
             cssclass += btab + 'animation-play-state: ' + animation.state + ';\n';
-            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' '  + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
+            cssclass += btab + '-webkit-animation: ' + name.replace(/\./g, '_').replace(/\s/g, '').replace(/\#/g, '_') + ' ' + animation.duration + 's ' + animation.timing + ' ' + animation.delay + 's ' + animation.repeat + ' ' + animation.direction + ';\n';
             cssclass += btab + '-webkit-animation-play-state: ' + animation.state + ';\n';
             // Closing selector
             cssclass += atab + close;
-            
+
             // ADDING GENERATED CLASS AND KEYFRAME TO CSS STRING.
             csstring += keyframe + '\n' + cssclass + '\n';
-            
+
             // ITERATING CHILD ANIMATIONS.
             for (var child in animation) {
                 if (animation.hasOwnProperty(child) && child.match(/\%/g) === null && conf.indexOf(child) < 0) {
@@ -175,7 +176,7 @@
             return '';
         }
     };
-    
+
     // CREATING CORE CONSTRUCTOR.
     var TocmAnimation = function (name, properties) {
         if (typeOf(name) === 'string' && !name.match(/[\!\@\#\$\%\^\&\*\.\,\:\;]+/)) {
@@ -194,11 +195,16 @@
             }
         }
     };
-    
+
     // REGISTERING TO WINDOW OBJECT AND CREATING MODULE WRAPPER.
     window.$animation = window.TocmAnimation = function (name, properties) {
         return new TocmAnimation(name, properties);
     };
+    // LOCKING OBJECT.
+    lock('$animation');
+    lock('TocmAnimation');
+
+    // CREATING MODULES.
     window.TocmAnimation.module = TocmAnimation.prototype = {
         apply: function () {
             // Getting the larger runtime.
@@ -207,7 +213,9 @@
             var x = ['endNode', 'endTime', 'name'];
             for (var i = 0; i < x.length; ++i) {
                 if (this.hasOwnProperty(x[i])) {
-                    Object.defineProperty(this, x[i], {enumerable: false});
+                    Object.defineProperty(this, x[i], {
+                        enumerable: false
+                    });
                 }
             }
             // Adding animation object to Timeline.
@@ -221,10 +229,10 @@
         last: function () {
             var conf = Object.keys(TocmConfig.animation),
                 config = TocmConfig.animation;
-            
+
             var endTime = config.endTime,
                 endNode = config.endNode;
-            
+
             var inherit = function (animation, preconf) {
                 if (typeOf(animation) === 'object') {
                     // CREATING ANIMATION CONFIGURATIONS.
@@ -255,7 +263,7 @@
 
             var nobj = JSON.parse(JSON.stringify(this));
             nobj = inherit(nobj);
-            
+
             var gLast = function (obj) {
                 if (typeOf(obj) !== 'object') return;
                 for (var key in obj) {
@@ -293,23 +301,16 @@
                     }
                 }
             };
-            
+
             gLast(nobj);
-            
+
             this.endNode = endNode;
             this.endTime = endTime;
-            
+
             return this;
         }
     };
 })(window);
-
-// CREATING EVENT.
-(function ($event) {
-    'use strict';
-    $event.onRun = [];
-    $event.onEnd = [];
-})(TocmAnimation.module);
 
 // CREATING MODULES.
 (function ($module) {
@@ -361,7 +362,7 @@
                     }
                 }
             };
-            
+
             if (typeOf(value) === 'object') {
                 if (!this[property]) {
                     this[property] = {};
@@ -390,10 +391,12 @@
         node.parentNode.removeChild(node);
         return [];
     };
-    
+
     // HIDING MODULES.
     var mod = Object.keys($module);
     for (var i = 0; i < mod.length; ++i) {
-        Object.defineProperty(TocmAnimation.module, mod[i], {enumerable: false});
+        Object.defineProperty(TocmAnimation.module, mod[i], {
+            enumerable: false
+        });
     }
 })(TocmAnimation.module);

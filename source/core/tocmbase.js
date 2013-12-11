@@ -9,11 +9,11 @@
     if (!window.TocmConfig) {
         window.TocmConfig = {};
     }
-    
+
     window.$log = window.TocmLogger = function (context, message, color, force) {
         if (TocmConfig.showdebug === true && typeOf(context) === 'string' && typeOf(message) === 'string' || force === true) {
             var date = new Date().format('%D-%M-%Y %h:%m:%s');
-            
+
             if (typeOf(color) === 'string') {
                 console.log('%c[' + date + '][' + context + '] >> ' + message, 'color:' + color + ';');
             } else {
@@ -21,6 +21,9 @@
             }
         }
     };
+    // Locking Debugger.
+    lock('$log');
+    lock('TocmLogger');
 })(window);
 
 // KEYFRAME COLLECTIONS.
@@ -34,7 +37,7 @@
             // CREATE KEYFRAMES IF ARGUMENT POSITION AND PROPERTIES ARE DEFINED, OR SELECT IF ONLY NAME THAT DEFINED.
             if (typeOf(position) === 'string' && typeOf(properties) === 'object') {
                 new TocmLogger('TocmKeyframe', 'Creating new keyframe "' + this.name + '".');
-                
+
                 this.name = name;
                 frame = TocmKeyframes[name];
                 if (typeOf(frame) !== 'object') {
@@ -66,7 +69,8 @@
     TocmKeyframe.prototype = {
         // FUNCTION TO WRITE KEYFRAME.
         write: function () {
-            var cstr = '', style, vendor;
+            var cstr = '',
+                style, vendor;
             vendor = ['', '-webkit-'];
             if (this.hasOwnProperty('name') && typeOf(this.name) === 'string') {
                 // Opening CSS Keyframes.
@@ -122,6 +126,9 @@
     window.$keyframes = window.TocmKeyframe = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
     };
+    // Locking Keyframe.
+    lock('$keyframes');
+    lock('TocmKeyframe');
 })(window);
 
 // FONTS COLLECTIONS.
@@ -167,7 +174,8 @@
     TocmFont.prototype = {
         // WRITING FONTS.
         write: function () {
-            var cstr = '', key, j;
+            var cstr = '',
+                key, j;
             if (this.hasOwnProperty('name')) {
                 cstr += '\n\t@font-face {\n';
                 for (key in this) {
@@ -177,7 +185,7 @@
                             cstr += '\t\tsrc: local("' + this.name + '");\n';
                         } else if (key === 'src') {
                             if (typeOf(this.src) === 'array') {
-                                for (j = 0; j < (this.src.length) ; ++j) {
+                                for (j = 0; j < (this.src.length); ++j) {
                                     if (this.src[j].search('.eot') > -1) {
                                         cstr += '\t\tsrc: url("' + this.src[j] + '");\n';
                                         cstr += '\t\tsrc: url("' + this.src[j] + '?#iefix") format("embedded-opentype");\n';
@@ -238,6 +246,9 @@
     window.$fonts = window.TocmFont = function (name, src, opt) {
         return new TocmFont(name, src, opt);
     };
+    // Locking TocmFont.
+    lock('$fonts');
+    lock('TocmFont');
 })(window);
 
 // MEDIA COLLECTIONS.
@@ -272,5 +283,7 @@
     window.$media = window.TocmMedia = function (name, value) {
         return new TocmMedia(name, value);
     };
+    // Locking TocmMedia.
+    lock('$media');
+    lock('TocmMedia');
 })(window);
-

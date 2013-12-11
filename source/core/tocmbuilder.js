@@ -8,11 +8,15 @@
     var TocmBuilder = {};
     // FUNCTION TO CREATE CSS STRING.
     TocmBuilder.generateCSS = function (object, tab) {
-        var ccss = TocmRef.ccss, xcss = TocmRef.xcss, css3 = TocmRef.css3, cssString = '', property;
+        var ccss = TocmRef.ccss,
+            xcss = TocmRef.xcss,
+            css3 = TocmRef.css3,
+            cssString = '',
+            property;
 
         if (typeOf(object) === 'object') {
             // Sorting Properties.
-            object.sort();
+            object = sortObject(object);
             // CREATE CUSTOM TAB.
             if (typeOf(tab) !== 'string') {
                 tab = '';
@@ -48,18 +52,11 @@
     // FUNCTION TO WRITE CSS STRING TO HANDLER.
     TocmBuilder.writeDOM = function (name, media, value) {
         var node, head, chld, last;
-        var find = function (path) {
-            var xpeval = document.evaluate(path, document, null, XPathResult.ANY_TYPE, null);
-            while (node = xpeval.iterateNext()) {
-                return node;
-            }
-            return null;
-        };
         if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
             head = document.getElementsByTagName('head')[0];
             chld = head.children;
             last = lastNode(chld, 'style');
-            node = find('//style[@id="' + name + '"][@data="' + media + '"]');
+            node = $('style[id="' + name + '"][data="' + media + '"]')[0];
             if (node) {
                 node.innerHTML = value;
             } else {
@@ -81,9 +78,13 @@
     // FUNCTION TO WRITE CSS STRING INTO COMMON FORMATED STRING.
     TocmBuilder.writeCSS = function (object, isget) {
         if (typeOf(object) === 'object' && object.hasOwnProperty('name')) {
-            var mediaInfo, cssString = '', property, pseudo;
-            var area = object.config.write_area, auto = object.config.write_auto, family = object.family, domid;
-        
+            var mediaInfo, cssString = '',
+                property, pseudo;
+            var area = object.config.write_area,
+                auto = object.config.write_auto,
+                family = object.family,
+                domid;
+
             if (object.media !== 'none') {
                 // GENERATING CLASS FROM MEDIA COLLECTIONS.
                 mediaInfo = new TocmMedia(object.media);
@@ -132,15 +133,19 @@
     };
     // FUNCTION TO WRITE READY STRIG TO HANDLER.
     TocmBuilder.writeSCS = function () {
-        var defaultClass = TocmDefClass, mediaClass = TocmMedClass, name, fml, className, dstr = '', mstr = '';
+        var defaultClass = TocmDefClass,
+            mediaClass = TocmMedClass,
+            name, fml, className, dstr = '',
+            mstr = '';
         var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
         // ENUMERATING DEFAULT CLASSES.
         if (TocmConfig.sortclass === true) {
-            defaultClass = TocmDefClass.sort();
+            defaultClass = sortObject(TocmDefClass);
         }
         for (name in defaultClass) {
             if (defaultClass.hasOwnProperty(name)) {
-                area = defaultClass[name].config.write_area; family = defaultClass[name].family;
+                area = defaultClass[name].config.write_area;
+                family = defaultClass[name].family;
                 if (area === 'family') {
                     if (typeOf(pdstr[family]) !== 'string') {
                         pdstr[family] = '';
@@ -165,16 +170,17 @@
 
         // ENUMERATING MEDIA CLASSES.
         if (TocmConfig.sortclass === true) {
-            mediaClass = TocmMedClass.sort();
+            mediaClass = sortObject(TocmMedClass);
         }
         for (name in mediaClass) {
             if (mediaClass.hasOwnProperty(name)) {
                 if (TocmConfig.sortclass === true) {
-                    mediaClass[name] = mediaClass[name].sort();
+                    mediaClass[name] = sortObject(mediaClass[name]);
                 }
                 for (className in mediaClass[name]) {
                     if (mediaClass[name].hasOwnProperty(className)) {
-                        area = mediaClass[name][className].config.write_area; family = mediaClass[name][className].family;
+                        area = mediaClass[name][className].config.write_area;
+                        family = mediaClass[name][className].family;
                         if (area === 'family') {
                             if (typeOf(pmdstr[family]) !== 'string') {
                                 pmdstr[family] = '';
@@ -188,7 +194,8 @@
                 // WRITING GLOBAL CLASSES.
                 if (mstr !== '') {
                     // GETTING MEDIA INFO.
-                    minfo = new TocmMedia(name); gcstr = '';
+                    minfo = new TocmMedia(name);
+                    gcstr = '';
                     // OPENING MEDIA QUERIES.
                     gcstr += '\n\t@media ' + minfo.value + ' {\n';
                     // ADDING CSS STRING.
@@ -201,7 +208,8 @@
                 // WRITING PRIVATE CLASSES.
                 for (fml in pmdstr) {
                     if (pmdstr.hasOwnProperty(fml)) {
-                        minfo = new TocmMedia(name); fmcstr = '';
+                        minfo = new TocmMedia(name);
+                        fmcstr = '';
                         // OPENING MEDIA QUERIES.
                         fmcstr += '\n\t@media ' + minfo.value + ' {\n';
                         // ADDING CSS STRING.
@@ -217,6 +225,5 @@
     };
 
     // ATTACHING CSS STRING BUILDER TO WINDOW OBJECT.
-    window.TocmBuilder = TocmBuilder;
+    define('TocmBuilder', TocmBuilder);
 })(window);
-

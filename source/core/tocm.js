@@ -45,11 +45,11 @@
                 write_auto: false
             };
             this.parent = {};
-            
+
             // ADDING TO MEDIA SPESIFIC COLLECTION IF 'media' WAS DEFINED AND ENSURE THE MEDIA HAS BEEN REGISTERED.
             if (typeOf(media) === 'string' && media !== 'none' && new TocmMedia(media).hasOwnProperty('name')) {
                 this.media = media;
-                
+
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.
                 new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "' + media + '".', 'purple');
 
@@ -66,8 +66,12 @@
                 TocmDefClass[name] = this;
             }
             // HIDING PRIVATE OBJECT.
-            Object.defineProperty(this, 'config', {enumerable:false});
-            Object.defineProperty(this, 'parent', {enumerable:false});
+            Object.defineProperty(this, 'config', {
+                enumerable: false
+            });
+            Object.defineProperty(this, 'parent', {
+                enumerable: false
+            });
             // RETURNING THE CLASS.
             return this;
         } else {
@@ -83,7 +87,7 @@
                 name = name.replace('!', '');
                 area = 'global';
             }
-            
+
             // PARSING NAME TO GET WETHER THE NAME CONTAINS MEDIA IDENTIFIER OR NOT.
             if (name.search('@') > -1) {
                 name = name.replace(/\s+(\@)\s+/g, '@'); // REMOVING SPACE.
@@ -100,7 +104,7 @@
                     media = 'none';
                 }
             }
-            
+
             // CREATING NEW OBJECT FOR THIS CLASS.
             newclass = new TocmClass(name, {}, media);
             if (newclass.hasOwnProperty('name')) {
@@ -110,7 +114,7 @@
             } else {
                 return;
             }
-            
+
             // ENUMERATING PROPERTIES.
             for (proname in object) {
                 if (object.hasOwnProperty(proname)) {
@@ -223,6 +227,9 @@
             }
         }
     };
+    lock('Tocm');
+    lock('$class');
+    lock('$global');
 
     // CREATING MODULE WRAPPER.
     window.Tocm.module = TocmClass.prototype = {
@@ -247,14 +254,20 @@
         }
     };
     // HIDING CORE MODULE.
-    Object.defineProperty(Tocm.module, 'apply', {enumerable: false});
-    Object.defineProperty(Tocm.module, 'write', {enumerable: false});
-    
+    Object.defineProperty(Tocm.module, 'apply', {
+        enumerable: false
+    });
+    Object.defineProperty(Tocm.module, 'write', {
+        enumerable: false
+    });
+
     // CREATING MODULE SETTER.
     Tocm.defineModule = function (name, func) {
         if (typeOf(name) === 'string' && typeOf(func) === 'function') {
             Tocm.module[name] = func;
-            Object.defineProperty(Tocm.module, name, {enumerable: false});
+            Object.defineProperty(Tocm.module, name, {
+                enumerable: false
+            });
             return Tocm.module[name];
         }
     };
@@ -263,15 +276,17 @@
         if (typeOf(linecolor) !== 'string' || linecolor.match(/\#/)) {
             linecolor = '#f00';
         }
-        $class('!*', {box_shadow: '0 0 0 1px ' + linecolor});
+        $class('*', {
+            box_shadow: '0 0 0 1px ' + linecolor
+        });
     };
 })(window);
 
 // CREATING TOCM MODULES.
-(function (Tocm) {
+(function (e) {
     'use strict';
     // MODULE TO ASSIGN PROPERTIES.
-    Tocm.module.set = function (objkey, value) {
+    e.module.set = function (objkey, value) {
         // DO ACTIONS ONLY IF THIS OBJECT IS TOCM CLASS.
         if (this.hasOwnProperty('name') && this.hasOwnProperty('properties')) {
             var key;
@@ -291,7 +306,7 @@
         return this;
     };
     // MODULE TO ASSIGN PSEUDO PROPERTIES.
-    Tocm.module.on = function (pseudo, props) {
+    e.module.on = function (pseudo, props) {
         var key;
         // DO ACTIONS ONLY IF ALL ARGUMENTS WAS DEFINED WITH TRUE TYPE AND IF THIS CLASS IS TOCM CLASS.
         if (typeOf(pseudo) === 'string' && typeOf(props) === 'object' && this.hasOwnProperty('name')) {
@@ -323,7 +338,7 @@
         return this;
     };
     // MODULE TO IMPORT PROPERTIES FROM ANOTHER CLASS.
-    Tocm.module.copy = function (name, media, psdo) {
+    e.module.copy = function (name, media, psdo) {
         var parent, key, ppsdo;
         if (typeOf(name) === 'string') {
             if (typeOf(media) === 'string' && media !== '' && media !== 'none') {
@@ -356,7 +371,7 @@
         return this;
     };
     // MODULE TO ADD CHILD CLASS. 
-    Tocm.module.add = function (name, prop) {
+    e.module.add = function (name, prop) {
         var newname = this.name + ' ';
         if (typeOf(name) === 'string') {
             if (name.search('&')) {
@@ -384,7 +399,7 @@
         }
     };
     // MOODULE TO NAVIGATE TO OTHER CLASS.
-    Tocm.module.goto = function (name) {
+    e.module.goTo = function (name) {
         var fclass = new TocmClass(this.name + ' ' + name, this.media);
         if (fclass.hasOwnProperty('name')) {
             return fclass;
@@ -393,20 +408,19 @@
         }
     };
     // MODULE TO GO BACK TO PARENT CLASS.
-    Tocm.module.back = function () {
+    e.module.back = function () {
         if (this.hasOwnProperty('parent') && this.parent.hasOwnProperty('name')) {
             return this.parent;
         } else {
             return this;
         }
     };
-    
+
     // HIDING MODULES.
     var mod = ['set', 'on', 'copy', 'add', 'goto', 'back'];
     for (var i = 0; i < mod.length; ++i) {
-        Object.defineProperty(Tocm.module, mod[i], {
+        Object.defineProperty(e.module, mod[i], {
             enumerable: false
         });
     }
 })(Tocm);
-

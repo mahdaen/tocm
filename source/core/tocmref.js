@@ -35,5 +35,5 @@
             'opacity', 'z-index', 'font-weight', 'column-count', 'line-height'
         ]
     };
+    lock('TocmRef');
 })(window);
-

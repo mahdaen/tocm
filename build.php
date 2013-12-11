@@ -2,14 +2,14 @@
 // CREATING FILE LISTS.
 $build_list = array(
     // External Library.
-    'source/ref/jquery.js',
+    'source/ref/jquery.js', //'source/ref/xpath.js', 'source/ref/array.js',
     // Core Library.
     'source/core/native.js', 'source/core/tocmreg.js', 'source/core/tocmref.js', 'source/core/tocmbuilder.js',
     'source/core/tocmbase.js', 'source/core/tocm.js',
     // Extensions Library.
     'source/ext/global.js', 'source/ext/animation.js', 'source/ext/query.js', 'source/ext/task.js',
     // Extender Library.
-    'source/ext/extender.js'
+    'source/ext/extender.js', 'source/ext/cssprop.js'
 );
 
 // CREATING BUILDED STRING.

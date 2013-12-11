@@ -5,6 +5,7 @@
 // CREATING GLOBAL REFERENCES.
 (function (window) {
     'use strict';
+    // CREATING HEX TO RGBA CONVERTER.
     window.rgb = function (hexColor, opacity, rtype) {
         var shorthandRegex, result, objRgb, isPrs;
 
@@ -47,8 +48,14 @@
             return objRgb;
         }
     };
+    // LOCKING RGB.
+    lock('rgb');
+
+    // CREATING GRADIENT GENERATOR.
     var Gradient = function (value, mode) {
-        var gstr = '', vendor = TocmRef.vendor, type;
+        var gstr = '',
+            vendor = TocmRef.vendor,
+            type;
         if (typeOf('mode') === 'string') {
             mode += '-gradient';
             gstr += mode + '(' + value + '); ';
@@ -71,5 +78,8 @@
     window.radial_gradient = function (value) {
         return gradient(value, 'radial');
     };
+    // LOCKING OBJECT.
+    lock('gradient');
+    lock('linear_gradient');
+    lock('radial_gradient');
 })(window);
-

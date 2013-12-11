@@ -3,7 +3,7 @@
 /*jshint undef:false*/
 
 // CREATING TOCM REGISTRY.
-(function(window) {
+(function (window) {
     'use strict';
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
@@ -27,4 +27,3 @@
     // CREATING FONTS COLLECTIONS.
     window.TocmFonts = {};
 })(window);
-
