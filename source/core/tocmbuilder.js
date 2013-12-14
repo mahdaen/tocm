@@ -8,6 +8,10 @@
     var TocmBuilder = {};
     // FUNCTION TO CREATE CSS STRING.
     TocmBuilder.generateCSS = function (object, tab) {
+        var baseurl = '';
+        if (TocmConfig.basedir !== '') {
+            baseurl = TocmConfig.basedir + '/';
+        }
         var ccss = TocmRef.ccss,
             xcss = TocmRef.xcss,
             css3 = TocmRef.css3,
@@ -26,11 +30,18 @@
                 if (object.hasOwnProperty(index) && object[index] !== '') {
                     // Formatting to CSS property format.
                     property = index.replace(/_/g, '-').replace(/\$/g, '*');
+                    property = property.replace(/[\d]+/g, '');
                     if (typeOf(object[index]) === 'number' && TocmRef.noint.indexOf(property) < 0) {
                         // Formatting number.
                         object[index] += 'px';
                     }
                     if (object[index] !== null) {
+                        if (typeOf(object[index] === 'string') && !Number(object[index])) {
+                            object[index] = String(object[index]).replace(/(url)(\s?)([\(]{1})/g, 'url(' + baseurl);
+                        }
+                        if (String(object[index]).match(/(.*)(\;)\s?$/)) {
+                            object[index] = String(object[index]).match(/(.*)(\;)\s?$/)[1];
+                        }
                         if (css3.indexOf(index) > -1) {
                             // CSS3 Properties.
                             cssString += tab + property + ': ' + object[index] + '; ';
@@ -78,6 +89,7 @@
     // FUNCTION TO WRITE CSS STRING INTO COMMON FORMATED STRING.
     TocmBuilder.writeCSS = function (object, isget) {
         if (typeOf(object) === 'object' && object.hasOwnProperty('name')) {
+            if (object.name === '') return '';
             var mediaInfo, cssString = '',
                 property, pseudo;
             var area = object.config.write_area,

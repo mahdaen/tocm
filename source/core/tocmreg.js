@@ -7,6 +7,7 @@
     'use strict';
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
+        basedir: '',
         autowrite: true,
         sortclass: false,
         showdebug: false,

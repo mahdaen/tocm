@@ -54,21 +54,35 @@
     // CREATING GRADIENT GENERATOR.
     var Gradient = function (value, mode) {
         var gstr = '',
-            vendor = TocmRef.vendor,
-            type;
+            vendor = ['', '-webkit-', '-moz-', '-o-', '-ms-'],
+            type, v, i;
         if (typeOf('mode') === 'string') {
             mode += '-gradient';
-            gstr += mode + '(' + value + '); ';
         } else {
             mode = 'gradient';
         }
         if (typeOf(value) === 'string') {
-            for (var i = 0; i < vendor.length; ++i) {
-                gstr += vendor[i] + mode + '(' + value + '); ';
+            value = value.replace(/(\s?)(&)(\s?)/g, '&');
+            value = value.split('&');
+            for (i = 0; i < (vendor.length); ++i) {
+                for (v = 0; v < (value.length - 1); ++v) {
+                    gstr += vendor[i] + mode + '(' + value[v] + '), ';
+                }
+                gstr += vendor[i] + mode + '(' + value[value.length - 1] + '); ';
+            }
+            return gstr;
+        } else if (typeOf(value) === 'object') {
+            // { linear: '90deg, #fff, #000', radial: '#fff, #000' }
+            for (i = 0; i < vendor.length; ++i) {
+                var vals = Object.keys(value);
+                for (v = 0; v < (vals.length - 1); ++v) {
+                    gstr += vendor[i] + vals[v].replace(/[\d]+/g, '') + '-gradient(' + value[vals[v]] + '), ';
+                }
+                gstr += vendor[i] + vals[v].replace(/[\d]+/g, '') + '-gradient(' + value[vals[vals.length - 1]] + '); ';
             }
             return gstr;
         } else {
-            return 'none';
+            return '';
         }
     };
     window.gradient = Gradient;
@@ -78,8 +92,26 @@
     window.radial_gradient = function (value) {
         return gradient(value, 'radial');
     };
+    
+    // Creating function to generate gradient value.
+    // gradival('90deg', ['#fff', '#fff', '#fff', '#ccc']);
+    // 90deg, #fff, #fff, #fff, #ccc
+    var Gradival = function (dir, val) {
+        var grdv = '', i, v;
+        if (typeOf(dir) === 'string' && typeOf(val) === 'array') {
+            grdv += dir + ', ' + gradval(val);
+        } else if (typeOf(dir) === 'array') {
+            for (i = 0; i < (dir.length - 1); ++i) {
+                grdv += dir[i] + ', ';
+            }
+            grdv += dir[dir.length - 1];
+        }
+        return grdv;
+    };
+    window.gradval = Gradival;
     // LOCKING OBJECT.
     lock('gradient');
     lock('linear_gradient');
     lock('radial_gradient');
+    lock('gradval');
 })(window);

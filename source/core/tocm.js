@@ -32,12 +32,12 @@
         }
     };
     // CREATING FUNCTION TO CREATE NEW CLASS.
-    var TocmClass = function (name, props, media, delayed) {
-        if (typeOf(name) === 'string' && typeOf(props) === 'object') {
+    var TocmClass = function (objname, props, media, delayed) {
+        if (typeOf(objname) === 'string' && typeOf(props) === 'object') {
             // COLLECTING CSS PROPERTIES.
-            new TocmLogger('TocmClass', 'Creating new class "' + name + '".');
+            new TocmLogger('TocmClass', 'Creating new class "' + objname + '".');
 
-            this.name = this.family = name;
+            this.name = this.family = objname;
             this.properties = props;
             this.pseudo = {};
             this.config = {
@@ -51,19 +51,19 @@
                 this.media = media;
 
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.
-                new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "' + media + '".', 'purple');
+                new TocmLogger('TocmClass', 'Adding class "' + objname + '" to media "' + media + '".', 'purple');
 
                 if (typeOf(TocmMedClass[media]) === 'object') {
-                    TocmMedClass[media][name] = this;
+                    TocmMedClass[media][objname] = this;
                 } else {
                     TocmMedClass[media] = {};
-                    TocmMedClass[media][name] = this;
+                    TocmMedClass[media][objname] = this;
                 }
             } else {
-                new TocmLogger('TocmClass', 'Adding class "' + name + '" to media "universal".', 'purple');
+                new TocmLogger('TocmClass', 'Adding class "' + objname + '" to media "universal".', 'purple');
 
                 this.media = 'none';
-                TocmDefClass[name] = this;
+                TocmDefClass[objname] = this;
             }
             // HIDING PRIVATE OBJECT.
             Object.defineProperty(this, 'config', {
@@ -122,15 +122,22 @@
                     if (typeOf(object[proname]) === 'object') {
                         if (TocmRef.pseudo.indexOf(proname) < 0) {
                             // IF PROPERTY IS NOT PSEUDO OBJECT, THEN CREATE NEW CLASS.
-                            newname = name + ' '; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
+                            if (name !== '') {
+                                newname = name + ' '; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
+                            } else {
+                                newname = '';
+                            }
                             // PARSING MULTIPLE NAME USE.
                             if (proname.search('&') > -1) {
+                                if (name !== '') {
+                                    name += ' ';
+                                }
                                 // If  name is multiple.
                                 tempname = proname.replace(/\s+(\&)\s+/g, '&'); // REPLACING SPACE.
                                 tempname = tempname.split('&'); // SPLITING NAME.
                                 // ADDING NAME.
                                 for (var i = 0; i < tempname.length - 1; ++i) {
-                                    newname += tempname[i] + ', ' + name + ' ';
+                                    newname += tempname[i] + ', ' + name;
                                 }
                                 newname += tempname[tempname.length - 1];
                             } else {
@@ -225,6 +232,11 @@
             else {
                 return new TocmSelector(select);
             }
+        } else if (typeOf(select) === 'object') {
+            var newclass = Object.keys(select);
+            for (var i = 0; i < newclass.length; ++i) {
+                new Tocm(newclass[i], select[newclass[i]]);
+            }
         }
     };
     lock('Tocm');
@@ -279,6 +291,14 @@
         $class('*', {
             box_shadow: '0 0 0 1px ' + linecolor
         });
+    };
+    // CREATING STYLE COLLECTOR.
+    Tocm.collect = function () {
+        var csstring = '';
+        $('style[data]').each(function () {
+            csstring += $(this).html();
+        });
+        return csstring;
     };
 })(window);
 

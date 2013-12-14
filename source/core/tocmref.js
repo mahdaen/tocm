@@ -28,7 +28,7 @@
         ],
         // VENDOR LISTS //
         vendor: [
-            '-webkit-', '-moz-', '-o-', '-ms-'
+            '', '-webkit-', '-moz-', '-o-', '-ms-'
         ],
         // RESTRICTED PROPERTIES FROM NUMBER AUTOMATIONS.
         noint: [

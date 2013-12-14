@@ -174,6 +174,10 @@
     TocmFont.prototype = {
         // WRITING FONTS.
         write: function () {
+            var baseurl = '';
+            if (TocmConfig.basedir !== '') {
+                baseurl = TocmConfig.basedir + '/';
+            }
             var cstr = '',
                 key, j;
             if (this.hasOwnProperty('name')) {
@@ -187,18 +191,18 @@
                             if (typeOf(this.src) === 'array') {
                                 for (j = 0; j < (this.src.length); ++j) {
                                     if (this.src[j].search('.eot') > -1) {
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '");\n';
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '?#iefix") format("embedded-opentype");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '?#iefix") format("embedded-opentype");\n';
                                     } else if (this.src[j].search('.ttf') > -1) {
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '") format("truetype");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '") format("truetype");\n';
                                     } else if (this.src[j].search('.svg') > -1) {
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '") format("svg");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '") format("svg");\n';
                                     } else if (this.src[j].search('.otf') > -1) {
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '") format("opentype");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '") format("opentype");\n';
                                     } else if (this.src[j].search('.woff') > -1) {
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '") format("woff");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '") format("woff");\n';
                                     } else {
-                                        cstr += '\t\tsrc: url("' + this.src[j] + '");\n';
+                                        cstr += '\t\tsrc: url("' + baseurl + this.src[j] + '");\n';
                                     }
                                 }
                             } else if (typeOf(this.src) === 'string') {

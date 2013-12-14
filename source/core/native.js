@@ -44,7 +44,8 @@
         }
         return Object.prototype.toString.call(obj).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
     };
-    define('typeOf', ObjectType);
+    window.typeOf = ObjectType;
+    lock('typeOf');
 
     // Last Node.
     var ObjectLastNode = function (from, what) {
@@ -60,7 +61,8 @@
             return last;
         }
     };
-    define('lastNode', ObjectLastNode);
+    window.lastNode = ObjectLastNode;
+    lock('lastNode');
 
     // Sorting object.
     var sortObject = function (object, direction) {
@@ -96,8 +98,8 @@
         }
         return newobject;
     };
-
-    define('sortObject', sortObject);
+    window.sortObject = sortObject;
+    lock('sortObject');
 })(window);
 
 // Extend Date.
