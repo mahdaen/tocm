@@ -93,7 +93,7 @@ new compressor.minify({
         // Extender Library.
         'source/ext/extender.js', 'source/ext/cssprop.js'
     ],
-    fileOut: '../template.dev/naomi/script/tocm-1.1.min.js',
+    fileOut: '../home.tocm.com/naomi/script/tocm-1.1.min.js',
     callback: function (err, min) {
         console.log(err);
     }
