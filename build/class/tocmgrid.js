@@ -11,7 +11,8 @@ var baseW = 100,    // Container width. (%).
     gridC = (baseW / baseC);   // Each column width - no margin. (%).
 
 // CREATING MAIN CLASS.
-$.class('.fl-grid', {
+$.media('Tocmgrid', 'all');
+$.class('.fl-grid@Tocmgrid', {
     // CONTAINER PROPERTIES.
     width: baseW  + '%', float: 'left', after: { clear: 'both' }
 });
@@ -19,7 +20,7 @@ $.class('.fl-grid', {
 // CREATING BOX INCREMENT.
 for (var i = 0; i <= 11; ++i) {
     var set = (i + 1);
-    $.class('.fl-grid')
+    $.class('.fl-grid', 'Tocmgrid')
     // FIRST COLUMN NO MARGIN.
     .add('.col-' + set + 's', {
         width: ((gridW * set) + (gridM * (set - 1))) + '%',
@@ -47,7 +48,6 @@ for (var i = 0; i <= 11; ++i) {
 
 // VIEWPORT.
 // ---------------------------------------------------------------------------
-$.media('Tocmgrid', 'all');
 $.class('!@Tocmgrid', {
     '.container': {
         width: baseW + '%', max_width: baseM, margin: '0 auto',
