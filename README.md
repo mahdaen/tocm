@@ -232,11 +232,10 @@ $.anime('turnLeft', {
 $('.content').addAnimation('turnLeft');
 
 // To attach callback, just define the functions to animation, then attach the animation to node.
-$.anime('turnLeft')
-.onRun = function () {
+$.anime('turnLeft').onRun = function () {
 	console.log('Animation started');
-})
-.onEnd = function () {
+});
+$.anime('turnLeft').onEnd = function () {
 	console.log('Animation ended');
 });
 ```
@@ -483,24 +482,38 @@ $.class('!@Mobile', {
 // --------------------------------------------------------------------------
 
 // CREATING DEFINITIONS.
-var baseW = 100,    			// Container width. (%).
-    baseM = 960,    			// Maximum width of container. (px)
-    baseC = 12,     			// Number of column.
-    gridM = 2.4,    			// Each column space. (%)
-    gridW = 6.132,  			// Each column width. (%)
-    gridC = (baseW / baseC);	// Each column width - no margin. (%)
+var baseW = 100,                // Container width. (%).
+    baseM = 960,                // Maximum width of container. (px)
+    baseC = 12,                 // Number of column.
+    gridM = 2.4,                // Each column space. (%)
+    gridW = 6.132,              // Each column width. (%)
+    gridC = (baseW / baseC);    // Each column width - no margin. (%)
 
 // CREATING MAIN CLASS.
 $.media('Tocmgrid', 'all');
+
+// CREATING CONTAINER CLASS.
+$.class('.container@Tocmgrid', {
+    width: baseW + '%', max_width: baseM, margin: '0 auto', padding_left: 10, padding_right: 10,
+    
+    // Working with pseudo is as simple adding child class. For multiple assignment, use '&' not ','.
+    ':before & :after': {
+        display: 'table'
+    },
+    ':after': {
+        clear: 'both'
+    }
+});
+
+// GRID CONTAINER PROPERTIES.
 $.class('.fl-grid@Tocmgrid', {
-    // CONTAINER PROPERTIES.
     width: baseW  + '%', float: 'left', after: { clear: 'both' }
 });
 
 // CREATING BOX INCREMENT.
-for (var i = 0; i <= 11; ++i) {
+for (var i = 0; i <= 10; ++i) {
     var set = (i + 1);
-	// SELECTING PARENT CLASS.
+    // SELECTING PARENT CLASS.
     $.class('.fl-grid', 'Tocmgrid')
 
     // FIRST COLUMN, NO MARGIN.
@@ -531,6 +544,23 @@ for (var i = 0; i <= 11; ++i) {
 ```
 #####Result
 ```html
+<style id=".container" data="Tocmgrid" type="text/css">
+	@media all {
+		.container {
+			margin: 0 auto;
+			max-width: 960px;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 100%;
+		}
+		.container:before, .container:after {
+			display: table;
+		}
+		.container:after {
+			clear: both;
+		}
+	}
+</style>
 <style id=".fl-grid" data="Tocmgrid" type="text/css">
 	@media all {
 		.fl-grid {
@@ -748,25 +778,6 @@ for (var i = 0; i <= 11; ++i) {
 			float: left;
 			margin: 0px;
 			width: 91.66666666666667%;
-		}
-		.fl-grid .col-12s {
-			float: left;
-			width: 99.98400000000001%;
-		}
-		.fl-grid .col-12r {
-			float: left;
-			margin-right: 2.4%;
-			width: 99.98400000000001%;
-		}
-		.fl-grid .col-12 {
-			float: left;
-			margin-left: 2.4%;
-			width: 99.98400000000001%;
-		}
-		.fl-grid .col-12c {
-			float: left;
-			margin: 0px;
-			width: 100%;
 		}
 	}
 </style>
