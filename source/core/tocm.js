@@ -35,7 +35,7 @@
     var TocmClass = function (objname, props, media, delayed) {
         if (typeOf(objname) === 'string' && typeOf(props) === 'object') {
             // COLLECTING CSS PROPERTIES.
-            new TocmLogger('TocmClass', 'Creating new class "' + objname + '".');
+            $.log('TocmClass', 'Creating new class "' + objname + '".');
 
             this.name = this.family = objname;
             this.properties = props;
@@ -51,7 +51,7 @@
                 this.media = media;
 
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.
-                new TocmLogger('TocmClass', 'Adding class "' + objname + '" to media "' + media + '".', 'purple');
+                $.log('TocmClass', 'Adding class "' + objname + '" to media "' + media + '".', 'purple');
 
                 if (typeOf(TocmMedClass[media]) === 'object') {
                     TocmMedClass[media][objname] = this;
@@ -60,7 +60,7 @@
                     TocmMedClass[media][objname] = this;
                 }
             } else {
-                new TocmLogger('TocmClass', 'Adding class "' + objname + '" to media "universal".', 'purple');
+                $.log('TocmClass', 'Adding class "' + objname + '" to media "universal".', 'purple');
 
                 this.media = 'none';
                 TocmDefClass[objname] = this;
@@ -122,33 +122,49 @@
                     if (typeOf(object[proname]) === 'object') {
                         if (TocmRef.pseudo.indexOf(proname) < 0) {
                             // IF PROPERTY IS NOT PSEUDO OBJECT, THEN CREATE NEW CLASS.
-                            if (name !== '') {
-                                newname = name + ' '; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
+                            if (name !== '' && name !== ' ') {
+                                newname = name; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
                             } else {
                                 newname = '';
                             }
                             // PARSING MULTIPLE NAME USE.
                             if (proname.search('&') > -1) {
-                                if (name !== '') {
-                                    name += ' ';
+                                if (name !== '' && name !== ' ') {
+                                    name = ' ' + name;
                                 }
                                 // If  name is multiple.
                                 tempname = proname.replace(/\s+(\&)\s+/g, '&'); // REPLACING SPACE.
                                 tempname = tempname.split('&'); // SPLITING NAME.
+                                // ENUMERATING PSEUDO IDENFIER (:).
+                                for (var x = 0; x < tempname.length; ++x) {
+                                    if (!tempname[x].match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
+                                        tempname[x] = ' ' + tempname[x];
+                                    }
+                                }
                                 // ADDING NAME.
                                 for (var i = 0; i < tempname.length - 1; ++i) {
-                                    newname += tempname[i] + ', ' + name;
+                                    newname += tempname[i] + ',' + name;
                                 }
                                 newname += tempname[tempname.length - 1];
                             } else {
-                                newname += proname;
+                                if (proname.match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
+                                    newname += proname;
+                                } else {
+                                    if (name !== '' && name !== ' ') {
+                                        newname += ' ' + proname;
+                                    } else {
+                                        newname += proname;
+                                    }
+                                }
                             }
+                            // REMOVING SPACE IN BEGINING OF NAME.
+                            newname = newname.replace(/^(\s)/, '');
                             // ASIGNING FAMILY NAME.
                             if (typeOf(family) !== 'string') {
                                 family = name;
                             }
                             // CREATING NEW CLASS INHERITING TO THIS CLASS.
-                            new TocmLogger('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
+                            $.log('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
 
                             TocmConfig.autowrite = false;
                             subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
@@ -254,7 +270,7 @@
                     TocmDefClass[this.name] = this;
                 }
                 if (TocmConfig.autowrite === true) {
-                    new TocmLogger('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
+                    $.log('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
                     TocmBuilder.writeSCS(this);
                 }
             }

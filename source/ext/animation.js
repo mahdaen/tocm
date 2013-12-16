@@ -181,7 +181,7 @@
     var TocmAnimation = function (name, properties) {
         if (typeOf(name) === 'string' && !name.match(/[\!\@\#\$\%\^\&\*\.\,\:\;]+/)) {
             if (typeOf(properties) === 'object') {
-                new TocmLogger('TocmAnimation', 'Creating new animation "' + name + '".');
+                $.log('TocmAnimation', 'Creating new animation "' + name + '".');
                 this.name = name;
                 for (var key in properties) {
                     if (properties.hasOwnProperty(key)) {
@@ -221,7 +221,7 @@
             // Adding animation object to Timeline.
             TocmTimeline[this.name] = this;
             // Build the animation.
-            new TocmLogger('TocmAnimation', 'Writing animation "' + this.name + '" to style node.', 'orange');
+            $.log('TocmAnimation', 'Writing animation "' + this.name + '" to style node.', 'orange');
             TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation('.' + this.name, JSON.parse(JSON.stringify(this))));
             return this;
         },
@@ -276,21 +276,21 @@
                             if (hX > endTime) {
                                 if (obj.hasOwnProperty('repeat')) {
                                     if (obj.repeat === 'infinite') {
-                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": using infinite play and it\'s mean never stoped. Now skipping end-point node.', 'purple');
+                                        $.log('TocmAnimation', '"' + obj.name + '": using infinite play and it\'s mean never stoped. Now skipping end-point node.', 'purple');
                                         endTime = 0;
                                         endNode = '';
                                     } else if (obj.repeat > 0) {
-                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + (hX * obj.repeat) + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                        $.log('TocmAnimation', '"' + obj.name + '": takes ' + (hX * obj.repeat) + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
                                         endTime = hX * obj.repeat;
                                         endNode = obj.name;
                                     }
                                 } else {
-                                    new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                    $.log('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
                                     endTime = hX;
                                     endNode = obj.name;
                                 }
                             } else {
-                                new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s smaller or equal to current largest time: "' + endTime + 's". Now skip it.', 'purple');
+                                $.log('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s smaller or equal to current largest time: "' + endTime + 's". Now skip it.', 'purple');
                             }
                         } else if (typeOf(obj[key]) === 'object' && !key.match(/\%/g) && conf.indexOf(key) < 0) {
                             var xobj = obj[key];
@@ -313,11 +313,11 @@
 })(window);
 
 // CREATING MODULES.
-(function ($module) {
+(function (e) {
     'use strict';
     // FUNCTION TO ADD CHILD ANIMATION.
-    $module.add = function (name, properties) {
-        new TocmLogger('TocmAnimation', 'Adding new animation "' + name + '" to parent animation "' + this.name + '".');
+    e.add = function (name, properties) {
+        $.log('TocmAnimation', 'Adding new animation "' + name + '" to parent animation "' + this.name + '".');
         if (typeOf(name) === 'string' && typeOf(properties) === 'object') {
             this[name] = properties;
             this.apply();
@@ -325,8 +325,8 @@
         }
     };
     // FUNCTION TO PAUSE ANIMATION.
-    $module.pause = function (delay) {
-        new TocmLogger('TocmAnimation', 'Pausing animation "' + this.name + '".');
+    e.pause = function (delay) {
+        $.log('TocmAnimation', 'Pausing animation "' + this.name + '".');
         this.state = 'paused';
         this.apply();
         var target = this;
@@ -338,15 +338,15 @@
         return this;
     };
     // FUNCTION TO CONTINUE ANIMATION.
-    $module.play = function () {
-        new TocmLogger('TocmAnimation', 'Playing animation "' + this.name + '".');
+    e.play = function () {
+        $.log('TocmAnimation', 'Playing animation "' + this.name + '".');
         this.state = 'running';
         this.apply();
         return this;
     };
     // FUNCTION TO SET PROPERTIES OR CONFIGURATIONS.
-    $module.set = function (property, value) {
-        new TocmLogger('TocmAnimation', 'Setting property to animation "' + this.name + '".', 'green');
+    e.set = function (property, value) {
+        $.log('TocmAnimation', 'Setting property to animation "' + this.name + '".', 'green');
         if (typeOf(property) === 'string') {
             var recset = function (object, prop) {
                 for (var key in prop) {
@@ -371,7 +371,7 @@
             } else {
                 this[property] = value;
             }
-            new TocmLogger('TocmAnimation', 'Applying changes to animation "' + this.name + '".', 'purple');
+            $.log('TocmAnimation', 'Applying changes to animation "' + this.name + '".', 'purple');
             this.apply();
         } else if (typeOf(property) === 'object') {
             for (var name in property) {
@@ -384,8 +384,8 @@
         return this;
     };
     // FUNCTION TO DELETE ANIMATION.
-    $module.remove = function () {
-        new TocmLogger('TocmAnimation', 'Removing animation "' + this.name + '".', 'red');
+    e.remove = function () {
+        $.log('TocmAnimation', 'Removing animation "' + this.name + '".', 'red');
         delete TocmTimeline[this.name];
         var node = $.path('#' + this.name.replace(/\./g, ''))[0];
         node.parentNode.removeChild(node);
@@ -393,7 +393,7 @@
     };
 
     // HIDING MODULES.
-    var mod = Object.keys($module);
+    var mod = Object.keys(e);
     for (var i = 0; i < mod.length; ++i) {
         Object.defineProperty(TocmAnimation.module, mod[i], {
             enumerable: false

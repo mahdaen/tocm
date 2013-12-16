@@ -36,7 +36,7 @@
         if (typeOf(name) === 'string') {
             // CREATE KEYFRAMES IF ARGUMENT POSITION AND PROPERTIES ARE DEFINED, OR SELECT IF ONLY NAME THAT DEFINED.
             if (typeOf(position) === 'string' && typeOf(properties) === 'object') {
-                new TocmLogger('TocmKeyframe', 'Creating new keyframe "' + this.name + '".');
+                $.log('TocmKeyframe', 'Creating new keyframe "' + this.name + '".');
 
                 this.name = name;
                 frame = TocmKeyframes[name];
@@ -49,7 +49,7 @@
                 this[position] = properties;
 
                 // Writing the Keyframe CSS.
-                new TocmLogger('TocmKeyframe', 'Writing keyframe "' + this.name + '" to style node.', 'purple');
+                $.log('TocmKeyframe', 'Writing keyframe "' + this.name + '" to style node.', 'purple');
                 this.write();
             } else {
                 frame = TocmKeyframes[name];
@@ -99,7 +99,7 @@
         at: function (position, properties) {
             var key, current;
             if (this.hasOwnProperty('name') && typeOf(position) === 'string' && typeOf(properties) === 'object') {
-                new TocmLogger('TocmKeyframe', 'Adding timeline "' + position + '" to keyframe "' + this.name + '".', 'green');
+                $.log('TocmKeyframe', 'Adding timeline "' + position + '" to keyframe "' + this.name + '".', 'green');
                 if (typeOf(this[position]) !== 'object') {
                     this[position] = {};
                 }
@@ -142,7 +142,7 @@
             if (typeOf(src) === 'string' || typeOf(src) === 'array') {
                 TocmFonts[name] = {};
 
-                new TocmLogger('TocmFont', 'Creating new font "' + name + '".');
+                $.log('TocmFont', 'Creating new font "' + name + '".');
 
                 this.name = name;
                 TocmFonts[name].src = src;
@@ -155,7 +155,7 @@
                         }
                     }
                 }
-                new TocmLogger('TocmFont', 'Writing font "' + name + '" to style node.', 'orange');
+                $.log('TocmFont', 'Writing font "' + name + '" to style node.', 'orange');
                 this.write();
             } else {
                 if (typeOf(fonts) === 'object') {

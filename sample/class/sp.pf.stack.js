@@ -10,17 +10,17 @@ TocmConfig.basedir = '/sample';
 $.font('Blackjack', ['font/blackjack.ttf']); $.font('Burlington', ['font/burlington.ttf']); $.font('Grandhotel', ['font/grandhotel.otf']);
 
 // CREATING CLASS USING BATCH MODE.
-$.class({
+$.class('!', {
     // BODY CLASS.
-    '!body': {
+    'body': {
         display: TABLE, width: '100%', height: '100%', background_image: 'url(img/bg.png)'
     },
     // HEADER CLASS.
-    '!.header': {
+    '.header': {
         display: 'table-row', position: RELATIVE, width: '100%',
     },
     // PAGE WRAP CLASS.
-    '!.page-wrap': {
+    '.page-wrap': {
         display: TABLE_ROW, width: '100%', height: '100%', position: RELATIVE, 
         
         
@@ -34,7 +34,7 @@ $.class({
         }
     },
     // PAGE STACK CLASS.
-    '!.page-stack': {
+    '.page-stack': {
         display: BLOCK, position: ABSOLUTE, top: 0, left: 0, overflow_y: AUTO,
         width: '100%', height: '100%',
         
@@ -43,3 +43,4 @@ $.class({
         }
     }
 });
+

@@ -802,7 +802,7 @@
         if (typeOf(name) === 'string') {
             // CREATE KEYFRAMES IF ARGUMENT POSITION AND PROPERTIES ARE DEFINED, OR SELECT IF ONLY NAME THAT DEFINED.
             if (typeOf(position) === 'string' && typeOf(properties) === 'object') {
-                new TocmLogger('TocmKeyframe', 'Creating new keyframe "' + this.name + '".');
+                $.log('TocmKeyframe', 'Creating new keyframe "' + this.name + '".');
 
                 this.name = name;
                 frame = TocmKeyframes[name];
@@ -815,7 +815,7 @@
                 this[position] = properties;
 
                 // Writing the Keyframe CSS.
-                new TocmLogger('TocmKeyframe', 'Writing keyframe "' + this.name + '" to style node.', 'purple');
+                $.log('TocmKeyframe', 'Writing keyframe "' + this.name + '" to style node.', 'purple');
                 this.write();
             } else {
                 frame = TocmKeyframes[name];
@@ -865,7 +865,7 @@
         at: function (position, properties) {
             var key, current;
             if (this.hasOwnProperty('name') && typeOf(position) === 'string' && typeOf(properties) === 'object') {
-                new TocmLogger('TocmKeyframe', 'Adding timeline "' + position + '" to keyframe "' + this.name + '".', 'green');
+                $.log('TocmKeyframe', 'Adding timeline "' + position + '" to keyframe "' + this.name + '".', 'green');
                 if (typeOf(this[position]) !== 'object') {
                     this[position] = {};
                 }
@@ -908,7 +908,7 @@
             if (typeOf(src) === 'string' || typeOf(src) === 'array') {
                 TocmFonts[name] = {};
 
-                new TocmLogger('TocmFont', 'Creating new font "' + name + '".');
+                $.log('TocmFont', 'Creating new font "' + name + '".');
 
                 this.name = name;
                 TocmFonts[name].src = src;
@@ -921,7 +921,7 @@
                         }
                     }
                 }
-                new TocmLogger('TocmFont', 'Writing font "' + name + '" to style node.', 'orange');
+                $.log('TocmFont', 'Writing font "' + name + '" to style node.', 'orange');
                 this.write();
             } else {
                 if (typeOf(fonts) === 'object') {
@@ -1094,7 +1094,7 @@
     var TocmClass = function (objname, props, media, delayed) {
         if (typeOf(objname) === 'string' && typeOf(props) === 'object') {
             // COLLECTING CSS PROPERTIES.
-            new TocmLogger('TocmClass', 'Creating new class "' + objname + '".');
+            $.log('TocmClass', 'Creating new class "' + objname + '".');
 
             this.name = this.family = objname;
             this.properties = props;
@@ -1110,7 +1110,7 @@
                 this.media = media;
 
                 // ADD TO THE MEDIA COLLECTIONS IF ALREADY EXISTS, OR CREATE NEW IF NOT EXISTS.
-                new TocmLogger('TocmClass', 'Adding class "' + objname + '" to media "' + media + '".', 'purple');
+                $.log('TocmClass', 'Adding class "' + objname + '" to media "' + media + '".', 'purple');
 
                 if (typeOf(TocmMedClass[media]) === 'object') {
                     TocmMedClass[media][objname] = this;
@@ -1119,7 +1119,7 @@
                     TocmMedClass[media][objname] = this;
                 }
             } else {
-                new TocmLogger('TocmClass', 'Adding class "' + objname + '" to media "universal".', 'purple');
+                $.log('TocmClass', 'Adding class "' + objname + '" to media "universal".', 'purple');
 
                 this.media = 'none';
                 TocmDefClass[objname] = this;
@@ -1181,33 +1181,49 @@
                     if (typeOf(object[proname]) === 'object') {
                         if (TocmRef.pseudo.indexOf(proname) < 0) {
                             // IF PROPERTY IS NOT PSEUDO OBJECT, THEN CREATE NEW CLASS.
-                            if (name !== '') {
-                                newname = name + ' '; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
+                            if (name !== '' && name !== ' ') {
+                                newname = name; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
                             } else {
                                 newname = '';
                             }
                             // PARSING MULTIPLE NAME USE.
                             if (proname.search('&') > -1) {
-                                if (name !== '') {
-                                    name += ' ';
+                                if (name !== '' && name !== ' ') {
+                                    name = ' ' + name;
                                 }
                                 // If  name is multiple.
                                 tempname = proname.replace(/\s+(\&)\s+/g, '&'); // REPLACING SPACE.
                                 tempname = tempname.split('&'); // SPLITING NAME.
+                                // ENUMERATING PSEUDO IDENFIER (:).
+                                for (var x = 0; x < tempname.length; ++x) {
+                                    if (!tempname[x].match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
+                                        tempname[x] = ' ' + tempname[x];
+                                    }
+                                }
                                 // ADDING NAME.
                                 for (var i = 0; i < tempname.length - 1; ++i) {
-                                    newname += tempname[i] + ', ' + name;
+                                    newname += tempname[i] + ',' + name;
                                 }
                                 newname += tempname[tempname.length - 1];
                             } else {
-                                newname += proname;
+                                if (proname.match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
+                                    newname += proname;
+                                } else {
+                                    if (name !== '' && name !== ' ') {
+                                        newname += ' ' + proname;
+                                    } else {
+                                        newname += proname;
+                                    }
+                                }
                             }
+                            // REMOVING SPACE IN BEGINING OF NAME.
+                            newname = newname.replace(/^(\s)/, '');
                             // ASIGNING FAMILY NAME.
                             if (typeOf(family) !== 'string') {
                                 family = name;
                             }
                             // CREATING NEW CLASS INHERITING TO THIS CLASS.
-                            new TocmLogger('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
+                            $.log('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
 
                             TocmConfig.autowrite = false;
                             subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
@@ -1313,7 +1329,7 @@
                     TocmDefClass[this.name] = this;
                 }
                 if (TocmConfig.autowrite === true) {
-                    new TocmLogger('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
+                    $.log('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
                     TocmBuilder.writeSCS(this);
                 }
             }
@@ -1803,7 +1819,7 @@
     var TocmAnimation = function (name, properties) {
         if (typeOf(name) === 'string' && !name.match(/[\!\@\#\$\%\^\&\*\.\,\:\;]+/)) {
             if (typeOf(properties) === 'object') {
-                new TocmLogger('TocmAnimation', 'Creating new animation "' + name + '".');
+                $.log('TocmAnimation', 'Creating new animation "' + name + '".');
                 this.name = name;
                 for (var key in properties) {
                     if (properties.hasOwnProperty(key)) {
@@ -1843,7 +1859,7 @@
             // Adding animation object to Timeline.
             TocmTimeline[this.name] = this;
             // Build the animation.
-            new TocmLogger('TocmAnimation', 'Writing animation "' + this.name + '" to style node.', 'orange');
+            $.log('TocmAnimation', 'Writing animation "' + this.name + '" to style node.', 'orange');
             TocmBuilder.writeDOM(this.name, 'animation', _writeAnimation('.' + this.name, JSON.parse(JSON.stringify(this))));
             return this;
         },
@@ -1898,21 +1914,21 @@
                             if (hX > endTime) {
                                 if (obj.hasOwnProperty('repeat')) {
                                     if (obj.repeat === 'infinite') {
-                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": using infinite play and it\'s mean never stoped. Now skipping end-point node.', 'purple');
+                                        $.log('TocmAnimation', '"' + obj.name + '": using infinite play and it\'s mean never stoped. Now skipping end-point node.', 'purple');
                                         endTime = 0;
                                         endNode = '';
                                     } else if (obj.repeat > 0) {
-                                        new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + (hX * obj.repeat) + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                        $.log('TocmAnimation', '"' + obj.name + '": takes ' + (hX * obj.repeat) + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
                                         endTime = hX * obj.repeat;
                                         endNode = obj.name;
                                     }
                                 } else {
-                                    new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
+                                    $.log('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s larger than current largest time: "' + endTime + 's". Now use it as end-point node.', 'purple');
                                     endTime = hX;
                                     endNode = obj.name;
                                 }
                             } else {
-                                new TocmLogger('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s smaller or equal to current largest time: "' + endTime + 's". Now skip it.', 'purple');
+                                $.log('TocmAnimation', '"' + obj.name + '": takes ' + hX + 's to finish run. It\'s smaller or equal to current largest time: "' + endTime + 's". Now skip it.', 'purple');
                             }
                         } else if (typeOf(obj[key]) === 'object' && !key.match(/\%/g) && conf.indexOf(key) < 0) {
                             var xobj = obj[key];
@@ -1935,11 +1951,11 @@
 })(window);
 
 // CREATING MODULES.
-(function ($module) {
+(function (e) {
     'use strict';
     // FUNCTION TO ADD CHILD ANIMATION.
-    $module.add = function (name, properties) {
-        new TocmLogger('TocmAnimation', 'Adding new animation "' + name + '" to parent animation "' + this.name + '".');
+    e.add = function (name, properties) {
+        $.log('TocmAnimation', 'Adding new animation "' + name + '" to parent animation "' + this.name + '".');
         if (typeOf(name) === 'string' && typeOf(properties) === 'object') {
             this[name] = properties;
             this.apply();
@@ -1947,8 +1963,8 @@
         }
     };
     // FUNCTION TO PAUSE ANIMATION.
-    $module.pause = function (delay) {
-        new TocmLogger('TocmAnimation', 'Pausing animation "' + this.name + '".');
+    e.pause = function (delay) {
+        $.log('TocmAnimation', 'Pausing animation "' + this.name + '".');
         this.state = 'paused';
         this.apply();
         var target = this;
@@ -1960,15 +1976,15 @@
         return this;
     };
     // FUNCTION TO CONTINUE ANIMATION.
-    $module.play = function () {
-        new TocmLogger('TocmAnimation', 'Playing animation "' + this.name + '".');
+    e.play = function () {
+        $.log('TocmAnimation', 'Playing animation "' + this.name + '".');
         this.state = 'running';
         this.apply();
         return this;
     };
     // FUNCTION TO SET PROPERTIES OR CONFIGURATIONS.
-    $module.set = function (property, value) {
-        new TocmLogger('TocmAnimation', 'Setting property to animation "' + this.name + '".', 'green');
+    e.set = function (property, value) {
+        $.log('TocmAnimation', 'Setting property to animation "' + this.name + '".', 'green');
         if (typeOf(property) === 'string') {
             var recset = function (object, prop) {
                 for (var key in prop) {
@@ -1993,7 +2009,7 @@
             } else {
                 this[property] = value;
             }
-            new TocmLogger('TocmAnimation', 'Applying changes to animation "' + this.name + '".', 'purple');
+            $.log('TocmAnimation', 'Applying changes to animation "' + this.name + '".', 'purple');
             this.apply();
         } else if (typeOf(property) === 'object') {
             for (var name in property) {
@@ -2006,8 +2022,8 @@
         return this;
     };
     // FUNCTION TO DELETE ANIMATION.
-    $module.remove = function () {
-        new TocmLogger('TocmAnimation', 'Removing animation "' + this.name + '".', 'red');
+    e.remove = function () {
+        $.log('TocmAnimation', 'Removing animation "' + this.name + '".', 'red');
         delete TocmTimeline[this.name];
         var node = $.path('#' + this.name.replace(/\./g, ''))[0];
         node.parentNode.removeChild(node);
@@ -2015,7 +2031,7 @@
     };
 
     // HIDING MODULES.
-    var mod = Object.keys($module);
+    var mod = Object.keys(e);
     for (var i = 0; i < mod.length; ++i) {
         Object.defineProperty(TocmAnimation.module, mod[i], {
             enumerable: false
@@ -2158,11 +2174,11 @@
     var TocmTask = function (name) {
         var task = TocmRegistry.TaskLibrary.Task;
         if (typeOf(name) === 'string') {
-            new TocmLogger('TocmTask', 'Creating new task "' + name + '".');
+            $.log('TocmTask', 'Creating new task "' + name + '".');
             // Handle if task already exist.
             for (var i = 0; i < task.length; ++i) {
                 if (task[i].name === name) {
-                    new TocmLogger('TocmTask', 'Task "' + name + '" is already exist. Now return it.', 'orange');
+                    $.log('TocmTask', 'Task "' + name + '" is already exist. Now return it.', 'orange');
                     return task[i];
                 }
             }
@@ -2178,7 +2194,7 @@
             this.actions = [];
 
             task[this.tsid] = this;
-            new TocmLogger('TocmTask', 'Task "' + name + '" has been created.', 'green');
+            $.log('TocmTask', 'Task "' + name + '" has been created.', 'green');
         }
         return this;
     };
@@ -2187,7 +2203,7 @@
     // ------------------------------------------------------
     // Handling actions.
     var actionHandler = function (task) {
-        new TocmLogger('TocmTask', 'Running task "' + task.name + '".', 'orange');
+        $.log('TocmTask', 'Running task "' + task.name + '".', 'orange');
         task.status = 'running';
         // Handling task onCall event.
         if (typeOf(task.onCall) === 'function') task.onCall(task);
@@ -2198,16 +2214,16 @@
         try {
             // Trying to trigger actions.
             for (var i = 0; i < action.length; ++i) {
-                new TocmLogger('TocmTask', 'Triggering action "' + action[i].name + '".');
+                $.log('TocmTask', 'Triggering action "' + action[i].name + '".');
                 action[i](task);
-                new TocmLogger('TocmTask', 'Action "' + action[i].name + '" has been triggered.', 'green');
+                $.log('TocmTask', 'Action "' + action[i].name + '" has been triggered.', 'green');
             }
         } catch (e) {
             // If error occurs while triggering actions, then call the onFail handler and stop the task.
             task.status = 'failed';
             if (typeOf(task.onFail) === 'function') task.onFail(task);
 
-            new TocmLogger('TocmTask', e.message, 'red', true);
+            $.log('TocmTask', e.message, 'red', true);
         } finally {
             if (task.status !== 'failed') {
                 task.status = 'ready';
@@ -2215,7 +2231,7 @@
 
                 if (typeOf(task.onLoad) === 'function') task.onLoad(task);
 
-                new TocmLogger('TocmTask', 'Task "' + task.name + '" finished running. Now it\'s ready for next run.', 'green');
+                $.log('TocmTask', 'Task "' + task.name + '" finished running. Now it\'s ready for next run.', 'green');
                 task.init();
                 listenTask(task.tsid);
             }
@@ -2296,7 +2312,7 @@
                     if (!trigarr[2].match(/[\d]+\:[\d]+$/)) {
                         task.nextRun = 0;
                         task.status = 'failed';
-                        new TocmLogger('TocmTask', 'Invalid time format "' + trigarr[2] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                        $.log('TocmTask', 'Invalid time format "' + trigarr[2] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                         break;
                     }
 
@@ -2314,7 +2330,7 @@
                     if (!trigarr[2].match(/^[\d]{2}\:[\d]{2}$/) || trigarr[3] !== 'and' || !trigarr[4].match(/^[\d]{2}\:[\d]{2}$/)) {
                         task.nextRun = 0;
                         task.status = 'failed';
-                        new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                        $.log('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                         break;
                     }
 
@@ -2340,7 +2356,7 @@
 
                     task.status = 'ready';
                 } else {
-                    new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                    $.log('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                 }
                 break;
             case 'weekly':
@@ -2364,7 +2380,7 @@
                     if (!trigarr[4].match(/[\d]+\:[\d]+$/)) {
                         task.nextRun = 0;
                         task.status = 'failed';
-                        new TocmLogger('TocmTask', 'Invalid time format "' + trigarr[4] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                        $.log('TocmTask', 'Invalid time format "' + trigarr[4] + '" on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                         break;
                     }
 
@@ -2383,7 +2399,7 @@
                     if (!trigarr[4].match(/^[\d]{2}\:[\d]{2}$/) || trigarr[5] !== 'and' || !trigarr[6].match(/^[\d]{2}\:[\d]{2}$/)) {
                         task.nextRun = 0;
                         task.status = 'failed';
-                        new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                        $.log('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                         break;
                     }
 
@@ -2410,11 +2426,11 @@
 
                     task.status = 'ready';
                 } else {
-                    new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                    $.log('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                 }
                 break;
             default:
-                new TocmLogger('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
+                $.log('TocmTask', 'Invalid time format on "' + trigger + '". Task "' + task.name + '" terminated.', 'red', true);
                 break;
             }
         }
@@ -2463,18 +2479,18 @@
         },
         // CREATING TASK STOPPER.
         stop: function () {
-            new TocmLogger('TocmTask', 'Stopping task "' + this.name + '".');
+            $.log('TocmTask', 'Stopping task "' + this.name + '".');
             this.status = 'stopped';
             if (TocmRegistry.TaskLibrary.Listener[this.tsid]) {
                 clearTimeout(TocmRegistry.TaskLibrary.Listener[this.tsid]);
             }
-            new TocmLogger('TocmTask', 'Task "' + this.name + '" has been stopped.');
+            $.log('TocmTask', 'Task "' + this.name + '" has been stopped.');
             return this;
         },
         // CREATING DELAY SETTER.
         repeat: function (trigger) {
             if (typeOf(trigger) === 'string') {
-                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as delayed task.');
+                $.log('TocmTask', 'Set task "' + this.name + '" as delayed task.');
                 unlistenTask(this.tsid);
                 this.runtime = 'delayed';
                 this.trigger = trigger;
@@ -2484,7 +2500,7 @@
         },
         // CREATING REALTIME SETTER.
         realtime: function () {
-            new TocmLogger('TocmTask', 'Set task "' + this.name + '" as realtime task.');
+            $.log('TocmTask', 'Set task "' + this.name + '" as realtime task.');
             unlistenTask(this.tsid);
             this.runtime = 'realtime';
             this.trigger = '';
@@ -2493,7 +2509,7 @@
         },
         schedule: function (trigger) {
             if (typeOf(trigger) === 'string') {
-                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as scheduled task.');
+                $.log('TocmTask', 'Set task "' + this.name + '" as scheduled task.');
                 unlistenTask(this.tsid);
                 this.runtime = 'scheduled';
                 this.trigger = trigger;
@@ -2504,11 +2520,11 @@
         immediate: function (time) {
             this.runtime = 'immediate';
             if (typeOf(time) === 'number') {
-                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as immediate task.');
+                $.log('TocmTask', 'Set task "' + this.name + '" as immediate task.');
                 this.init();
                 listenTask(this.tsid, time);
             } else {
-                new TocmLogger('TocmTask', 'Set task "' + this.name + '" as immediate task and run it immediately since no time defined.');
+                $.log('TocmTask', 'Set task "' + this.name + '" as immediate task and run it immediately since no time defined.');
                 this.init();
                 this.call();
             }
@@ -2516,13 +2532,13 @@
         },
         addAction: function (func) {
             if (typeOf(func) === 'function') {
-                new TocmLogger('TocmTask', 'Adding action "' + func.name + '" to task "' + this.name + '".');
+                $.log('TocmTask', 'Adding action "' + func.name + '" to task "' + this.name + '".');
                 if (this.actions.indexOf(func) < 0) {
                     this.actions.push(func);
                 } else {
                     this.actions[this.actions.indexOf(func)] = func;
                 }
-                new TocmLogger('TocmTask', 'Action "' + func.name + '" has been added to task "' + this.name + '".', 'green');
+                $.log('TocmTask', 'Action "' + func.name + '" has been added to task "' + this.name + '".', 'green');
             }
             return this;
         }
@@ -2551,6 +2567,10 @@
     $.font = TocmFont;
     $.keyframe = TocmKeyframe;
     $.task = TocmTask;
+    $.log = TocmLogger;
+    
+    // CONFIGUGRATION EDIT.
+    $.config = TocmConfig;
     
     // LOCKING ALL TOCM INSTANCE.
     var obj = Object.keys(window);

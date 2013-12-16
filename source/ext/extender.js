@@ -12,6 +12,10 @@
     $.font = TocmFont;
     $.keyframe = TocmKeyframe;
     $.task = TocmTask;
+    $.log = TocmLogger;
+    
+    // CONFIGUGRATION EDIT.
+    $.config = TocmConfig;
     
     // LOCKING ALL TOCM INSTANCE.
     var obj = Object.keys(window);
