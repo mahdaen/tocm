@@ -38,8 +38,8 @@ if (bgImage !== '') {
 }
 ```
 
-Features:
-=========
+##Features:
+---
 ####Tocm Font
 Tocm Font is a `font-face` generator. With Tocm Font you can embed your web font with easy way.
 Usage:
@@ -76,7 +76,24 @@ Bellow is generated css by code above:
 }
 
 ```
+######Method:
+Create new font-face.
+`$.font(name, source, options);`.
 
+Selecting font-face.
+`$.font(name);`
+
+Modifying fonts property.
+`$.font(name).set(objkey, value);`
+
+Sample:
+```js
+$.font('Open Sans').set('font-style', 'italic');
+// Or
+$.font('Open Sans').set({ 'font-style': 'italic', 'font-weight' : 400 });
+```
+
+---
 ####Tocm Media
 Tocm Media is Media Query generator. With Tocm Media you can group your class without escaping from current class scope event in nested method. Usage:
 
@@ -110,7 +127,14 @@ Sample above is grouping `body` class to `Mobile` media. Bellow is generated css
 	}
 }
 ```
+######Method:
+Create new media.
+`$.media(name, rule);`
 
+Selecting media.
+`$.media(name);`
+
+---
 ####Tocm Keyframe
 Tocm Keyframe is CSS3 Keyframes generator. Usage:
 
@@ -183,23 +207,33 @@ Now, the `TurnLeft` keyframe become:
 	}
 }
 ```
+######Method:
+Create new keyframe.
+`$.keyframe(name, position, property);`
 
+Selecting keyframe.
+`$.keyframe(name);`
+
+Adding/editing position.
+`$.keyframe(name).at(position, property);`
+
+---
 ####Tocm Animation
 Tocm Animation is animation generator. With Tocm Animation you can create animation definition without manually define the keyframe and class. Tocm animation support nested method. It's mean that you can define multiple animation definition for parent class and child class. Child class will follow the parent properties if you not define their properties. Tocm animation also support onRun and onEnd callback for each animation. It's mean you can attach function to handle when animation has been started and finished. Usage:
 
 ```js
 $.anime(name, properties);
-
-// name is the animation name. It's used when you attach the animation to DOM element.
-// properties is collection of animation properties. It's including keyframe position, animation rule, and css properties.
 ```
+
+Where `name` is the animation name. It's used when you attach the animation to DOM element, `properties` is collection of animation properties. It's including keyframe position, animation rule, and css properties.
+
 ######Animation Rule:
-* duration				--> *animation duration (in sec). Default is 0.*
-* timing				--> *animation timing function. Default is 'linear'.*
-* delay					--> *animation delay (in sec) before start. Default is 0.*
-* repeat				--> *animation repeating (number). Default is 1, use 'infinite' to allways repeat.*
-* direction				--> *animation direction.
-* inherit				--> *(boolean) inherit parent properties or not. Default is true.*
+* `duration`			*animation duration (in sec). Default is 0.*
+* `timing`				*animation timing function. Default is 'linear'.*
+* `delay`				*animation delay (in sec) before start. Default is 0.*
+* `repeat`				*animation repeating (number). Default is 1, use 'infinite' to allways repeat.*
+* `direction`			*animation direction.
+* `inherit`				*(boolean) inherit parent properties or not. Default is true.*
 
 #####Expamle:
 ```js
@@ -240,18 +274,44 @@ $.anime('turnLeft').onEnd = function () {
 });
 ```
 
-Sample above will animate the node with class '.content'. Since the parent animation doesn't have duration (0sec), it's mean the parent animation is only animation keyframe definiton to use as child keyframe. Then the child node with class '.title' and '.description' will animated with parent animation keyframe properties. The difference is only in delay before the animation start. 
+Sample above will animate the node with class '.content'. Since the parent animation doesn't have duration (0sec), it's mean the parent animation is only animation keyframe definiton to use as child keyframe. Then the child node with class '.title' and '.description' will animated with parent animation keyframe properties. The difference is only in delay before the animation start.
+
+######Method:
+Create new animation.
+`$.anime(name, property);`
+
+Selecting animation.
+`$.anime(name);`
+
+Adding child animation.
+`$.anime(name).add(newname, properties);`
+
+Pause animation.
+`$.anime(name).pause();`
+
+Playing animation.
+`$.anime(name).play();`
 
 ####Tocm Class
 Tocm Class is css generator. You can create class with two group: Family and Global. Family class will written to single style node with `family-name` as the `id` attribute. Global class will be written to global class node.  Family class is default method where you doesn't need to add prefix to the class name. While global, you need to add global identifier to the class name. Both Family and Global group is builded to makes debugging stylesheet easily since you can find the block of code in each style nodes.
 
 When building stylesheet, you can using Basic and Nested method. Using basic method will give more options, but need lot of work. While using nested method, you can create a class and child classes easily. With nested method you doesn't need to write the parent class name. Just put the child classes under the parent class scope. Child classes fill follow the parent class group, except you define a new group in child classes.
 
-Besides building stylesheet, you can also modify the class properties. Just select the class, and then set their property. Usage: `.set(string property, value) >> $.class('.clearfix').set('padding', 20)` 
+Besides building stylesheet, you can also modify the class properties. Just select the class, and then set their property. If you group the class into media, then you have to add the media name to the select pattern. Usage: `.set(string property, value) >> $.class('.clearfix').set('padding', 20)` 
 
 or 
 
-`.set(object property) >> $.class('.clearfix').set({padding: 20, margin: 20})`
+`.set(object property) >> $.class('.clearfix@Mobile').set({padding: 20, margin: 20})`
+
+######RULES:
+* Class name should only contains `a-z A-Z 0-9 - _`.
+* `!` on class name will be used as global identifier.
+* `@` on class name will be used as media identifier.
+* Class property using native object. You can't add multiple key in one object. Both `'property' : 'value'` or `property: value` method are allowed. If you want to add two property in one class, then you have to add number as prefix or suffix. e.g. `{ 'background-image1' : 'url(...)', 'background-image2' : 'linear-gradient(...)' }`.
+* Number in property value will be converted to `px`. e.g. `width: 200` will become `width: 200px`. But in some case, it will be ignored like when in property `line-height, opacity, etc`. If you want to define in another format, then you have to use string format. e.g. `'10pt'`, `'100%'`, etc.
+* `$` in property name will be converted to `*`. It's used for some IE hack like `*zoom: 1`.
+
+
 
 ###Example:
 
@@ -514,7 +574,7 @@ $.class('.fl-grid@Tocmgrid', {
 for (var i = 0; i <= 10; ++i) {
     var set = (i + 1);
     // SELECTING PARENT CLASS.
-    $.class('.fl-grid', 'Tocmgrid')
+    $.class('.fl-grid@Tocmgrid')
 
     // FIRST COLUMN, NO MARGIN.
     .add('.col-' + set + 's', {
