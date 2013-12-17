@@ -23,7 +23,13 @@
                     return;
                 }
             } else {
-                obj = TocmDefClass[name];
+                if (name.search(/\@/) !== -1) {
+                    name = name.replace(/\s?(\@)\s?/, '@');
+                    name = name.split('@');
+                    obj = new TocmSelector(name[0], name[1]);
+                } else {
+                    obj = TocmDefClass[name];
+                }
             }
             // Returning selected object.
             return obj;
@@ -122,6 +128,10 @@
                     if (typeOf(object[proname]) === 'object') {
                         if (TocmRef.pseudo.indexOf(proname) < 0) {
                             // IF PROPERTY IS NOT PSEUDO OBJECT, THEN CREATE NEW CLASS.
+                            // ASIGNING FAMILY NAME.
+                            if (typeOf(family) !== 'string') {
+                                family = name;
+                            }
                             if (name !== '' && name !== ' ') {
                                 newname = name; // ADDING THIS NAME AS PARENT NAME FOR NEW CLASS.
                             } else {
@@ -159,10 +169,6 @@
                             }
                             // REMOVING SPACE IN BEGINING OF NAME.
                             newname = newname.replace(/^(\s)/, '');
-                            // ASIGNING FAMILY NAME.
-                            if (typeOf(family) !== 'string') {
-                                family = name;
-                            }
                             // CREATING NEW CLASS INHERITING TO THIS CLASS.
                             $.log('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
 
