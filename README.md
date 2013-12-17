@@ -218,7 +218,7 @@ Now, the `TurnLeft` keyframe become:
 ######Method:
 Create new keyframe.
 ```js
-$.keyframe(name, position, property);
+$.keyframe(name, position, properties);
 ```
 
 Selecting keyframe.
@@ -228,7 +228,7 @@ $.keyframe(name);
 
 Adding/editing position.
 ```js
-$.keyframe(name).at(position, property);
+$.keyframe(name).at(position, properties);
 ```
 
 ---
@@ -312,8 +312,68 @@ Playing animation.
 $.anime(name).play();
 ```
 
+---
+####Tocm Task
+Tocm Task is task scheduller. With Tocm Task you can create a Realtime, Immediate, Delayed, and Schedulled task.
+Realtime task will run everytime, Immediate task will run once, with or without delay before run, Delayed task will run every given interval, and Schedulled task will run on specified rule. You can also add multiple action into one task. For example, you will run function to sync message and sync status every 1sec, then you just simply create delayed task and attach the sync funtion into the task.
+
+######Method:
+Create/Select task.
+```js
+$.task(name);
+
+// This method will create a new task if not exist, and return the task if already exist.
+// Sample:
+
+$.task('Clock');
+```
+Configuring task.
+######Task Method:
+* `.realtime()` - Set as Realtime task.
+* `.immediate(delay)` - Set as Immediate task. (delay in milliseconds).
+* `.repeat(rule)` - Set as Delayed task. **Rule**: `every #time` (second, minute, hour). e.g. `ever 5s`, `every 1m`, `every 1h`
+* `.schedule(rule)` - Set as Schedulled task. **Rule**: `daily at 18:25`, `daily between 06:00 and 13:00`, `weekly on Sun at 15:00`, `weekly on Wed between 06:00 and 12:00`. You can only change the time and day (in weekly) on that rule.
+
+* `.addAction(function)` - Adding action into task.
+* `.run()` - Run the task. *Note: task will never run until you run them.*
+* `.stop()` - Stop the task.
+ 
+```js
+$.task(name).method(methodrule);
+
+// Sample:
+$.task('Clock').repeat('every 1s').addAction(function () {
+	$('#clock').html(new Date());
+}).run();
+// That sample will set the current date as #clock element text every 1sec.
+
+$.task('Alert').immediate(500).addAction(function () { alert('Success'); }).run();
+// That sample will create new task 'Alert' and alert 'Success' in 500ms after the task run.
+
+$.task('GoSchool').schedule('weekly on Mon at 07:00').addAction(function () { alert('Time to go to school'); }).run();
+// That sample will create new task 'GoSchool' and alert 'Time to go to school' every Monday at 07:00.
+
+$.task('MillSec').realtime().addAction(function () {
+	$('#clock').html(new Date().getMilliseconds());
+}).run();
+// That sample will create new task 'MilSec' and change the #clock text with the current millisecond Date().
+// Task will re run after the action triggered.
+
+$.task('MilSec').stop();
+// That sample will stop the 'MilSec' task. You can re run the task with .run() method. 
+```
+You can change the task method anytime. But we prefer to stop the task before you change the method.
+Sample:
+```js
+$.task('Clock').stop().realtime().run();
+// That sample will stop and change the 'Clock' method to realtime task, and then re run the task.
+``` 
+
+---
 ####Tocm Class
 Tocm Class is css generator. You can create class with two group: Family and Global. Family class will written to single style node with `family-name` as the `id` attribute. Global class will be written to global class node.  Family class is default method where you doesn't need to add prefix to the class name. While global, you need to add global identifier to the class name. Both Family and Global group is builded to makes debugging stylesheet easily since you can find the block of code in each style nodes.
+
+Tocm Class is support with almost all of CSS3. So you doesn't need to add vendor prefix `-webkit-, -moz-` etc. Just use the standard property and Tocm Class will add the vendor prefix automatically. e.g. `filter: 'blur(1px)'`, then it would become `filter: 'blur(1px)'; -webkit-filter: 'blur(1px)'; -ms-filter: 'blur(1px)';`
 
 When building stylesheet, you can using Basic and Nested method. Using basic method will give more options, but need lot of work. While using nested method, you can create a class and child classes easily. With nested method you doesn't need to write the parent class name. Just put the child classes under the parent class scope. Child classes fill follow the parent class group, except you define a new group in child classes.
 
@@ -331,10 +391,91 @@ or
 * Number in property value will be converted to `px`. e.g. `width: 200` will become `width: 200px`. But in some case, it will be ignored like when in property `line-height, opacity, etc`. If you want to define in another format, then you have to use string format. e.g. `'10pt'`, `'100%'`, etc.
 * `$` in property name will be converted to `*`. It's used for some IE hack like `*zoom: 1`.
 
+######Method:
+Create new class.
+```js
+$.class(name, properties);
+// or
+$.class(object);
+// or
+$.class(group, object);
+
+// Sample:
+$.class('.button', {
+	display: 'block', padding: 10, background_color: '#fff',
+
+	'img': {
+		opacity: 1
+	},
+
+	':hover': {
+		'background-color': '#ccc',
+
+		'img': {
+			opacity: 0.7
+		}
+	}
+});
+```
+
+Selecting class.
+```js
+$.class(name);
+
+// Sample:
+$.class('body .button');
+```
+
+Adding/Editing properties.
+```js
+$.class(name).set(property, value);
+// or
+$.class(name).set(objproperties);
+
+// Sample:
+$.class('.button').set('border', '1px solid #ccc');
+// or
+$.class('.button img').set({ width: '100%', filter: 'blur(2px)' });
+``` 
+
+Adding child class. This is chaining method.
+```js
+$.class(name).add(newname, properties);
+```
+
+Back to parent class when in chaining method.
+```js
+.back()
+
+// Sample:
+$.class(name).add('newbutton', { display: 'block' }).back();
+```
+
+Go to another class in current parent class when in chaining method.
+```js
+.goto(name)
+
+// Sample:
+$.class(name)
+.add('newbutton', { display: 'block' })
+.back()
+.goto('.oldbutton')
+.set('display', 'none');
+```
+
+Importing properties from other class.
+```js
+$.class(name).copy(sourcename);
+
+// Sample:
+$.class('.nbt').copy('.button');
+```
 
 
+
+
+---
 ###Example:
-
 ```js
 // Family Class
 $.class('.clearfix', {
@@ -373,9 +514,8 @@ $.class('!.clearfix@Mobile', {
 });
 ```
 
-Advanced Sample.
-================
-
+###Advanced Sample.
+---
 ```js
 // Basic method.
 // Using global group.
