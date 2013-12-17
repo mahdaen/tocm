@@ -78,16 +78,20 @@ Bellow is generated css by code above:
 ```
 ######Method:
 Create new font-face.
-`$.font(name, source, options);`.
+```js
+$.font(name, source, options);
+```
 
 Selecting font-face.
-`$.font(name);`
+```js
+$.font(name);
+```
 
 Modifying fonts property.
-`$.font(name).set(objkey, value);`
-
-Sample:
 ```js
+$.font(name).set(objkey, value);
+
+// Sample:
 $.font('Open Sans').set('font-style', 'italic');
 // Or
 $.font('Open Sans').set({ 'font-style': 'italic', 'font-weight' : 400 });
@@ -129,10 +133,14 @@ Sample above is grouping `body` class to `Mobile` media. Bellow is generated css
 ```
 ######Method:
 Create new media.
-`$.media(name, rule);`
+```js
+$.media(name, rule);
+```
 
 Selecting media.
-`$.media(name);`
+```js
+$.media(name);
+```
 
 ---
 ####Tocm Keyframe
@@ -209,13 +217,19 @@ Now, the `TurnLeft` keyframe become:
 ```
 ######Method:
 Create new keyframe.
-`$.keyframe(name, position, property);`
+```js
+$.keyframe(name, position, property);
+```
 
 Selecting keyframe.
-`$.keyframe(name);`
+```js
+$.keyframe(name);
+```
 
 Adding/editing position.
-`$.keyframe(name).at(position, property);`
+```js
+$.keyframe(name).at(position, property);
+```
 
 ---
 ####Tocm Animation
@@ -278,19 +292,25 @@ Sample above will animate the node with class '.content'. Since the parent anima
 
 ######Method:
 Create new animation.
-`$.anime(name, property);`
-
+```js
+$.anime(name, property);
+```
 Selecting animation.
-`$.anime(name);`
-
+```js
+$.anime(name);
+```
 Adding child animation.
-`$.anime(name).add(newname, properties);`
-
+```js
+$.anime(name).add(newname, properties);
+```
 Pause animation.
-`$.anime(name).pause();`
-
+```js
+$.anime(name).pause();
+```
 Playing animation.
-`$.anime(name).play();`
+```js
+$.anime(name).play();
+```
 
 ####Tocm Class
 Tocm Class is css generator. You can create class with two group: Family and Global. Family class will written to single style node with `family-name` as the `id` attribute. Global class will be written to global class node.  Family class is default method where you doesn't need to add prefix to the class name. While global, you need to add global identifier to the class name. Both Family and Global group is builded to makes debugging stylesheet easily since you can find the block of code in each style nodes.
