@@ -213,9 +213,7 @@
             var x = ['endNode', 'endTime', 'name'];
             for (var i = 0; i < x.length; ++i) {
                 if (this.hasOwnProperty(x[i])) {
-                    Object.defineProperty(this, x[i], {
-                        enumerable: false
-                    });
+                    hide(x[i], this);
                 }
             }
             // Adding animation object to Timeline.
@@ -395,8 +393,6 @@
     // HIDING MODULES.
     var mod = Object.keys(e);
     for (var i = 0; i < mod.length; ++i) {
-        Object.defineProperty(TocmAnimation.module, mod[i], {
-            enumerable: false
-        });
+        lock(mod[i], TocmAnimation.module);
     }
 })(TocmAnimation.module);

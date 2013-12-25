@@ -15,6 +15,7 @@
         var ccss = TocmRef.ccss,
             xcss = TocmRef.xcss,
             css3 = TocmRef.css3,
+            vend = TocmRef.vendor,
             cssString = '',
             property;
 
@@ -31,7 +32,7 @@
                     // Formatting to CSS property format.
                     property = index.replace(/_/g, '-').replace(/\$/g, '*');
                     property = property.replace(/[\d]+/g, '');
-                    if (typeOf(object[index]) === 'number' && TocmRef.noint.indexOf(property) < 0) {
+                    if (typeOf(object[index]) === 'number' && object[index] !== 0 && TocmRef.noint.indexOf(property) < 0) {
                         // Formatting number.
                         object[index] += 'px';
                     }
@@ -42,13 +43,11 @@
                         if (String(object[index]).match(/(.*)(\;)\s?$/)) {
                             object[index] = String(object[index]).match(/(.*)(\;)\s?$/)[1];
                         }
-                        if (css3.indexOf(index) > -1) {
-                            // CSS3 Properties.
-                            cssString += tab + property + ': ' + object[index] + '; ';
-                            cssString += '-webkit-' + property + ': ' + object[index] + '; ';
-                            cssString += '-moz-' + property + ': ' + object[index] + '; ';
-                            cssString += '-o-' + property + ': ' + object[index] + '; ';
-                            cssString += '-ms-' + property + ': ' + object[index] + ';\n';
+                        if (css3.indexOf(property) > -1) {
+                            // Adding vendor prefix for CSS3 property.
+                            for (var x = 0; x < vend.length; ++x) {
+                                cssString += tab + vend[x] + property + ': ' + object[index] + ';\n';
+                            }
                         } else {
                             cssString += tab + property + ': ' + object[index] + ';\n';
                         }
@@ -62,25 +61,29 @@
     };
     // FUNCTION TO WRITE CSS STRING TO HANDLER.
     TocmBuilder.writeDOM = function (name, media, value) {
-        var node, head, chld, last;
+        var node, head, chld, last, lnod;
         if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
-            head = document.getElementsByTagName('head')[0];
-            chld = head.children;
+            chld = $('head').children();
             last = lastNode(chld, 'style');
+            lnod = chld[last];
             node = $('style[id="' + name + '"][data="' + media + '"]')[0];
             if (node) {
                 node.innerHTML = value;
             } else {
                 node = document.createElement('style');
-                node.setAttribute('id', name);
-                node.setAttribute('data', media);
-                node.setAttribute('type', 'text/css');
-                node.innerHTML = value;
+                $(node).attr({
+                    id: name, data: media, type: 'text/css'
+                }).html(value);
 
                 if (last > -1) {
-                    head.insertBefore(node, chld[last + 1]);
+                    var isimp = $(lnod).attr('data').toLowerCase();
+                    if (isimp === 'important') {
+                        $(node).insertBefore(lnod);
+                    } else {
+                        $(node).insertBefore(chld[last + 1]);
+                    }
                 } else {
-                    head.appendChild(node);
+                    $('head').append(node);
                 }
             }
         }
@@ -119,7 +122,7 @@
                         }
                     }
                     // RETURNING THE GENERATED CSS STRING.
-                    return cssString;
+                    return cssString + '\n';
                 }
             } else {
                 // GENERATING CLASS FROM GLOBAL COLLECTIONS.
@@ -150,6 +153,7 @@
             name, fml, className, dstr = '',
             mstr = '';
         var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
+
         // ENUMERATING DEFAULT CLASSES.
         if (TocmConfig.sortclass === true) {
             defaultClass = sortObject(TocmDefClass);
@@ -237,5 +241,6 @@
     };
 
     // ATTACHING CSS STRING BUILDER TO WINDOW OBJECT.
-    define('TocmBuilder', TocmBuilder);
+    window.TocmBuilder = TocmBuilder;
+    lock('TocmBuilder');
 })(window);

@@ -116,12 +116,9 @@
         }
     };
     // Hiding Prototype.
-    Object.defineProperty(TocmKeyframe.prototype, 'write', {
-        enumerable: false
-    });
-    Object.defineProperty(TocmKeyframe.prototype, 'at', {
-        enumerable: false
-    });
+    lock('write', TocmKeyframe.prototype);
+    lock('at', TocmKeyframe.prototype);
+    
     // TocmKeyframe Wrapper.
     window.$keyframes = window.TocmKeyframe = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
@@ -240,12 +237,9 @@
         }
     };
     // Hiding Prototype.
-    Object.defineProperty(TocmFont.prototype, 'write', {
-        enumerable: false
-    });
-    Object.defineProperty(TocmFont.prototype, 'set', {
-        enumerable: false
-    });
+    lock('write', TocmFont.prototype);
+    lock('set', TocmFont.prototype);
+    
     // TocmFont Wrapper.
     window.$fonts = window.TocmFont = function (name, src, opt) {
         return new TocmFont(name, src, opt);

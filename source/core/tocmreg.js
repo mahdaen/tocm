@@ -8,7 +8,8 @@
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
         basedir: '',
-        autowrite: true,
+        autowrite: false,
+        writeload: true,
         sortclass: false,
         showdebug: false,
         date: {

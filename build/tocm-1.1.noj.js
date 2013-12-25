@@ -23,33 +23,92 @@
 (function (window) {
     'use strict';
     // CREATING FUNCTION TO DEFINE CONSTANT/NON-WRITABLE OBJECT.
-    Object.defineProperty(window, 'define', {
-        configurable: false,
-        enumerable: false,
-        writable: false,
-        value: function (name, value) {
-            if (name !== 'undefined' && value !== 'undefined') {
-                Object.defineProperty(window, name, {
-                    writable: false,
-                    value: value
-                });
+    if (Object.defineProperty) {
+        Object.defineProperty(window, 'define', {
+            writable: false,
+            value: function (name, value) {
+                if (name !== 'undefined' && value !== 'undefined') {
+                    Object.defineProperty(window, name, {
+                        writable: false,
+                        enumerable: false,
+                        value: value
+                    });
+                }
             }
-        }
-    });
+        });
+    } else {
+        window.define = function (name, value) {
+            window[name] = value;
+        };
+    }
     // CREATING FUNCTION TO LOCK OBJECT ON WINDOW.
-    define('lock', function (name) {
-        if (typeof name === 'string') {
+    define('glock', function (name) {
+        if (typeof name === 'string' && Object.defineProperty) {
             var object = window[name];
             if (object) {
                 delete window[name];
                 Object.defineProperty(window, name, {
                     writable: false,
+                    enumerable: false,
                     value: object
                 });
+                return window[name];
             }
-            return window[name];
         }
     });
+    // CREATING FUNCTION TO HIDE OBJECT ON WINDOW.
+    define('ghide', function (name) {
+        if (typeof name === 'string' && Object.defineProperty) {
+            var object = window[name];
+            if (object) {
+                delete window[name];
+                Object.defineProperty(window, name, {
+                    enumerable: false,
+                    value: object
+                });
+                return window[name];
+            }
+        }
+    });
+    // CREATING FUNCTION TO LOCK OBJECT ON OBJECT.
+    window.lock = function (name, from) {
+        if (typeOf(name) === 'string' && Object.defineProperty) {
+            if (typeOf(from) === 'object') {
+                var obj = from[name];
+                if (obj) {
+                    //delete from[name];
+                    Object.defineProperty(from, name, {
+                        writable: false,
+                        enumerable: false,
+                        value: obj
+                    });
+                    return from[name];
+                }
+            } else {
+                return glock(name);
+            }
+        }
+    };
+    // CREATINF FUNCTION TO HIDE OBJECT ON OBJECT.
+    window.hide = function (name, from) {
+        if (typeOf(name) === 'string' && Object.defineProperty) {
+            if (typeOf(from) === 'object') {
+                var obj = from[name];
+                if (obj) {
+                    //delete from[name];
+                    Object.defineProperty(from, name, {
+                        enumerable: false,
+                        value: obj
+                    });
+                    return from[name];
+                }
+            } else {
+                return ghide(name);
+            }
+        }
+    };
+    glock('hide');
+    glock('lock');
     // Object Type.
     var ObjectType = function (obj) {
         if (typeof obj === 'undefined') {
@@ -116,6 +175,20 @@
     };
     window.sortObject = sortObject;
     lock('sortObject');
+    
+    if (!Object.keys) {
+        Object.prototype.keys = function (obj) {
+            if (typeOf(obj) === 'object') {
+                var arr = [];
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        arr.push(key);
+                    }
+                }
+                return arr;
+            }
+        };
+    }
 })(window);
 
 // Extend Date.
@@ -358,9 +431,7 @@
         Array.prototype.shuffle = function () {
             for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
         };
-        Object.defineProperty(Array.prototype, 'shuffle', {
-            enumerable: false
-        });
+        lock('shuffle', Array.prototype);
     }
 
     // Cycle array. Move first item to end, then return the moved item.
@@ -370,9 +441,7 @@
             this.push(first);
             return first;
         };
-        Object.defineProperty(Array.prototype, 'cycle', {
-            enumerable: false
-        });
+        lock('cycle', Array.prototype);
     }
 
     // Delete array.
@@ -392,9 +461,7 @@
             }
             return this;
         };
-        Object.defineProperty(Array.prototype, 'delete', {
-            enumerable: false
-        });
+        lock('del', Array.prototype);
     }
 })(Array);
 
@@ -464,7 +531,8 @@
     // CREATING TOCM CONFIGURATIONS.
     window.TocmConfig = {
         basedir: '',
-        autowrite: true,
+        autowrite: false,
+        writeload: true,
         sortclass: false,
         showdebug: false,
         date: {
@@ -484,6 +552,7 @@
     // CREATING FONTS COLLECTIONS.
     window.TocmFonts = {};
 })(window);
+
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -493,20 +562,22 @@
     'use strict';
     window.TocmRef = {
         css3: [
-            'animation', 'animation_name', 'animation_duration', 'animation_fill_mode', 'animation_timing_function', 'animation_delay',
-            'animation_iteration_count', 'animation_direction', 'animation_play_state', 'background_clip', 'background_origin',
-            'background_size', 'border_radius', 'border_top_left_radius', 'border_top_right_radius', 'border_bottom_left_radius',
-            'border_bottom_right_radius', 'border_image', 'border_image_outset', 'border_image_repeat', 'border_image_slice',
-            'border_image_source', 'border_image_width', 'box_align', 'box_direction', 'box_decoration_break', 'box_flex',
-            'box_flex_group', 'box_lines', 'box_ordinal_group', 'box_orient', 'box_pack', 'box_sizing', 'box_shadow', 'break_after',
-            'break_before', 'break_inside', 'columns', 'column_count', 'column_fill', 'column_gap', 'column_rule', 'column_rule_color',
-            'column_rule_style', 'column_rule_width', 'column_span', 'column_width', 'marquee_direction', 'marquee_play_count',
-            'marquee_speed', 'marquee_style', 'nav_index', 'nav_left', 'nav_right', 'nav_up', 'opacity', 'perspective', 'perspective_origin',
-            'rotation', 'rotation_point', 'text_shadow', 'text_wrap', 'transform', 'transform_origin', 'transform_style', 'transition',
-            'transition_property', 'transition_duration', 'transition_timing_function', 'transition_delay',
+            'animation', 'animation-name', 'animation-duration', 'animation-fill-mode', 'animation-timing-function', 'animation-delay',
+            'animation-iteration-count', 'animation-direction', 'animation-play-state', 'background-clip', 'background-origin',
+            'background-size', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius',
+            'border-bottom-right-radius', 'border-image', 'border-image-outset', 'border-image-repeat', 'border-image-slice',
+            'border-image-source', 'border-image-width', 'box-align', 'box-direction', 'box-decoration-break', 'box-flex',
+            'box-flex-group', 'box-lines', 'box-ordinal-group', 'box-orient', 'box-pack', 'box-sizing', 'box-shadow', 'break-after',
+            'break-before', 'break-inside', 'columns', 'column-count', 'column-fill', 'column-gap', 'column-rule', 'column-rule-color',
+            'column-rule-style', 'column-rule-width', 'column-span', 'column-width', 'marquee-direction', 'marquee-play-count',
+            'marquee-speed', 'marquee-style', 'nav-index', 'nav-left', 'nav-right', 'nav-up', 'opacity', 'perspective', 'perspective-origin',
+            'rotation', 'rotation-point', 'text-shadow', 'text-wrap', 'transform', 'transform-origin', 'transform-style', 'transition',
+            'transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay',
             // POSSIBLE DROPPED //
-            'appearance', 'backface_visibility', 'grid_columns', 'grid_rows', 'hanging_punctuation', 'icon', 'punctuation_trim', 'resize',
-            'target', 'target_name', 'target_new', 'target_position', 'word_break', 'word_wrap', 'filter', 'user_select'
+            'appearance', 'backface-visibility', 'grid-columns', 'grid-rows', 'hanging-punctuation', 'icon', 'punctuation-trim', 'resize',
+            'target', 'target-name', 'target-new', 'target-position', 'word-break', 'word-wrap', 'filter', 'user-select',
+            // OPTIONAL //
+            'text-size-adjust'
         ],
         // PSEUDO LISTS //
         pseudo: [
@@ -514,7 +585,7 @@
         ],
         // VENDOR LISTS //
         vendor: [
-            '', '-webkit-', '-moz-', '-o-', '-ms-'
+            '-webkit-', '-moz-', '-o-', '-ms-', ''
         ],
         // RESTRICTED PROPERTIES FROM NUMBER AUTOMATIONS.
         noint: [
@@ -540,6 +611,7 @@
         var ccss = TocmRef.ccss,
             xcss = TocmRef.xcss,
             css3 = TocmRef.css3,
+            vend = TocmRef.vendor,
             cssString = '',
             property;
 
@@ -556,7 +628,7 @@
                     // Formatting to CSS property format.
                     property = index.replace(/_/g, '-').replace(/\$/g, '*');
                     property = property.replace(/[\d]+/g, '');
-                    if (typeOf(object[index]) === 'number' && TocmRef.noint.indexOf(property) < 0) {
+                    if (typeOf(object[index]) === 'number' && object[index] !== 0 && TocmRef.noint.indexOf(property) < 0) {
                         // Formatting number.
                         object[index] += 'px';
                     }
@@ -567,13 +639,11 @@
                         if (String(object[index]).match(/(.*)(\;)\s?$/)) {
                             object[index] = String(object[index]).match(/(.*)(\;)\s?$/)[1];
                         }
-                        if (css3.indexOf(index) > -1) {
-                            // CSS3 Properties.
-                            cssString += tab + property + ': ' + object[index] + '; ';
-                            cssString += '-webkit-' + property + ': ' + object[index] + '; ';
-                            cssString += '-moz-' + property + ': ' + object[index] + '; ';
-                            cssString += '-o-' + property + ': ' + object[index] + '; ';
-                            cssString += '-ms-' + property + ': ' + object[index] + ';\n';
+                        if (css3.indexOf(property) > -1) {
+                            // Adding vendor prefix for CSS3 property.
+                            for (var x = 0; x < vend.length; ++x) {
+                                cssString += tab + vend[x] + property + ': ' + object[index] + ';\n';
+                            }
                         } else {
                             cssString += tab + property + ': ' + object[index] + ';\n';
                         }
@@ -587,25 +657,29 @@
     };
     // FUNCTION TO WRITE CSS STRING TO HANDLER.
     TocmBuilder.writeDOM = function (name, media, value) {
-        var node, head, chld, last;
+        var node, head, chld, last, lnod;
         if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
-            head = document.getElementsByTagName('head')[0];
-            chld = head.children;
+            chld = $('head').children();
             last = lastNode(chld, 'style');
+            lnod = chld[last];
             node = $('style[id="' + name + '"][data="' + media + '"]')[0];
             if (node) {
                 node.innerHTML = value;
             } else {
                 node = document.createElement('style');
-                node.setAttribute('id', name);
-                node.setAttribute('data', media);
-                node.setAttribute('type', 'text/css');
-                node.innerHTML = value;
+                $(node).attr({
+                    id: name, data: media, type: 'text/css'
+                }).html(value);
 
                 if (last > -1) {
-                    head.insertBefore(node, chld[last + 1]);
+                    var isimp = $(lnod).attr('data').toLowerCase();
+                    if (isimp === 'important') {
+                        $(node).insertBefore(lnod);
+                    } else {
+                        $(node).insertBefore(chld[last + 1]);
+                    }
                 } else {
-                    head.appendChild(node);
+                    $('head').append(node);
                 }
             }
         }
@@ -644,7 +718,7 @@
                         }
                     }
                     // RETURNING THE GENERATED CSS STRING.
-                    return cssString;
+                    return cssString + '\n';
                 }
             } else {
                 // GENERATING CLASS FROM GLOBAL COLLECTIONS.
@@ -675,6 +749,7 @@
             name, fml, className, dstr = '',
             mstr = '';
         var area, family, auto, pdstr = {}, pmdstr = {}, minfo, fmcstr, gcstr;
+
         // ENUMERATING DEFAULT CLASSES.
         if (TocmConfig.sortclass === true) {
             defaultClass = sortObject(TocmDefClass);
@@ -762,8 +837,10 @@
     };
 
     // ATTACHING CSS STRING BUILDER TO WINDOW OBJECT.
-    define('TocmBuilder', TocmBuilder);
+    window.TocmBuilder = TocmBuilder;
+    lock('TocmBuilder');
 })(window);
+
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -882,12 +959,9 @@
         }
     };
     // Hiding Prototype.
-    Object.defineProperty(TocmKeyframe.prototype, 'write', {
-        enumerable: false
-    });
-    Object.defineProperty(TocmKeyframe.prototype, 'at', {
-        enumerable: false
-    });
+    lock('write', TocmKeyframe.prototype);
+    lock('at', TocmKeyframe.prototype);
+    
     // TocmKeyframe Wrapper.
     window.$keyframes = window.TocmKeyframe = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
@@ -1006,12 +1080,9 @@
         }
     };
     // Hiding Prototype.
-    Object.defineProperty(TocmFont.prototype, 'write', {
-        enumerable: false
-    });
-    Object.defineProperty(TocmFont.prototype, 'set', {
-        enumerable: false
-    });
+    lock('write', TocmFont.prototype);
+    lock('set', TocmFont.prototype);
+    
     // TocmFont Wrapper.
     window.$fonts = window.TocmFont = function (name, src, opt) {
         return new TocmFont(name, src, opt);
@@ -1131,12 +1202,8 @@
                 TocmDefClass[objname] = this;
             }
             // HIDING PRIVATE OBJECT.
-            Object.defineProperty(this, 'config', {
-                enumerable: false
-            });
-            Object.defineProperty(this, 'parent', {
-                enumerable: false
-            });
+            hide('config', this);
+            hide('parent', this);
             // RETURNING THE CLASS.
             return this;
         } else {
@@ -1145,6 +1212,7 @@
     };
     // CREATING FUNCTION TO CREATE BATCH OBJECT CLASSES.
     var TocmBatchClass = function (name, object, cmedia, area, family, parent) {
+        var lastAuto = TocmConfig.autowrite;
         var proname, tempname, newclass, media, newname, subclass, properties = {}, pseudos = {};
         if (typeOf(name) === 'string' && typeOf(object) === 'object') {
             // PARSING NAME TO GET WETHER THE NAME CONTAINS GLOBAL IDENTIFIER OR NOT.
@@ -1274,7 +1342,7 @@
                 }
             }
             // APPLYING CLASS.
-            if (newclass.name === newclass.family) {
+            if (newclass.name === newclass.family && lastAuto === true) {
                 TocmConfig.autowrite = true;
             }
             newclass.apply();
@@ -1304,10 +1372,6 @@
                 else {
                     return new TocmBatchClass(select, omedia);
                 }
-                // Writing CSS if the auto write is true.
-                if (TocmConfig.autowrite === true) {
-                    // TocmBuilder.writeSCS();
-                }
             }
             // Else, just select class with no media.
             else {
@@ -1336,31 +1400,28 @@
                 }
                 if (TocmConfig.autowrite === true) {
                     $.log('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
-                    TocmBuilder.writeSCS(this);
+                    TocmBuilder.writeSCS();
                 }
             }
             return this;
         },
-        write: function () {
+        write: function (turnauto) {
             TocmBuilder.writeSCS();
+            if (turnauto === true) {
+                TocmConfig.autowrite = true;
+            }
             return this;
         }
     };
     // HIDING CORE MODULE.
-    Object.defineProperty(Tocm.module, 'apply', {
-        enumerable: false
-    });
-    Object.defineProperty(Tocm.module, 'write', {
-        enumerable: false
-    });
+    lock('apply', Tocm.module);
+    lock('write', Tocm.module);
 
     // CREATING MODULE SETTER.
     Tocm.defineModule = function (name, func) {
         if (typeOf(name) === 'string' && typeOf(func) === 'function') {
             Tocm.module[name] = func;
-            Object.defineProperty(Tocm.module, name, {
-                enumerable: false
-            });
+            lock(name, Tocm.module);
             return Tocm.module[name];
         }
     };
@@ -1373,6 +1434,22 @@
             box_shadow: '0 0 0 1px ' + linecolor
         });
     };
+    Tocm.rebuild = function (turnauto) {
+        if (turnauto === true) {
+            TocmConfig.autowrite = true;
+        }
+        TocmBuilder.writeSCS();
+    };
+    lock('debugLayout', Tocm);
+    lock('defineModule', Tocm);
+    lock('rebuild', Tocm);
+
+    // Adding listener to build the class when document ready to styling.
+    if (TocmConfig.writeload === true) {
+        $(document).ready(function () {
+            Tocm.rebuild();
+        });
+    }
     // CREATING STYLE COLLECTOR.
     Tocm.collect = function () {
         var csstring = '';
@@ -1381,6 +1458,7 @@
         });
         return csstring;
     };
+    lock('collect', Tocm);
 })(window);
 
 // CREATING TOCM MODULES.
@@ -1471,9 +1549,10 @@
         }
         return this;
     };
-    // MODULE TO ADD CHILD CLASS. 
+    // MODULE TO ADD CHILD CLASS.
     e.module.add = function (name, prop) {
         var newname = this.name + ' ';
+        TocmConfig.autowrite = false;
         if (typeOf(name) === 'string') {
             if (name.search('&')) {
                 name = name.replace(/\s+(\&)\s+/g, '&');
@@ -1488,7 +1567,7 @@
         if (newclass.hasOwnProperty('name')) {
             newclass.family = this.family;
             newclass.parent = this;
-            newclass.config.write_area = 'family';
+            newclass.config.write_area = this.config.write_area;
             var doc = document.getElementById(newclass.name);
             if (doc) {
                 doc.parentNode.removeChild(doc);
@@ -1518,13 +1597,12 @@
     };
 
     // HIDING MODULES.
-    var mod = ['set', 'on', 'copy', 'add', 'goto', 'back'];
+    var mod = ['set', 'on', 'copy', 'add', 'goTo', 'back'];
     for (var i = 0; i < mod.length; ++i) {
-        Object.defineProperty(e.module, mod[i], {
-            enumerable: false
-        });
+        lock(mod[i], e.module);
     }
 })(Tocm);
+
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -1532,6 +1610,26 @@
 // CREATING GLOBAL REFERENCES.
 (function (window) {
     'use strict';
+    // CREATING UNIT CONVERTER.
+    var conv = function (src, suf) {
+        if (typeOf(src) === 'number') {
+            return src + suf;
+        } else {
+            return src;
+        }
+    };
+    define('em', function (src) {
+        return conv(src, 'em');
+    });
+    define('px', function (src) {
+        return conv(src, 'px');
+    });
+    define('pt', function (src) {
+        return conv(src, 'pt');
+    });
+    define('pr', function (src) {
+        return conv(src, '%');
+    });
     // CREATING HEX TO RGBA CONVERTER.
     window.rgb = function (hexColor, opacity, rtype) {
         var shorthandRegex, result, objRgb, isPrs;
@@ -1619,7 +1717,7 @@
     window.radial_gradient = function (value) {
         return gradient(value, 'radial');
     };
-    
+
     // Creating function to generate gradient value.
     // gradival('90deg', ['#fff', '#fff', '#fff', '#ccc']);
     // 90deg, #fff, #fff, #fff, #ccc
@@ -1642,6 +1740,7 @@
     lock('radial_gradient');
     lock('gradval');
 })(window);
+
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -1857,9 +1956,7 @@
             var x = ['endNode', 'endTime', 'name'];
             for (var i = 0; i < x.length; ++i) {
                 if (this.hasOwnProperty(x[i])) {
-                    Object.defineProperty(this, x[i], {
-                        enumerable: false
-                    });
+                    hide(x[i], this);
                 }
             }
             // Adding animation object to Timeline.
@@ -2039,9 +2136,7 @@
     // HIDING MODULES.
     var mod = Object.keys(e);
     for (var i = 0; i < mod.length; ++i) {
-        Object.defineProperty(TocmAnimation.module, mod[i], {
-            enumerable: false
-        });
+        lock(mod[i], TocmAnimation.module);
     }
 })(TocmAnimation.module);
 /*jshint strict:true*/
@@ -2566,25 +2661,48 @@
 // EXTENDING JQUERY IDENTIFIER ($).
 (function($) {
     'use strict';
-    $.anime = TocmAnimation;
-    $['class'] = Tocm;
-    $.media = TocmMedia;
-    $.path = TocmQuery;
-    $.font = TocmFont;
-    $.keyframe = TocmKeyframe;
-    $.task = TocmTask;
-    $.log = TocmLogger;
+    $.anime         = TocmAnimation;
+    $['class']      = Tocm;
+    $.media         = TocmMedia;
+    $.path          = TocmQuery;
+    $.font          = TocmFont;
+    $.keyframe      = TocmKeyframe;
+    $.task          = TocmTask;
+    $.log           = TocmLogger;
     
     // CONFIGUGRATION EDIT.
-    $.config = TocmConfig;
+    $.config        = TocmConfig;
     
-    // LOCKING ALL TOCM INSTANCE.
-    var obj = Object.keys(window);
-    for (var i = 0; i < obj.length; ++i) {
-        if (obj[i].search('Tocm') !== -1) {
-            //lock(obj[i]);
+    // CREATING DOM CREATOR.
+    $.create        = function (tagname, attr) {
+        if (typeOf(tagname) === 'string') {
+            var doc = document.createElement(tagname);
+            if (typeOf(attr) === 'object') {
+                $.path(doc).attr(attr);
+            }
+            return $.path(doc);
+        } else {
+            return $.path('nonedom');
         }
-    }
+    };
+    
+    // CREATING DOM RENAMER.
+    $.fn.rename     = function (newname) {
+        if (typeOf(newname) === 'string') {
+            for (var x = this.length - 1; x >= 0; --x) {
+                var cdoc = this[x];
+                var atrs = cdoc.attributes,
+                    docs = $(document.createElement(newname));
+                for (var i = 0; i < atrs.length; ++i) {
+                    docs.attr(atrs[i].name, cdoc.getAttribute(atrs[i].name));
+                }
+                docs.html($(cdoc).html());
+                $(cdoc).replaceWith(docs);
+                this[x] = docs[0];
+            }
+        }
+        return this;
+    };
 })(jQuery);
 
 // CREATING JQUERY PLUGIN.

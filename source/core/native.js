@@ -7,33 +7,92 @@
 (function (window) {
     'use strict';
     // CREATING FUNCTION TO DEFINE CONSTANT/NON-WRITABLE OBJECT.
-    Object.defineProperty(window, 'define', {
-        configurable: false,
-        enumerable: false,
-        writable: false,
-        value: function (name, value) {
-            if (name !== 'undefined' && value !== 'undefined') {
-                Object.defineProperty(window, name, {
-                    writable: false,
-                    value: value
-                });
+    if (Object.defineProperty) {
+        Object.defineProperty(window, 'define', {
+            writable: false,
+            value: function (name, value) {
+                if (name !== 'undefined' && value !== 'undefined') {
+                    Object.defineProperty(window, name, {
+                        writable: false,
+                        enumerable: false,
+                        value: value
+                    });
+                }
             }
-        }
-    });
+        });
+    } else {
+        window.define = function (name, value) {
+            window[name] = value;
+        };
+    }
     // CREATING FUNCTION TO LOCK OBJECT ON WINDOW.
-    define('lock', function (name) {
-        if (typeof name === 'string') {
+    define('glock', function (name) {
+        if (typeof name === 'string' && Object.defineProperty) {
             var object = window[name];
             if (object) {
                 delete window[name];
                 Object.defineProperty(window, name, {
                     writable: false,
+                    enumerable: false,
                     value: object
                 });
+                return window[name];
             }
-            return window[name];
         }
     });
+    // CREATING FUNCTION TO HIDE OBJECT ON WINDOW.
+    define('ghide', function (name) {
+        if (typeof name === 'string' && Object.defineProperty) {
+            var object = window[name];
+            if (object) {
+                delete window[name];
+                Object.defineProperty(window, name, {
+                    enumerable: false,
+                    value: object
+                });
+                return window[name];
+            }
+        }
+    });
+    // CREATING FUNCTION TO LOCK OBJECT ON OBJECT.
+    window.lock = function (name, from) {
+        if (typeOf(name) === 'string' && Object.defineProperty) {
+            if (typeOf(from) === 'object') {
+                var obj = from[name];
+                if (obj) {
+                    //delete from[name];
+                    Object.defineProperty(from, name, {
+                        writable: false,
+                        enumerable: false,
+                        value: obj
+                    });
+                    return from[name];
+                }
+            } else {
+                return glock(name);
+            }
+        }
+    };
+    // CREATINF FUNCTION TO HIDE OBJECT ON OBJECT.
+    window.hide = function (name, from) {
+        if (typeOf(name) === 'string' && Object.defineProperty) {
+            if (typeOf(from) === 'object') {
+                var obj = from[name];
+                if (obj) {
+                    //delete from[name];
+                    Object.defineProperty(from, name, {
+                        enumerable: false,
+                        value: obj
+                    });
+                    return from[name];
+                }
+            } else {
+                return ghide(name);
+            }
+        }
+    };
+    glock('hide');
+    glock('lock');
     // Object Type.
     var ObjectType = function (obj) {
         if (typeof obj === 'undefined') {
@@ -100,6 +159,20 @@
     };
     window.sortObject = sortObject;
     lock('sortObject');
+    
+    if (!Object.keys) {
+        Object.prototype.keys = function (obj) {
+            if (typeOf(obj) === 'object') {
+                var arr = [];
+                for (var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        arr.push(key);
+                    }
+                }
+                return arr;
+            }
+        };
+    }
 })(window);
 
 // Extend Date.
@@ -342,9 +415,7 @@
         Array.prototype.shuffle = function () {
             for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
         };
-        Object.defineProperty(Array.prototype, 'shuffle', {
-            enumerable: false
-        });
+        lock('shuffle', Array.prototype);
     }
 
     // Cycle array. Move first item to end, then return the moved item.
@@ -354,9 +425,7 @@
             this.push(first);
             return first;
         };
-        Object.defineProperty(Array.prototype, 'cycle', {
-            enumerable: false
-        });
+        lock('cycle', Array.prototype);
     }
 
     // Delete array.
@@ -376,9 +445,7 @@
             }
             return this;
         };
-        Object.defineProperty(Array.prototype, 'delete', {
-            enumerable: false
-        });
+        lock('del', Array.prototype);
     }
 })(Array);
 

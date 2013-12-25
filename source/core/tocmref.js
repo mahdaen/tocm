@@ -7,20 +7,22 @@
     'use strict';
     window.TocmRef = {
         css3: [
-            'animation', 'animation_name', 'animation_duration', 'animation_fill_mode', 'animation_timing_function', 'animation_delay',
-            'animation_iteration_count', 'animation_direction', 'animation_play_state', 'background_clip', 'background_origin',
-            'background_size', 'border_radius', 'border_top_left_radius', 'border_top_right_radius', 'border_bottom_left_radius',
-            'border_bottom_right_radius', 'border_image', 'border_image_outset', 'border_image_repeat', 'border_image_slice',
-            'border_image_source', 'border_image_width', 'box_align', 'box_direction', 'box_decoration_break', 'box_flex',
-            'box_flex_group', 'box_lines', 'box_ordinal_group', 'box_orient', 'box_pack', 'box_sizing', 'box_shadow', 'break_after',
-            'break_before', 'break_inside', 'columns', 'column_count', 'column_fill', 'column_gap', 'column_rule', 'column_rule_color',
-            'column_rule_style', 'column_rule_width', 'column_span', 'column_width', 'marquee_direction', 'marquee_play_count',
-            'marquee_speed', 'marquee_style', 'nav_index', 'nav_left', 'nav_right', 'nav_up', 'opacity', 'perspective', 'perspective_origin',
-            'rotation', 'rotation_point', 'text_shadow', 'text_wrap', 'transform', 'transform_origin', 'transform_style', 'transition',
-            'transition_property', 'transition_duration', 'transition_timing_function', 'transition_delay',
+            'animation', 'animation-name', 'animation-duration', 'animation-fill-mode', 'animation-timing-function', 'animation-delay',
+            'animation-iteration-count', 'animation-direction', 'animation-play-state', 'background-clip', 'background-origin',
+            'background-size', 'border-radius', 'border-top-left-radius', 'border-top-right-radius', 'border-bottom-left-radius',
+            'border-bottom-right-radius', 'border-image', 'border-image-outset', 'border-image-repeat', 'border-image-slice',
+            'border-image-source', 'border-image-width', 'box-align', 'box-direction', 'box-decoration-break', 'box-flex',
+            'box-flex-group', 'box-lines', 'box-ordinal-group', 'box-orient', 'box-pack', 'box-sizing', 'box-shadow', 'break-after',
+            'break-before', 'break-inside', 'columns', 'column-count', 'column-fill', 'column-gap', 'column-rule', 'column-rule-color',
+            'column-rule-style', 'column-rule-width', 'column-span', 'column-width', 'marquee-direction', 'marquee-play-count',
+            'marquee-speed', 'marquee-style', 'nav-index', 'nav-left', 'nav-right', 'nav-up', 'opacity', 'perspective', 'perspective-origin',
+            'rotation', 'rotation-point', 'text-shadow', 'text-wrap', 'transform', 'transform-origin', 'transform-style', 'transition',
+            'transition-property', 'transition-duration', 'transition-timing-function', 'transition-delay',
             // POSSIBLE DROPPED //
-            'appearance', 'backface_visibility', 'grid_columns', 'grid_rows', 'hanging_punctuation', 'icon', 'punctuation_trim', 'resize',
-            'target', 'target_name', 'target_new', 'target_position', 'word_break', 'word_wrap', 'filter', 'user_select'
+            'appearance', 'backface-visibility', 'grid-columns', 'grid-rows', 'hanging-punctuation', 'icon', 'punctuation-trim', 'resize',
+            'target', 'target-name', 'target-new', 'target-position', 'word-break', 'word-wrap', 'filter', 'user-select',
+            // OPTIONAL //
+            'text-size-adjust'
         ],
         // PSEUDO LISTS //
         pseudo: [
@@ -28,7 +30,7 @@
         ],
         // VENDOR LISTS //
         vendor: [
-            '', '-webkit-', '-moz-', '-o-', '-ms-'
+            '-webkit-', '-moz-', '-o-', '-ms-', ''
         ],
         // RESTRICTED PROPERTIES FROM NUMBER AUTOMATIONS.
         noint: [

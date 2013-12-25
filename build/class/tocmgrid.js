@@ -12,7 +12,7 @@ var baseW = 100,    // Container width. (%).
 
 // CREATING MAIN CLASS.
 $.media('Tocmgrid', 'all');
-$.class('.fl-grid@Tocmgrid', {
+$.class('!.fl-grid@Tocmgrid', {
     // CONTAINER PROPERTIES.
     width: baseW  + '%', float: 'left', after: { clear: 'both' }
 });
@@ -20,7 +20,7 @@ $.class('.fl-grid@Tocmgrid', {
 // CREATING BOX INCREMENT.
 for (var i = 0; i <= 11; ++i) {
     var set = (i + 1);
-    $.class('.fl-grid', 'Tocmgrid')
+    $.class('.fl-grid@Tocmgrid')
     // FIRST COLUMN NO MARGIN.
     .add('.col-' + set + 's', {
         width: ((gridW * set) + (gridM * (set - 1))) + '%',

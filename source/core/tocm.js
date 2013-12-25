@@ -72,12 +72,8 @@
                 TocmDefClass[objname] = this;
             }
             // HIDING PRIVATE OBJECT.
-            Object.defineProperty(this, 'config', {
-                enumerable: false
-            });
-            Object.defineProperty(this, 'parent', {
-                enumerable: false
-            });
+            hide('config', this);
+            hide('parent', this);
             // RETURNING THE CLASS.
             return this;
         } else {
@@ -86,6 +82,7 @@
     };
     // CREATING FUNCTION TO CREATE BATCH OBJECT CLASSES.
     var TocmBatchClass = function (name, object, cmedia, area, family, parent) {
+        var lastAuto = TocmConfig.autowrite;
         var proname, tempname, newclass, media, newname, subclass, properties = {}, pseudos = {};
         if (typeOf(name) === 'string' && typeOf(object) === 'object') {
             // PARSING NAME TO GET WETHER THE NAME CONTAINS GLOBAL IDENTIFIER OR NOT.
@@ -215,7 +212,7 @@
                 }
             }
             // APPLYING CLASS.
-            if (newclass.name === newclass.family) {
+            if (newclass.name === newclass.family && lastAuto === true) {
                 TocmConfig.autowrite = true;
             }
             newclass.apply();
@@ -245,10 +242,6 @@
                 else {
                     return new TocmBatchClass(select, omedia);
                 }
-                // Writing CSS if the auto write is true.
-                if (TocmConfig.autowrite === true) {
-                    // TocmBuilder.writeSCS();
-                }
             }
             // Else, just select class with no media.
             else {
@@ -277,31 +270,28 @@
                 }
                 if (TocmConfig.autowrite === true) {
                     $.log('TocmClass', 'Writing class "' + this.name + '" changes to style node.', 'orange');
-                    TocmBuilder.writeSCS(this);
+                    TocmBuilder.writeSCS();
                 }
             }
             return this;
         },
-        write: function () {
+        write: function (turnauto) {
             TocmBuilder.writeSCS();
+            if (turnauto === true) {
+                TocmConfig.autowrite = true;
+            }
             return this;
         }
     };
     // HIDING CORE MODULE.
-    Object.defineProperty(Tocm.module, 'apply', {
-        enumerable: false
-    });
-    Object.defineProperty(Tocm.module, 'write', {
-        enumerable: false
-    });
+    lock('apply', Tocm.module);
+    lock('write', Tocm.module);
 
     // CREATING MODULE SETTER.
     Tocm.defineModule = function (name, func) {
         if (typeOf(name) === 'string' && typeOf(func) === 'function') {
             Tocm.module[name] = func;
-            Object.defineProperty(Tocm.module, name, {
-                enumerable: false
-            });
+            lock(name, Tocm.module);
             return Tocm.module[name];
         }
     };
@@ -314,6 +304,22 @@
             box_shadow: '0 0 0 1px ' + linecolor
         });
     };
+    Tocm.rebuild = function (turnauto) {
+        if (turnauto === true) {
+            TocmConfig.autowrite = true;
+        }
+        TocmBuilder.writeSCS();
+    };
+    lock('debugLayout', Tocm);
+    lock('defineModule', Tocm);
+    lock('rebuild', Tocm);
+
+    // Adding listener to build the class when document ready to styling.
+    if (TocmConfig.writeload === true) {
+        $(document).ready(function () {
+            Tocm.rebuild();
+        });
+    }
     // CREATING STYLE COLLECTOR.
     Tocm.collect = function () {
         var csstring = '';
@@ -322,6 +328,7 @@
         });
         return csstring;
     };
+    lock('collect', Tocm);
 })(window);
 
 // CREATING TOCM MODULES.
@@ -412,9 +419,10 @@
         }
         return this;
     };
-    // MODULE TO ADD CHILD CLASS. 
+    // MODULE TO ADD CHILD CLASS.
     e.module.add = function (name, prop) {
         var newname = this.name + ' ';
+        TocmConfig.autowrite = false;
         if (typeOf(name) === 'string') {
             if (name.search('&')) {
                 name = name.replace(/\s+(\&)\s+/g, '&');
@@ -429,7 +437,7 @@
         if (newclass.hasOwnProperty('name')) {
             newclass.family = this.family;
             newclass.parent = this;
-            newclass.config.write_area = 'family';
+            newclass.config.write_area = this.config.write_area;
             var doc = document.getElementById(newclass.name);
             if (doc) {
                 doc.parentNode.removeChild(doc);
@@ -459,10 +467,8 @@
     };
 
     // HIDING MODULES.
-    var mod = ['set', 'on', 'copy', 'add', 'goto', 'back'];
+    var mod = ['set', 'on', 'copy', 'add', 'goTo', 'back'];
     for (var i = 0; i < mod.length; ++i) {
-        Object.defineProperty(e.module, mod[i], {
-            enumerable: false
-        });
+        lock(mod[i], e.module);
     }
 })(Tocm);

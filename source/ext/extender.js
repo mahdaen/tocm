@@ -5,25 +5,48 @@
 // EXTENDING JQUERY IDENTIFIER ($).
 (function($) {
     'use strict';
-    $.anime = TocmAnimation;
-    $['class'] = Tocm;
-    $.media = TocmMedia;
-    $.path = TocmQuery;
-    $.font = TocmFont;
-    $.keyframe = TocmKeyframe;
-    $.task = TocmTask;
-    $.log = TocmLogger;
+    $.anime         = TocmAnimation;
+    $['class']      = Tocm;
+    $.media         = TocmMedia;
+    $.path          = TocmQuery;
+    $.font          = TocmFont;
+    $.keyframe      = TocmKeyframe;
+    $.task          = TocmTask;
+    $.log           = TocmLogger;
     
     // CONFIGUGRATION EDIT.
-    $.config = TocmConfig;
+    $.config        = TocmConfig;
     
-    // LOCKING ALL TOCM INSTANCE.
-    var obj = Object.keys(window);
-    for (var i = 0; i < obj.length; ++i) {
-        if (obj[i].search('Tocm') !== -1) {
-            //lock(obj[i]);
+    // CREATING DOM CREATOR.
+    $.create        = function (tagname, attr) {
+        if (typeOf(tagname) === 'string') {
+            var doc = document.createElement(tagname);
+            if (typeOf(attr) === 'object') {
+                $.path(doc).attr(attr);
+            }
+            return $.path(doc);
+        } else {
+            return $.path('nonedom');
         }
-    }
+    };
+    
+    // CREATING DOM RENAMER.
+    $.fn.rename     = function (newname) {
+        if (typeOf(newname) === 'string') {
+            for (var x = this.length - 1; x >= 0; --x) {
+                var cdoc = this[x];
+                var atrs = cdoc.attributes,
+                    docs = $(document.createElement(newname));
+                for (var i = 0; i < atrs.length; ++i) {
+                    docs.attr(atrs[i].name, cdoc.getAttribute(atrs[i].name));
+                }
+                docs.html($(cdoc).html());
+                $(cdoc).replaceWith(docs);
+                this[x] = docs[0];
+            }
+        }
+        return this;
+    };
 })(jQuery);
 
 // CREATING JQUERY PLUGIN.

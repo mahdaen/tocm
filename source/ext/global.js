@@ -5,6 +5,26 @@
 // CREATING GLOBAL REFERENCES.
 (function (window) {
     'use strict';
+    // CREATING UNIT CONVERTER.
+    var conv = function (src, suf) {
+        if (typeOf(src) === 'number') {
+            return src + suf;
+        } else {
+            return src;
+        }
+    };
+    define('em', function (src) {
+        return conv(src, 'em');
+    });
+    define('px', function (src) {
+        return conv(src, 'px');
+    });
+    define('pt', function (src) {
+        return conv(src, 'pt');
+    });
+    define('pr', function (src) {
+        return conv(src, '%');
+    });
     // CREATING HEX TO RGBA CONVERTER.
     window.rgb = function (hexColor, opacity, rtype) {
         var shorthandRegex, result, objRgb, isPrs;
@@ -92,7 +112,7 @@
     window.radial_gradient = function (value) {
         return gradient(value, 'radial');
     };
-    
+
     // Creating function to generate gradient value.
     // gradival('90deg', ['#fff', '#fff', '#fff', '#ccc']);
     // 90deg, #fff, #fff, #fff, #ccc
