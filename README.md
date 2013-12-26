@@ -102,6 +102,13 @@ Below is generated css by code above:
 Create new font-face.
 ```js
 $.font(name, source, options);
+
+// Source usage sample
+$.font('Arial', ['font/arial.eot', 'font/arial.ttf']); // Embed .eot and .ttf font
+// Or
+$.font('Arial', 'font/arial.ttf'); // Embed .ttf font only.
+// Or
+$.font('Arial', 'font/arial'); // Embed all font type.
 ```
 
 Selecting font-face.
