@@ -8952,23 +8952,6 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     window.typeOf = ObjectType;
     lock('typeOf');
 
-    // Last Node.
-    var ObjectLastNode = function (from, what) {
-        var ncoll = from;
-        var acoll = {};
-        for (var i = 0; i < ncoll.length; ++i) {
-            acoll[ncoll[i].nodeName.toLowerCase()] = i;
-        }
-        var last = acoll[what];
-        if (!last) {
-            return -1;
-        } else {
-            return last;
-        }
-    };
-    window.lastNode = ObjectLastNode;
-    lock('lastNode');
-
     // Sorting object.
     var sortObject = function (object, direction) {
         var tmparray = Object.keys(object),
@@ -9005,7 +8988,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
     window.sortObject = sortObject;
     lock('sortObject');
-    
+
     if (!Object.keys) {
         Object.prototype.keys = function (obj) {
             if (typeOf(obj) === 'object') {
@@ -9351,6 +9334,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         };
     }
 })(String);
+
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -9489,9 +9473,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     TocmBuilder.writeDOM = function (name, media, value) {
         var node, head, chld, last, lnod;
         if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
-            chld = $('head').children();
-            last = lastNode(chld, 'style');
-            lnod = chld[last];
+            last = $('style').last();
             node = $('style[id="' + name + '"][data="' + media + '"]')[0];
             if (node) {
                 node.innerHTML = value;
@@ -9501,12 +9483,12 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                     id: name, data: media, type: 'text/css'
                 }).html(value);
 
-                if (last > -1) {
-                    var isimp = $(lnod).attr('data').toLowerCase();
+                if (last.length > 0) {
+                    var isimp = last.attr('data').toLowerCase();
                     if (isimp === 'important') {
-                        $(node).insertBefore(lnod);
+                        $(node).insertBefore(last);
                     } else {
-                        $(node).insertBefore(chld[last + 1]);
+                        $(node).insertAfter(last);
                     }
                 } else {
                     $('head').append(node);
@@ -9791,7 +9773,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // Hiding Prototype.
     lock('write', TocmKeyframe.prototype);
     lock('at', TocmKeyframe.prototype);
-    
+
     // TocmKeyframe Wrapper.
     window.$keyframes = window.TocmKeyframe = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
@@ -9843,7 +9825,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // CREATING PROTOTYPES.
     TocmFont.prototype = {
         // WRITING FONTS.
-        write: function () {
+        write: function (isget) {
             var baseurl = '';
             if (TocmConfig.basedir !== '') {
                 baseurl = TocmConfig.basedir + '/';
@@ -9876,7 +9858,13 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                                     }
                                 }
                             } else if (typeOf(this.src) === 'string') {
-                                cstr += '\t\tsrc: url("' + this.src + '");';
+                                if (this.src.match(/(\.)([a-zA-Z]+)$/)) {
+                                    cstr += '\t\tsrc: url("' + this.src + '");';
+                                } else {
+                                    this.src = [this.src + '.eot', this.src + '.woff', this.src + '.ttf', this.src + '.svg', this.src + '.otf'];
+                                    this.write();
+                                    return this;
+                                }
                             }
                         } else {
                             cstr += '\t\t' + key.replace('_', '-') + ': ' + this[key] + ';\n';
@@ -9884,7 +9872,11 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                     }
                 }
                 cstr += '\t}\n';
-                TocmBuilder.writeDOM(this.name, 'font', cstr);
+                if (isget === true) {
+                    return cstr;
+                } else {
+                    TocmBuilder.writeDOM(this.name, 'font', cstr);
+                }
             }
             return this;
         },
@@ -9912,7 +9904,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // Hiding Prototype.
     lock('write', TocmFont.prototype);
     lock('set', TocmFont.prototype);
-    
+
     // TocmFont Wrapper.
     window.$fonts = window.TocmFont = function (name, src, opt) {
         return new TocmFont(name, src, opt);
@@ -9958,6 +9950,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     lock('$media');
     lock('TocmMedia');
 })(window);
+
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -10236,10 +10229,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
             return this;
         },
         write: function (turnauto) {
+            TocmConfig.autowrite = true;
             TocmBuilder.writeSCS();
-            if (turnauto === true) {
-                TocmConfig.autowrite = true;
-            }
             return this;
         }
     };
@@ -10277,7 +10268,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // Adding listener to build the class when document ready to styling.
     if (TocmConfig.writeload === true) {
         $(document).ready(function () {
-            Tocm.rebuild();
+            Tocm.rebuild(true);
         });
     }
     // CREATING STYLE COLLECTOR.
@@ -10297,6 +10288,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // MODULE TO ASSIGN PROPERTIES.
     e.module.set = function (objkey, value) {
         // DO ACTIONS ONLY IF THIS OBJECT IS TOCM CLASS.
+        TocmConfig.autowrite = false;
         if (this.hasOwnProperty('name') && this.hasOwnProperty('properties')) {
             var key;
             // DO ACTIONS ONLY IF THE ARGUMENTS IS VALID TYPE.
@@ -10317,6 +10309,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // MODULE TO ASSIGN PSEUDO PROPERTIES.
     e.module.on = function (pseudo, props) {
         var key;
+        TocmConfig.autowrite = false;
         // DO ACTIONS ONLY IF ALL ARGUMENTS WAS DEFINED WITH TRUE TYPE AND IF THIS CLASS IS TOCM CLASS.
         if (typeOf(pseudo) === 'string' && typeOf(props) === 'object' && this.hasOwnProperty('name')) {
             if (pseudo.search('&') > -1) {
@@ -10349,6 +10342,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     // MODULE TO IMPORT PROPERTIES FROM ANOTHER CLASS.
     e.module.copy = function (name, media, psdo) {
         var parent, key, ppsdo;
+        TocmConfig.autowrite = false;
         if (typeOf(name) === 'string') {
             if (typeOf(media) === 'string' && media !== '' && media !== 'none') {
                 parent = new TocmClass(name, media);

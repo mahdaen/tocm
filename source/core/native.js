@@ -106,23 +106,6 @@
     window.typeOf = ObjectType;
     lock('typeOf');
 
-    // Last Node.
-    var ObjectLastNode = function (from, what) {
-        var ncoll = from;
-        var acoll = {};
-        for (var i = 0; i < ncoll.length; ++i) {
-            acoll[ncoll[i].nodeName.toLowerCase()] = i;
-        }
-        var last = acoll[what];
-        if (!last) {
-            return -1;
-        } else {
-            return last;
-        }
-    };
-    window.lastNode = ObjectLastNode;
-    lock('lastNode');
-
     // Sorting object.
     var sortObject = function (object, direction) {
         var tmparray = Object.keys(object),
@@ -159,7 +142,7 @@
     };
     window.sortObject = sortObject;
     lock('sortObject');
-    
+
     if (!Object.keys) {
         Object.prototype.keys = function (obj) {
             if (typeOf(obj) === 'object') {

@@ -276,10 +276,8 @@
             return this;
         },
         write: function (turnauto) {
+            TocmConfig.autowrite = true;
             TocmBuilder.writeSCS();
-            if (turnauto === true) {
-                TocmConfig.autowrite = true;
-            }
             return this;
         }
     };
@@ -317,7 +315,7 @@
     // Adding listener to build the class when document ready to styling.
     if (TocmConfig.writeload === true) {
         $(document).ready(function () {
-            Tocm.rebuild();
+            Tocm.rebuild(true);
         });
     }
     // CREATING STYLE COLLECTOR.
@@ -337,6 +335,7 @@
     // MODULE TO ASSIGN PROPERTIES.
     e.module.set = function (objkey, value) {
         // DO ACTIONS ONLY IF THIS OBJECT IS TOCM CLASS.
+        TocmConfig.autowrite = false;
         if (this.hasOwnProperty('name') && this.hasOwnProperty('properties')) {
             var key;
             // DO ACTIONS ONLY IF THE ARGUMENTS IS VALID TYPE.
@@ -357,6 +356,7 @@
     // MODULE TO ASSIGN PSEUDO PROPERTIES.
     e.module.on = function (pseudo, props) {
         var key;
+        TocmConfig.autowrite = false;
         // DO ACTIONS ONLY IF ALL ARGUMENTS WAS DEFINED WITH TRUE TYPE AND IF THIS CLASS IS TOCM CLASS.
         if (typeOf(pseudo) === 'string' && typeOf(props) === 'object' && this.hasOwnProperty('name')) {
             if (pseudo.search('&') > -1) {
@@ -389,6 +389,7 @@
     // MODULE TO IMPORT PROPERTIES FROM ANOTHER CLASS.
     e.module.copy = function (name, media, psdo) {
         var parent, key, ppsdo;
+        TocmConfig.autowrite = false;
         if (typeOf(name) === 'string') {
             if (typeOf(media) === 'string' && media !== '' && media !== 'none') {
                 parent = new TocmClass(name, media);

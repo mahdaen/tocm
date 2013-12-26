@@ -9,7 +9,7 @@ Tocm is CSS generator for javascript. With Tocm you can create and manage css on
 ```
 
 ####Why Tocm?
-Tocm is easey to use, flexible and configurable. Tocm available for chaining and nested method. You can use your javascript experience when building stylesheet, like using math when defining css property value and etc. See ui definition sample bellow:
+Tocm is easey to use, flexible and configurable. Tocm available for chaining and nested method. You can use your javascript experience when building stylesheet, like using math when defining css property value and etc. See ui definition sample below:
 
 ```js
 // Creating definition.
@@ -60,8 +60,7 @@ $.font('Open Sans', [
 	font_weight: 600
 });
 ```
-
-Bellow is generated css by code above:
+Below is generated css by code above:
 
 ```css
 @font-face {
@@ -76,6 +75,29 @@ Bellow is generated css by code above:
 }
 
 ```
+
+If you have fonts with same name, then you doesn't need to write array as source. Simply use this method:
+```js
+$.font('Open Sans', 'font/opensans');
+```
+Tocm Font will automatically generate array for you with complete font type (.eot, .woff, .ttf, .svg, .otf).
+
+Below is generated css by code above:
+
+```css
+@font-face {
+	font-family: "Open Sans";
+	src: local("Open Sans");
+	src: url("font/opensans.eot");
+	src: url("font/opensans.eot?#iefix") format("embedded-opentype");
+	src: url("font/opensans.woff") format("woff");
+	src: url("font/opensans.ttf") format("truetype");
+	src: url("font/opensans.svg") format("svg");
+	src: url("font/opensans.otf") format("opentype");
+}
+
+```
+
 ######Method:
 Create new font-face.
 ```js
@@ -119,7 +141,7 @@ $.class('body@Mobile', {
 });
 ``` 
 
-Sample above is grouping `body` class to `Mobile` media. Bellow is generated css by code above:
+Sample above is grouping `body` class to `Mobile` media. Below is generated css by code above:
 
 ```css
 @media screen and (max-width: 640px) {
@@ -157,7 +179,7 @@ $.keyframe('TurnLeft', '0%', {
 	left: 20, top: 0
 });
 ```
-Bellow is generated css by code above:
+Below is generated css by code above:
 
 ```css
 @keyframes TurnLeft {
@@ -375,7 +397,9 @@ Tocm Class is css generator. You can create class with two group: Family and Glo
 
 Tocm Class is support with almost all of CSS3. So you doesn't need to add vendor prefix `-webkit-, -moz-` etc. Just use the standard property and Tocm Class will add the vendor prefix automatically. e.g. `filter: 'blur(1px)'`, then it would become `filter: 'blur(1px)'; -webkit-filter: 'blur(1px)'; -ms-filter: 'blur(1px)';`
 
-When building stylesheet, you can using Basic and Nested method. Using basic method will give more options, but need lot of work. While using nested method, you can create a class and child classes easily. With nested method you doesn't need to write the parent class name. Just put the child classes under the parent class scope. Child classes fill follow the parent class group, except you define a new group in child classes.
+When building stylesheet, you can using Basic and Nested method. Using basic method will give more options, but need lot of work. You also must to write the style manualy if you change/modify the class after page load, since tocm only listen on page load `.ready`. The reason is to increase the compile speed.
+
+While using nested method, you can create a class and child classes easily. With nested method you doesn't need to write the parent class name. Just put the child classes under the parent class scope. Child classes will follow the parent class group, except you define a new group in child classes.
 
 Besides building stylesheet, you can also modify the class properties. Just select the class, and then set their property. If you group the class into media, then you have to add the media name to the select pattern. Usage: `.set(string property, value) >> $.class('.clearfix').set('padding', 20)` 
 
@@ -471,7 +495,16 @@ $.class(name).copy(sourcename);
 $.class('.nbt').copy('.button');
 ```
 
+Writing the class after finish using chaining method and after page loaded. This is neccessary if you're using chaining method, since the style will never generated before you write the style. But you have to write the style only after the chain is complete, or you will reduce the compile performance.
+```js
+$.class(name).write();
 
+// Sample
+$.class('.nbt').copy('.button').set('display', 'none').write();
+
+// Do not!
+$.class('.nbt').copy('.button').write().add('.some', {}).write().back().add('.some2', {}).write();
+```
 
 
 ---

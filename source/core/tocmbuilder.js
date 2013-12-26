@@ -63,9 +63,7 @@
     TocmBuilder.writeDOM = function (name, media, value) {
         var node, head, chld, last, lnod;
         if (typeOf(name) === 'string' && typeOf(media) === 'string' && typeOf(value) === 'string') {
-            chld = $('head').children();
-            last = lastNode(chld, 'style');
-            lnod = chld[last];
+            last = $('style').last();
             node = $('style[id="' + name + '"][data="' + media + '"]')[0];
             if (node) {
                 node.innerHTML = value;
@@ -75,12 +73,12 @@
                     id: name, data: media, type: 'text/css'
                 }).html(value);
 
-                if (last > -1) {
-                    var isimp = $(lnod).attr('data').toLowerCase();
+                if (last.length > 0) {
+                    var isimp = last.attr('data').toLowerCase();
                     if (isimp === 'important') {
-                        $(node).insertBefore(lnod);
+                        $(node).insertBefore(last);
                     } else {
-                        $(node).insertBefore(chld[last + 1]);
+                        $(node).insertAfter(last);
                     }
                 } else {
                     $('head').append(node);

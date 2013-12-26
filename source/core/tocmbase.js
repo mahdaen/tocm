@@ -118,7 +118,7 @@
     // Hiding Prototype.
     lock('write', TocmKeyframe.prototype);
     lock('at', TocmKeyframe.prototype);
-    
+
     // TocmKeyframe Wrapper.
     window.$keyframes = window.TocmKeyframe = function (name, position, propertis) {
         return new TocmKeyframe(name, position, propertis);
@@ -170,7 +170,7 @@
     // CREATING PROTOTYPES.
     TocmFont.prototype = {
         // WRITING FONTS.
-        write: function () {
+        write: function (isget) {
             var baseurl = '';
             if (TocmConfig.basedir !== '') {
                 baseurl = TocmConfig.basedir + '/';
@@ -203,7 +203,13 @@
                                     }
                                 }
                             } else if (typeOf(this.src) === 'string') {
-                                cstr += '\t\tsrc: url("' + this.src + '");';
+                                if (this.src.match(/(\.)([a-zA-Z]+)$/)) {
+                                    cstr += '\t\tsrc: url("' + this.src + '");';
+                                } else {
+                                    this.src = [this.src + '.eot', this.src + '.woff', this.src + '.ttf', this.src + '.svg', this.src + '.otf'];
+                                    this.write();
+                                    return this;
+                                }
                             }
                         } else {
                             cstr += '\t\t' + key.replace('_', '-') + ': ' + this[key] + ';\n';
@@ -211,7 +217,11 @@
                     }
                 }
                 cstr += '\t}\n';
-                TocmBuilder.writeDOM(this.name, 'font', cstr);
+                if (isget === true) {
+                    return cstr;
+                } else {
+                    TocmBuilder.writeDOM(this.name, 'font', cstr);
+                }
             }
             return this;
         },
@@ -239,7 +249,7 @@
     // Hiding Prototype.
     lock('write', TocmFont.prototype);
     lock('set', TocmFont.prototype);
-    
+
     // TocmFont Wrapper.
     window.$fonts = window.TocmFont = function (name, src, opt) {
         return new TocmFont(name, src, opt);
