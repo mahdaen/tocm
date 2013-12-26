@@ -6,7 +6,7 @@
 (function($) {
     'use strict';
     $.anime         = TocmAnimation;
-    $['class']      = Tocm;
+    $['class']      = window.$$ = Tocm;
     $.media         = TocmMedia;
     $.path          = TocmQuery;
     $.font          = TocmFont;
@@ -16,6 +16,63 @@
     
     // CONFIGUGRATION EDIT.
     $.config        = TocmConfig;
+    
+    lock('$$');
+    
+    // CREATING CLASS EXPORTER.
+    Tocm.module.exports = function (newname) {
+        if (this.hasOwnProperty('properties')) {
+            if (typeOf(newname) === 'string') {
+                return new Tocm(newname, this.properties);
+            } else {
+                return this.properties;
+            }
+        } else {
+            return {};
+        }
+    };
+    
+    // CREATING CLASS IMPORTER.
+    $.imports       = window.imports = function (src) {
+        var nobj = {}, robj, key;
+        if (typeOf(src) === 'string') {
+            robj = new Tocm(src);
+            if (robj.hasOwnProperty('name')) {
+                for (key in robj.properties) {
+                    if (robj.properties.hasOwnProperty(key)) {
+                        nobj[key] = robj.properties[key];
+                    }
+                }
+            }
+        } else if (typeOf(src) === 'array') {
+            for (var i = 0; i < src.length; ++i) {
+                robj = $.imports(src[i]);
+                for (key in robj) {
+                    if (robj.hasOwnProperty(key)) {
+                        nobj[key] = robj[key];
+                    }
+                }
+            }
+        }
+        return nobj;
+    };
+
+    // CREATING CLASS COMBINER
+    $.combine       = window.combine = function (src) {
+        var nobj = {};
+        if (typeOf(src) === 'array') {
+            for (var i = 0; i < src.length; ++i) {
+                for (var key in src[i]) {
+                    if (src[i].hasOwnProperty(key)) {
+                        nobj[key] = src[i][key];
+                    }
+                }
+            }
+        }
+        return nobj;
+    };
+    
+    lock('imports'); lock('combine');
     
     // CREATING DOM CREATOR.
     $.create        = function (tagname, attr) {

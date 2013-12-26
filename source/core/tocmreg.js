@@ -11,6 +11,7 @@
         autowrite: false,
         writeload: true,
         sortclass: false,
+        sortprior: true,
         showdebug: false,
         date: {
             dayname: ['', 'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu'],

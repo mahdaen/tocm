@@ -9348,6 +9348,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         autowrite: false,
         writeload: true,
         sortclass: false,
+        sortprior: true,
         showdebug: false,
         date: {
             dayname: ['', 'Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jum\'at', 'Sabtu'],
@@ -9484,15 +9485,35 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
                 }).html(value);
 
                 if (last.length > 0) {
-                    var isimp = last.attr('data').toLowerCase();
-                    if (isimp === 'important') {
-                        $(node).insertBefore(last);
+                    if (TocmConfig.sortprior === true) {
+                        var isimp = last.attr('data').toLowerCase();
+                        if (isimp === 'important') {
+                            var uni = last.prev().attr('data').toLowerCase();
+                            if (uni === 'universal') {
+                                $(node).insertBefore($('style[data="universal"]').first());
+                            } else {
+                                $(node).insertBefore(last);
+                            }
+                        } else if (isimp === 'universal') {
+                            $(node).insertBefore($('style[data="universal"]').first());
+                        } else {
+                            $(node).insertAfter(last);
+                        }
                     } else {
                         $(node).insertAfter(last);
                     }
                 } else {
                     $('head').append(node);
                 }
+            }
+            // Keep the font class on top of style.
+            var farr = [];
+            $('style[data="font"]').each(function () {
+                farr.push($(this).attr('id'));
+            });
+            farr.sort();
+            for (var f = farr.length - 1; f >= 0; --f) {
+                $('style#' + farr[f]).insertBefore($('style').first());
             }
         }
         return node;
@@ -10345,9 +10366,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
         TocmConfig.autowrite = false;
         if (typeOf(name) === 'string') {
             if (typeOf(media) === 'string' && media !== '' && media !== 'none') {
-                parent = new TocmClass(name, media);
+                parent = e(name, media);
             } else {
-                parent = new TocmClass(name);
+                parent = e(name);
             }
 
             for (key in parent.properties) {
@@ -10404,7 +10425,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
     // MOODULE TO NAVIGATE TO OTHER CLASS.
     e.module.goTo = function (name) {
-        var fclass = new TocmClass(this.name + ' ' + name, this.media);
+        var fclass = e(this.name + ' ' + name, this.media);
         if (fclass.hasOwnProperty('name')) {
             return fclass;
         } else {
@@ -11486,7 +11507,7 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 (function($) {
     'use strict';
     $.anime         = TocmAnimation;
-    $['class']      = Tocm;
+    $['class']      = window.$$ = Tocm;
     $.media         = TocmMedia;
     $.path          = TocmQuery;
     $.font          = TocmFont;
@@ -11496,6 +11517,63 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     
     // CONFIGUGRATION EDIT.
     $.config        = TocmConfig;
+    
+    lock('$$');
+    
+    // CREATING CLASS EXPORTER.
+    Tocm.module.exports = function (newname) {
+        if (this.hasOwnProperty('properties')) {
+            if (typeOf(newname) === 'string') {
+                return new Tocm(newname, this.properties);
+            } else {
+                return this.properties;
+            }
+        } else {
+            return {};
+        }
+    };
+    
+    // CREATING CLASS IMPORTER.
+    $.imports       = window.imports = function (src) {
+        var nobj = {}, robj, key;
+        if (typeOf(src) === 'string') {
+            robj = new Tocm(src);
+            if (robj.hasOwnProperty('name')) {
+                for (key in robj.properties) {
+                    if (robj.properties.hasOwnProperty(key)) {
+                        nobj[key] = robj.properties[key];
+                    }
+                }
+            }
+        } else if (typeOf(src) === 'array') {
+            for (var i = 0; i < src.length; ++i) {
+                robj = $.imports(src[i]);
+                for (key in robj) {
+                    if (robj.hasOwnProperty(key)) {
+                        nobj[key] = robj[key];
+                    }
+                }
+            }
+        }
+        return nobj;
+    };
+
+    // CREATING CLASS COMBINER
+    $.combine       = window.combine = function (src) {
+        var nobj = {};
+        if (typeOf(src) === 'array') {
+            for (var i = 0; i < src.length; ++i) {
+                for (var key in src[i]) {
+                    if (src[i].hasOwnProperty(key)) {
+                        nobj[key] = src[i][key];
+                    }
+                }
+            }
+        }
+        return nobj;
+    };
+    
+    lock('imports'); lock('combine');
     
     // CREATING DOM CREATOR.
     $.create        = function (tagname, attr) {

@@ -392,9 +392,9 @@
         TocmConfig.autowrite = false;
         if (typeOf(name) === 'string') {
             if (typeOf(media) === 'string' && media !== '' && media !== 'none') {
-                parent = new TocmClass(name, media);
+                parent = e(name, media);
             } else {
-                parent = new TocmClass(name);
+                parent = e(name);
             }
 
             for (key in parent.properties) {
@@ -451,7 +451,7 @@
     };
     // MOODULE TO NAVIGATE TO OTHER CLASS.
     e.module.goTo = function (name) {
-        var fclass = new TocmClass(this.name + ' ' + name, this.media);
+        var fclass = e(this.name + ' ' + name, this.media);
         if (fclass.hasOwnProperty('name')) {
             return fclass;
         } else {

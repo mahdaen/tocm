@@ -74,15 +74,35 @@
                 }).html(value);
 
                 if (last.length > 0) {
-                    var isimp = last.attr('data').toLowerCase();
-                    if (isimp === 'important') {
-                        $(node).insertBefore(last);
+                    if (TocmConfig.sortprior === true) {
+                        var isimp = last.attr('data').toLowerCase();
+                        if (isimp === 'important') {
+                            var uni = last.prev().attr('data').toLowerCase();
+                            if (uni === 'universal') {
+                                $(node).insertBefore($('style[data="universal"]').first());
+                            } else {
+                                $(node).insertBefore(last);
+                            }
+                        } else if (isimp === 'universal') {
+                            $(node).insertBefore($('style[data="universal"]').first());
+                        } else {
+                            $(node).insertAfter(last);
+                        }
                     } else {
                         $(node).insertAfter(last);
                     }
                 } else {
                     $('head').append(node);
                 }
+            }
+            // Keep the font class on top of style.
+            var farr = [];
+            $('style[data="font"]').each(function () {
+                farr.push($(this).attr('id'));
+            });
+            farr.sort();
+            for (var f = farr.length - 1; f >= 0; --f) {
+                $('style#' + farr[f]).insertBefore($('style').first());
             }
         }
         return node;

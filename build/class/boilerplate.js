@@ -23,11 +23,11 @@ $.media('Boilerplate', 'all');
 $.class('!@Boilerplate', {
     // Base
     // --------------------------------------------------------------------------------------------
-    'html': { font_size: pr(100), overflow_y: 'auto', text_size_adjust: pr(100),
+    'html': { font_size: pr(100), overflow_y: 'auto', text_size_adjust: pr(100), height: pr(100),
         // Sets all element box sizing to 'border-box' to prevent overlapping layout.
         '*': { box_sizing: 'border-box' }
     },
-    'body': { margin: 0, font_size: pr(100), line_height: 1.231, position: 'relative' },
+    'body': { margin: 0, font_size: pr(100), line_height: 1.231, position: 'relative', height: pr(100) },
 
     // HTML5 display definitions.
     // --------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ $.class('!@Boilerplate', {
 
     // Links.
     // --------------------------------------------------------------------------------------------
-    'a': { color: '#00e', // Link state.
+    'a': { color: '#00e', text_decoration: 'none', // Link state.
         ':visited': { color: '#551a8b' },
         ':hover': { color: '#06e' },
         ':focus': { outline: 'thin dotted' },
@@ -77,8 +77,6 @@ $.class('!@Boilerplate', {
     'ul & ol': { margin: '1em 0', padding: '0 0 0 40px' },
     'dd': { margin: '0 0 0 40px' },
     'nav': {
-        display: 'block',
-
         'ul & ol': { list_style: 'none', list_style_image: 'none', margin: 0, padding: 0 }
     },
 
@@ -154,8 +152,8 @@ $.class('!@Important', {
     },
 
     // Most used display classes.
-    '.table'        : { display: 'table' },
-    '.cell'         : { display: 'table-cell' },
+    '.table'        : { display: 'table'},
+    '.cell'         : { display: 'table-cell'},
     '.row'          : { display: 'table-row' },
     '.column'       : { display: 'table-column' },
 
@@ -164,11 +162,15 @@ $.class('!@Important', {
 
     '.fit-width'    : { width: pr(100) },
     '.fit-height'   : { height: pr(100) },
+    '.fit-25'       : { width: pr(25) },
+    '.fit-50'       : { width: pr(50) },
+    '.fit-75'       : { width: pr(75) },
     '.stretch'      : { width: pr(100), height: pr(100) },
 
     // Most used positioning classes.
     '.relative'     : { position: 'relative' },
     '.absolute'     : { position: 'absolute' },
+    '.fixed'        : { position: 'fixed' },
 
     // Align
     '.left'         : { text_align: 'left' },
@@ -179,7 +181,7 @@ $.class('!@Important', {
     '.middle'       : { vertical_align: 'middle' },
     '.bottom'       : { vertical_align: 'bottom' },
     '.front'        : { z_index: 999999999 },
-    '.back'         : { z_index: 0 }
+    '.back'         : { z_index: 0 },
 });
 
 /*
@@ -240,7 +242,7 @@ $.class('!@Tocmgrid', {
     },
     // Fluids Grid container class.
     '.fl-grid': {
-        width: pr(100), position: 'relative', ':after': { clear: 'both' }
+        width: pr(100), position: 'relative', ':before & :after': { content: '""', display: 'table' }, ':after': { clear: 'both' }
     },
     // Fixed Grid container class.
     '.fx-grid': {
@@ -330,3 +332,4 @@ define('paintGrid', function (isdo) {
 $.path(document).ready(function () {
     //paintGrid();
 });
+
