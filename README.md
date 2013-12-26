@@ -738,307 +738,689 @@ $.class('!@Mobile', {
 ---
 #####Code
 ```js
-// 960 GRID SYSTEM WITH FLUIDS LAYOUT.
-// --------------------------------------------------------------------------
+/*
+ * ADAPTING 960 GRID SYSTEM AND CONVERT IT TO FLUIDS GRID.
+ * 960 fluids system with 12 column layout.
+ * -------------------------------------------------------------------------------------------
+ */
 
-// CREATING DEFINITIONS.
-var baseW = 100,                // Container width. (%).
-    baseM = 960,                // Maximum width of container. (px)
-    baseC = 12,                 // Number of column.
-    gridM = 2.4,                // Each column space. (%)
-    gridW = 6.132,              // Each column width. (%)
-    gridC = (baseW / baseC);    // Each column width - no margin. (%)
+// CREATING CLASS DEFINITIONS CONSTANTS.
+define('baseWidth', 960);                                   // Main container width (px).
+define('column',     12);                                   // Column count.
+define('colgap',      8);                                   // Column gap count.
 
-// CREATING MAIN CLASS.
+define('fixSize',   (baseWidth / column));                  // Each fixed column size (px).         ->                 80px
+define('gapSize',   (fixSize / colgap));                    // Each gap size (px).                  ->                 10px
+
+define('marSize',   (gapSize / baseWidth) * 100);           // Each margin size (%).                ->  1.0416666666666665%
+define('filSize',   (marSize * 2));                         // Each column fill size (%).           ->   2.083333333333333%
+define('colSize',   (marSize * (colgap - 2)));              // Each column size (%).                ->   6.249999999999999%
+
+// CREATING MEDIA GROUPS.
 $.media('Tocmgrid', 'all');
+$.media('Tocmgrid-tablet', $.media('tablet').value);
+$.media('Tocmgrid-mobile', $.media('mobile').value);
 
-// CREATING CONTAINER CLASS.
-$.class('.container@Tocmgrid', {
-    width: baseW + '%', max_width: baseM, margin: '0 auto', padding_left: 10, padding_right: 10,
-    
-    // Working with pseudo is as simple adding child class. For multiple assignment, use '&' not ','.
-    ':before & :after': {
-        display: 'table'
+// CREATING MAIN CLASSES.
+$.class('!@Tocmgrid', {
+    // Content container class.
+    '.container': {
+        width: pr(100), max_width: baseWidth, margin: '0 auto'
     },
-    ':after': {
-        clear: 'both'
+    // Content wrapper class.
+    '.wrapper': {
+        width: pr(100), margin: 0, padding_left: 10, padding_right: 10
+    },
+    // Fluids Grid container class.
+    '.fl-grid': {
+        width: pr(100), position: 'relative', ':after': { clear: 'both' }
+    },
+    // Fixed Grid container class.
+    '.fx-grid': {
+        width: baseWidth, float: 'left', position: 'relative', ':after': { clear: 'both' }
     }
 });
 
-// GRID CONTAINER PROPERTIES.
-$.class('.fl-grid@Tocmgrid', {
-    width: baseW  + '%', float: 'left', after: { clear: 'both' }
-});
-
-// CREATING BOX INCREMENT.
-for (var i = 0; i <= 10; ++i) {
-    var set = (i + 1);
-    // SELECTING PARENT CLASS.
+// CREATING GRID CALSSES.
+var x;
+for (x = 1; x <= column; ++x) {
+    // Selecting parent class.
     $.class('.fl-grid@Tocmgrid')
-
-    // FIRST COLUMN, NO MARGIN.
-    .add('.col-' + set + 's', {
-        width: ((gridW * set) + (gridM * (set - 1))) + '%',
-        float: 'left'
-    })
-    .back()
-
-    // NEXT COLUMN, RIGHT MARGIN.
-    .add('.col-' + set + 'r', {
-        width: ((gridW * set) + (gridM * (set - 1))) + '%',
-        float: 'left', margin_right: gridM + '%'
-    })
-    .back()
-    // NEXT COLUMN, LEFT MARGIN.
-    .add('.col-' + set, {
-        width: ((gridW * set) + (gridM * (set - 1))) + '%',
-        float: 'left', margin_left: gridM + '%'
-    })
-    .back()
-    // ALL COLUMN, NO MARGIN.
-    .add('.col-' + set + 'c', {
-        width: (gridC * set) + '%',
-        float: 'left', margin: 0
-    });
+    // Fluids column with margin.
+    .add('.grid-' + x, {
+        float: 'left', width: pr(((colSize * x) + (filSize * (x - 1)))), margin_left: pr(marSize), margin_right: pr(marSize)
+    }).back()
+    // Fluids column without margin.
+    .add('.grid-' + x + 'c', {
+        float: 'left', width: pr(((colSize * x) + (filSize * (x - 1)) + (marSize * 2))), margin: 0
+    }).back()
+    // --------------------------------------------------------------------------------------------
+    // Fluids column push.
+    .add('.push-' + x, {
+        position: 'relative', left: pr(((colSize * x) + (filSize * x)))
+    }).back()
+    // Fluids column pull.
+    .add('.pull-' + x, {
+        position: 'relative', left: pr(-((colSize * x) + (filSize * x)))
+    }).back()
+    // --------------------------------------------------------------------------------------------
+    // Fuilds column prefix.
+    .add('.prefix-' + x, {
+        padding_left: pr(((colSize * x) + (filSize * (x - 1))))
+    }).back()
+    // Fuilds column suffix.
+    .add('.suffix-' + x, {
+        padding_right: pr(((colSize * x) + (filSize * (x - 1))))
+    }).back()
+    // --------------------------------------------------------------------------------------------
+    // Fluids column for tablet.
+    .add('!.grid-' + x + '.tablet@Tocmgrid-tablet', {
+        float: 'left', width: pr(((colSize * 4) + (filSize * 3))), margin_left: pr(marSize), margin_right: pr(marSize)
+    }).back()
+    // --------------------------------------------------------------------------------------------
+    // Fluids column for mobile.
+    .add('!.grid-' + x + '.mobile@Tocmgrid-mobile', {
+        float: 'left', width: pr(((colSize * 12) + (filSize * 12))), margin: 0, padding_left: 10, padding_right: 10
+    }).back();
+    // --------------------------------------------------------------------------------------------
 }
 ```
 #####Result
 ```html
-<style id=".container" data="Tocmgrid" type="text/css">
+<style id="Global Class" data="Tocmgrid" type="text/css">
 	@media all {
 		.container {
 			margin: 0 auto;
 			max-width: 960px;
+			width: 100%;
+		}
+
+		.wrapper {
+			margin: 0;
 			padding-left: 10px;
 			padding-right: 10px;
 			width: 100%;
 		}
-		.container:before, .container:after {
-			display: table;
-		}
-		.container:after {
-			clear: both;
-		}
-	}
-</style>
-<style id=".fl-grid" data="Tocmgrid" type="text/css">
-	@media all {
+
 		.fl-grid {
-			float: left;
+			position: relative;
 			width: 100%;
 		}
+
 		.fl-grid:after {
 			clear: both;
 		}
-		.fl-grid .col-1s {
+
+		.fx-grid {
 			float: left;
-			width: 6.132%;
+			position: relative;
+			width: 960px;
 		}
-		.fl-grid .col-1r {
-			float: left;
-			margin-right: 2.4%;
-			width: 6.132%;
+
+		.fx-grid:after {
+			clear: both;
 		}
-		.fl-grid .col-1 {
+
+		.fl-grid .grid-1 {
 			float: left;
-			margin-left: 2.4%;
-			width: 6.132%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 6.249999999999999%;
 		}
-		.fl-grid .col-1c {
+
+		.fl-grid .grid-1c {
 			float: left;
-			margin: 0px;
-			width: 8.333333333333334%;
+			margin: 0;
+			width: 8.333333333333332%;
 		}
-		.fl-grid .col-2s {
-			float: left;
-			width: 14.664%;
+
+		.fl-grid .push-1 {
+			left: 8.333333333333332%;
+			position: relative;
 		}
-		.fl-grid .col-2r {
-			float: left;
-			margin-right: 2.4%;
-			width: 14.664%;
+
+		.fl-grid .pull-1 {
+			left: -8.333333333333332%;
+			position: relative;
 		}
-		.fl-grid .col-2 {
-			float: left;
-			margin-left: 2.4%;
-			width: 14.664%;
+
+		.fl-grid .prefix-1 {
+			padding-left: 6.249999999999999%;
 		}
-		.fl-grid .col-2c {
-			float: left;
-			margin: 0px;
-			width: 16.666666666666668%;
+
+		.fl-grid .suffix-1 {
+			padding-right: 6.249999999999999%;
 		}
-		.fl-grid .col-3s {
+
+		.fl-grid .grid-2 {
 			float: left;
-			width: 23.196%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 14.583333333333332%;
 		}
-		.fl-grid .col-3r {
+
+		.fl-grid .grid-2c {
 			float: left;
-			margin-right: 2.4%;
-			width: 23.196%;
+			margin: 0;
+			width: 16.666666666666664%;
 		}
-		.fl-grid .col-3 {
-			float: left;
-			margin-left: 2.4%;
-			width: 23.196%;
+
+		.fl-grid .push-2 {
+			left: 16.666666666666664%;
+			position: relative;
 		}
-		.fl-grid .col-3c {
-			float: left;
-			margin: 0px;
-			width: 25%;
+
+		.fl-grid .pull-2 {
+			left: -16.666666666666664%;
+			position: relative;
 		}
-		.fl-grid .col-4s {
-			float: left;
-			width: 31.727999999999998%;
+
+		.fl-grid .prefix-2 {
+			padding-left: 14.583333333333332%;
 		}
-		.fl-grid .col-4r {
-			float: left;
-			margin-right: 2.4%;
-			width: 31.727999999999998%;
+
+		.fl-grid .suffix-2 {
+			padding-right: 14.583333333333332%;
 		}
-		.fl-grid .col-4 {
+
+		.fl-grid .grid-3 {
 			float: left;
-			margin-left: 2.4%;
-			width: 31.727999999999998%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 22.916666666666664%;
 		}
-		.fl-grid .col-4c {
+
+		.fl-grid .grid-3c {
 			float: left;
-			margin: 0px;
-			width: 33.333333333333336%;
+			margin: 0;
+			width: 24.999999999999996%;
 		}
-		.fl-grid .col-5s {
-			float: left;
-			width: 40.26%;
+
+		.fl-grid .push-3 {
+			left: 24.999999999999996%;
+			position: relative;
 		}
-		.fl-grid .col-5r {
-			float: left;
-			margin-right: 2.4%;
-			width: 40.26%;
+
+		.fl-grid .pull-3 {
+			left: -24.999999999999996%;
+			position: relative;
 		}
-		.fl-grid .col-5 {
-			float: left;
-			margin-left: 2.4%;
-			width: 40.26%;
+
+		.fl-grid .prefix-3 {
+			padding-left: 22.916666666666664%;
 		}
-		.fl-grid .col-5c {
-			float: left;
-			margin: 0px;
-			width: 41.66666666666667%;
+
+		.fl-grid .suffix-3 {
+			padding-right: 22.916666666666664%;
 		}
-		.fl-grid .col-6s {
+
+		.fl-grid .grid-4 {
 			float: left;
-			width: 48.792%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
 		}
-		.fl-grid .col-6r {
+
+		.fl-grid .grid-4c {
 			float: left;
-			margin-right: 2.4%;
-			width: 48.792%;
+			margin: 0;
+			width: 33.33333333333333%;
 		}
-		.fl-grid .col-6 {
-			float: left;
-			margin-left: 2.4%;
-			width: 48.792%;
+
+		.fl-grid .push-4 {
+			left: 33.33333333333333%;
+			position: relative;
 		}
-		.fl-grid .col-6c {
-			float: left;
-			margin: 0px;
-			width: 50%;
+
+		.fl-grid .pull-4 {
+			left: -33.33333333333333%;
+			position: relative;
 		}
-		.fl-grid .col-7s {
-			float: left;
-			width: 57.324%;
+
+		.fl-grid .prefix-4 {
+			padding-left: 31.249999999999996%;
 		}
-		.fl-grid .col-7r {
-			float: left;
-			margin-right: 2.4%;
-			width: 57.324%;
+
+		.fl-grid .suffix-4 {
+			padding-right: 31.249999999999996%;
 		}
-		.fl-grid .col-7 {
+
+		.fl-grid .grid-5 {
 			float: left;
-			margin-left: 2.4%;
-			width: 57.324%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 39.58333333333333%;
 		}
-		.fl-grid .col-7c {
+
+		.fl-grid .grid-5c {
 			float: left;
-			margin: 0px;
-			width: 58.333333333333336%;
+			margin: 0;
+			width: 41.666666666666664%;
 		}
-		.fl-grid .col-8s {
-			float: left;
-			width: 65.856%;
+
+		.fl-grid .push-5 {
+			left: 41.66666666666666%;
+			position: relative;
 		}
-		.fl-grid .col-8r {
-			float: left;
-			margin-right: 2.4%;
-			width: 65.856%;
+
+		.fl-grid .pull-5 {
+			left: -41.66666666666666%;
+			position: relative;
 		}
-		.fl-grid .col-8 {
-			float: left;
-			margin-left: 2.4%;
-			width: 65.856%;
+
+		.fl-grid .prefix-5 {
+			padding-left: 39.58333333333333%;
 		}
-		.fl-grid .col-8c {
-			float: left;
-			margin: 0px;
-			width: 66.66666666666667%;
+
+		.fl-grid .suffix-5 {
+			padding-right: 39.58333333333333%;
 		}
-		.fl-grid .col-9s {
+
+		.fl-grid .grid-6 {
 			float: left;
-			width: 74.38799999999999%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 47.91666666666666%;
 		}
-		.fl-grid .col-9r {
+
+		.fl-grid .grid-6c {
 			float: left;
-			margin-right: 2.4%;
-			width: 74.38799999999999%;
+			margin: 0;
+			width: 49.99999999999999%;
 		}
-		.fl-grid .col-9 {
-			float: left;
-			margin-left: 2.4%;
-			width: 74.38799999999999%;
+
+		.fl-grid .push-6 {
+			left: 49.99999999999999%;
+			position: relative;
 		}
-		.fl-grid .col-9c {
-			float: left;
-			margin: 0px;
-			width: 75%;
+
+		.fl-grid .pull-6 {
+			left: -49.99999999999999%;
+			position: relative;
 		}
-		.fl-grid .col-10s {
-			float: left;
-			width: 82.91999999999999%;
+
+		.fl-grid .prefix-6 {
+			padding-left: 47.91666666666666%;
 		}
-		.fl-grid .col-10r {
-			float: left;
-			margin-right: 2.4%;
-			width: 82.91999999999999%;
+
+		.fl-grid .suffix-6 {
+			padding-right: 47.91666666666666%;
 		}
-		.fl-grid .col-10 {
+
+		.fl-grid .grid-7 {
 			float: left;
-			margin-left: 2.4%;
-			width: 82.91999999999999%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 56.24999999999999%;
 		}
-		.fl-grid .col-10c {
+
+		.fl-grid .grid-7c {
 			float: left;
-			margin: 0px;
-			width: 83.33333333333334%;
+			margin: 0;
+			width: 58.33333333333333%;
 		}
-		.fl-grid .col-11s {
-			float: left;
-			width: 91.452%;
+
+		.fl-grid .push-7 {
+			left: 58.33333333333333%;
+			position: relative;
 		}
-		.fl-grid .col-11r {
-			float: left;
-			margin-right: 2.4%;
-			width: 91.452%;
+
+		.fl-grid .pull-7 {
+			left: -58.33333333333333%;
+			position: relative;
 		}
-		.fl-grid .col-11 {
-			float: left;
-			margin-left: 2.4%;
-			width: 91.452%;
+
+		.fl-grid .prefix-7 {
+			padding-left: 56.24999999999999%;
 		}
-		.fl-grid .col-11c {
+
+		.fl-grid .suffix-7 {
+			padding-right: 56.24999999999999%;
+		}
+
+		.fl-grid .grid-8 {
 			float: left;
-			margin: 0px;
-			width: 91.66666666666667%;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 64.58333333333333%;
+		}
+
+		.fl-grid .grid-8c {
+			float: left;
+			margin: 0;
+			width: 66.66666666666666%;
+		}
+
+		.fl-grid .push-8 {
+			left: 66.66666666666666%;
+			position: relative;
+		}
+
+		.fl-grid .pull-8 {
+			left: -66.66666666666666%;
+			position: relative;
+		}
+
+		.fl-grid .prefix-8 {
+			padding-left: 64.58333333333333%;
+		}
+
+		.fl-grid .suffix-8 {
+			padding-right: 64.58333333333333%;
+		}
+
+		.fl-grid .grid-9 {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 72.91666666666666%;
+		}
+
+		.fl-grid .grid-9c {
+			float: left;
+			margin: 0;
+			width: 74.99999999999999%;
+		}
+
+		.fl-grid .push-9 {
+			left: 74.99999999999999%;
+			position: relative;
+		}
+
+		.fl-grid .pull-9 {
+			left: -74.99999999999999%;
+			position: relative;
+		}
+
+		.fl-grid .prefix-9 {
+			padding-left: 72.91666666666666%;
+		}
+
+		.fl-grid .suffix-9 {
+			padding-right: 72.91666666666666%;
+		}
+
+		.fl-grid .grid-10 {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 81.24999999999999%;
+		}
+
+		.fl-grid .grid-10c {
+			float: left;
+			margin: 0;
+			width: 83.33333333333331%;
+		}
+
+		.fl-grid .push-10 {
+			left: 83.33333333333331%;
+			position: relative;
+		}
+
+		.fl-grid .pull-10 {
+			left: -83.33333333333331%;
+			position: relative;
+		}
+
+		.fl-grid .prefix-10 {
+			padding-left: 81.24999999999999%;
+		}
+
+		.fl-grid .suffix-10 {
+			padding-right: 81.24999999999999%;
+		}
+
+		.fl-grid .grid-11 {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 89.58333333333331%;
+		}
+
+		.fl-grid .grid-11c {
+			float: left;
+			margin: 0;
+			width: 91.66666666666664%;
+		}
+
+		.fl-grid .push-11 {
+			left: 91.66666666666666%;
+			position: relative;
+		}
+
+		.fl-grid .pull-11 {
+			left: -91.66666666666666%;
+			position: relative;
+		}
+
+		.fl-grid .prefix-11 {
+			padding-left: 89.58333333333331%;
+		}
+
+		.fl-grid .suffix-11 {
+			padding-right: 89.58333333333331%;
+		}
+
+		.fl-grid .grid-12 {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 97.91666666666666%;
+		}
+
+		.fl-grid .grid-12c {
+			float: left;
+			margin: 0;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .push-12 {
+			left: 99.99999999999999%;
+			position: relative;
+		}
+
+		.fl-grid .pull-12 {
+			left: -99.99999999999999%;
+			position: relative;
+		}
+
+		.fl-grid .prefix-12 {
+			padding-left: 97.91666666666666%;
+		}
+
+		.fl-grid .suffix-12 {
+			padding-right: 97.91666666666666%;
 		}
 	}
 </style>
+<style id="Global Class" data="Tocmgrid-tablet" type="text/css">
+	@media (max-width: 989px) and (min-device-width: 1024px), screen and (max-device-width: 480px), (max-device-width: 480px) and (orientation: landscape), (max-device-width: 1024px) and (min-device-width: 481px) and (orientation: portrait) {
+		.fl-grid .grid-1.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-2.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-3.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-4.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-5.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-6.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-7.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-8.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-9.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-10.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-11.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+		.fl-grid .grid-12.tablet {
+			float: left;
+			margin-left: 1.0416666666666665%;
+			margin-right: 1.0416666666666665%;
+			width: 31.249999999999996%;
+		}
+
+	}
+</style>
+<style id="Global Class" data="Tocmgrid-mobile" type="text/css">
+	@media (max-width: 509px) and (min-device-width: 1024px), (max-device-width: 480px) and (orientation: portrait) {
+		.fl-grid .grid-1.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-2.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-3.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-4.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-5.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-6.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-7.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-8.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-9.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-10.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-11.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+		.fl-grid .grid-12.mobile {
+			float: left;
+			margin: 0;
+			padding-left: 10px;
+			padding-right: 10px;
+			width: 99.99999999999999%;
+		}
+
+	}
+</style>
+
 ```

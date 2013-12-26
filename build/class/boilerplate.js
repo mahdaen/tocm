@@ -213,8 +213,8 @@ $.media('large-desktop', 'all and (min-width: 1600px)');
 
 // CREATING CLASS DEFINITIONS CONSTANTS.
 define('baseWidth', 960);                                   // Main container width (px).
-define('column',     24);                                   // Column count.
-define('colgap',      4);                                   // Column gap count.
+define('column',     12);                                   // Column count.
+define('colgap',      8);                                   // Column gap count.
 
 define('fixSize',   (baseWidth / column));                  // Each fixed column size (px).         ->                 80px
 define('gapSize',   (fixSize / colgap));                    // Each gap size (px).                  ->                 10px
@@ -278,12 +278,7 @@ for (x = 1; x <= column; ++x) {
     // Fuilds column suffix.
     .add('.suffix-' + x, {
         padding_right: pr(((colSize * x) + (filSize * (x - 1))))
-    }).back();
-    // --------------------------------------------------------------------------------------------
-}
-for (x = 1; x <= column; ++x) {
-    // Selecting parent class.
-    $.class('.fl-grid@Tocmgrid')
+    }).back()
     // --------------------------------------------------------------------------------------------
     // Fluids column for tablet.
     .add('!.grid-' + x + '.tablet@Tocmgrid-tablet', {
@@ -296,7 +291,6 @@ for (x = 1; x <= column; ++x) {
     }).back();
     // --------------------------------------------------------------------------------------------
 }
-
 
 // CREATING GRID DEBUGGER.
 $.class('!.overlay@Tocmgrid', {
