@@ -11,7 +11,10 @@
         // Ensure the given name is in valid format.
         if (typeOf(name) === 'string') {
             // Specifying where the class object will be selected.
-            if (typeOf(media) === 'string' && media !== 'none' && new TocmMedia(media).hasOwnProperty('name')) {
+            if (typeOf(media) === 'string') {
+                if (!TocmMedClass.hasOwnProperty(media) || !TocmMedClass[media].hasOwnProperty(name)) {
+                    return;
+                }
                 // Ensure the given media is exist on TocmMedia Registry.
                 if (typeOf(TocmMedClass[media]) === 'object') {
                     obj = TocmMedClass[media][name];
@@ -39,13 +42,28 @@
     };
     // CREATING FUNCTION TO CREATE NEW CLASS.
     var TocmClass = function (objname, props, media, delayed) {
+        var old;
         if (typeOf(objname) === 'string' && typeOf(props) === 'object') {
+            // SEARCHING EXISTING CLASS.
+            if (typeOf(media) === 'string' && media !== 'none') {
+                old = new TocmSelector(objname, media);
+            } else {
+                old = new TocmSelector(objname);
+            }
+            
+            // COMBINING NEW CLASS WITH OLD CLASS.
+            if (old.hasOwnProperty('name')) {
+                old.properties = combine([old.properties, props]);
+                this.pseudo = old.pseudo;
+                this.properties = old.properties;
+            } else {
+                this.properties = props;
+                this.pseudo = {};
+            }
             // COLLECTING CSS PROPERTIES.
             $.log('TocmClass', 'Creating new class "' + objname + '".');
 
             this.name = this.family = objname;
-            this.properties = props;
-            this.pseudo = {};
             this.config = {
                 write_area: 'universal', // family <> universal.
                 write_auto: false
@@ -74,6 +92,7 @@
             // HIDING PRIVATE OBJECT.
             hide('config', this);
             hide('parent', this);
+            
             // RETURNING THE CLASS.
             return this;
         } else {
@@ -135,23 +154,30 @@
                                 newname = '';
                             }
                             // PARSING MULTIPLE NAME USE.
-                            if (proname.search('&') > -1) {
-                                if (name !== '' && name !== ' ') {
-                                    name = ' ' + name;
-                                }
+                            if (proname.search('&') > -1 || proname.search(',') > -1) {
                                 // If  name is multiple.
-                                tempname = proname.replace(/\s+(\&)\s+/g, '&'); // REPLACING SPACE.
+                                tempname = proname.replace(/\s?(\,)\s?/g, '&'); // REPLACING SPACE.
+                                tempname = tempname.replace(/\s+(\&)\s+/g, '&'); // REPLACING SPACE.
                                 tempname = tempname.split('&'); // SPLITING NAME.
                                 // ENUMERATING PSEUDO IDENFIER (:).
                                 for (var x = 0; x < tempname.length; ++x) {
-                                    if (!tempname[x].match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
-                                        tempname[x] = ' ' + tempname[x];
+                                    if (tempname[x].match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
+                                        tempname[x] = name + tempname[x];
+                                    } else {
+                                        if (name !== '' && name !== ' ') {
+                                            tempname[x] = name + ' ' + tempname[x];
+                                        } else {
+                                            tempname[x] = tempname[x];
+                                        }
                                     }
                                 }
-                                // ADDING NAME.
-                                for (var i = 0; i < tempname.length - 1; ++i) {
-                                    newname += tempname[i] + ',' + name;
+
+                                TocmConfig.autowrite = false;
+                                for (var i = 0; i < tempname.length; ++i) {
+                                    tempname[i] = tempname[i].replace(/^(\s)/, '');
+                                    subclass = new TocmBatchClass(tempname[i], object[proname], media, area, family, newclass);
                                 }
+                                $.log('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
                                 newname += tempname[tempname.length - 1];
                             } else {
                                 if (proname.match(/^([\:]+)([a-zA-Z\d\-\_\(\)\[\]]+)$/)) {
@@ -163,14 +189,14 @@
                                         newname += proname;
                                     }
                                 }
+                                // REMOVING SPACE IN BEGINING OF NAME.
+                                newname = newname.replace(/^(\s)/, '');
+                                // CREATING NEW CLASS INHERITING TO THIS CLASS.
+                                $.log('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
+    
+                                TocmConfig.autowrite = false;
+                                subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
                             }
-                            // REMOVING SPACE IN BEGINING OF NAME.
-                            newname = newname.replace(/^(\s)/, '');
-                            // CREATING NEW CLASS INHERITING TO THIS CLASS.
-                            $.log('TocmClass', 'Adding child-class "' + newname + '" to parent calss "' + name + '".', 'green');
-
-                            TocmConfig.autowrite = false;
-                            subclass = new TocmBatchClass(newname, object[proname], media, area, family, newclass);
                         } else {
                             // IF PROPERTY IS PSEUDO OBJECT, THEN ADD THE PSEUDO OBJEC TO QUEUE.
                             if (typeOf(pseudos[proname]) !== 'object') {
@@ -220,10 +246,6 @@
             return newclass;
         }
     };
-    // CREATING WRPAPPER //
-    window.$global = function (selector, props, media) {
-        return new TocmBatchClass(selector, props, media, 'global');
-    };
     // CREATE A TOCM SELECTOR AND CREATOR WRAPPER.
     window.$class = window.Tocm = function (select, omedia, media) {
         // Ensure the selector/class pattern is string.
@@ -256,7 +278,6 @@
     };
     lock('Tocm');
     lock('$class');
-    lock('$global');
 
     // CREATING MODULE WRAPPER.
     window.Tocm.module = TocmClass.prototype = {

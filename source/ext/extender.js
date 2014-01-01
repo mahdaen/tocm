@@ -32,11 +32,23 @@
         }
     };
     
+    $.exports        = window.exports = function (src, dest, media) {
+        if (src && typeOf(dest) === 'string') {
+            var nclass = new Tocm(dest, {});
+            if (typeOf(src) === 'string') {
+                var rclass = new Tocm(src, media);
+                nclass.properties = combine([nclass.properties, rclass.properties ]);
+            } else if (typeOf(src) === 'array') {
+                
+            }
+        }
+    };
+    
     // CREATING CLASS IMPORTER.
-    $.imports       = window.imports = function (src) {
+    $.imports       = window.imports = function (src, media) {
         var nobj = {}, robj, key;
         if (typeOf(src) === 'string') {
-            robj = new Tocm(src);
+            robj = new Tocm(src, media);
             if (robj.hasOwnProperty('name')) {
                 for (key in robj.properties) {
                     if (robj.properties.hasOwnProperty(key)) {
@@ -46,7 +58,7 @@
             }
         } else if (typeOf(src) === 'array') {
             for (var i = 0; i < src.length; ++i) {
-                robj = $.imports(src[i]);
+                robj = $.imports(src[i], media);
                 for (key in robj) {
                     if (robj.hasOwnProperty(key)) {
                         nobj[key] = robj[key];
@@ -72,7 +84,31 @@
         return nobj;
     };
     
-    lock('imports'); lock('combine');
+    $.indexs        = window.indexs = function (src, media) {
+        var clist = [], i, objs, rego, regp;
+        if (typeOf(media) === 'string' && $.media(media).hasOwnProperty('name')) {
+            objs = Object.keys(TocmMedClass[media]);
+            rego = new RegExp('^(' + src + ')$');
+            regp = new RegExp('^(' + src + ')(\\:)([a-zA-Z\\-\\_\\d]+)$');
+            for (i = 0; i < objs.length; ++i) {
+                if (objs[i].match(rego) || objs[i].match(regp)) {
+                    clist.push($class(objs[i], media));
+                }
+            }
+        } else {
+            objs = Object.keys(TocmDefClass);
+            rego = new RegExp('^(' + src + ')$');
+            regp = new RegExp('^(' + src + ')(\\:)([a-zA-Z\\-\\_\\d]+)$');
+            for (i = 0; i < objs.length; ++i) {
+                if (objs[i].match(rego) || objs[i].match(regp)) {
+                    clist.push($class(objs[i]));
+                }
+            }
+        }
+        return clist;
+    };
+    
+    lock('imports'); lock('combine'); lock('indexs');
     
     // CREATING DOM CREATOR.
     $.create        = function (tagname, attr) {

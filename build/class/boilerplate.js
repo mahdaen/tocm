@@ -25,18 +25,20 @@ $.class('!@Boilerplate', {
     // --------------------------------------------------------------------------------------------
     'html': { font_size: pr(100), overflow_y: 'auto', text_size_adjust: pr(100), height: pr(100),
         // Sets all element box sizing to 'border-box' to prevent overlapping layout.
-        '*': { box_sizing: 'border-box' }
+        '*': { box_sizing: 'border-box' },
+        '.test, .tost': { some: 'thing' }
     },
     'body': { margin: 0, font_size: pr(100), line_height: 1.231, position: 'relative', height: pr(100) },
 
     // HTML5 display definitions.
     // --------------------------------------------------------------------------------------------
-    'article & aside & details & figcaption & figure & footer & header & hgroup & nav & section': {
+    'article, aside, details, figcaption, figure, footer, header, hgroup, nav, section': {
         display: 'block'
     },
 
     // Styling selection.
-    '::selection & ::-moz-selection': { text_shadow: 'none', background_color: 'highlight', color: 'highlighttext' },
+    '::selection': { text_shadow: 'none', background_color: '#cbcbcb' },
+    '::-moz-selection': { text_shadow: 'none', background_color: '#cbcbcb' },
 
     // Links.
     // --------------------------------------------------------------------------------------------
@@ -46,13 +48,13 @@ $.class('!@Boilerplate', {
         ':focus': { outline: 'thin dotted' },
 
         // Improve readability when focused and hovered in all browsers: h5bp.com/h //
-        ':hover & :visited': { outline: 0 }
+        ':hover, :visited': { outline: 0 }
     },
 
     // Typography
     // --------------------------------------------------------------------------------------------
     'abbr[title]': { border_bottom: '1px dotted' },
-    'b & strong': { font_weight: 'bold' },
+    'b, strong': { font_weight: 'bold' },
     'blockquote': { margin: '1em 40px' },
     'dfn': { font_style: 'italic' },
     'hr': { display: 'block', height: 1, border: 0, border_top: '1px solid #ccc', margin: '1em 0', padding: 0 },
@@ -60,24 +62,24 @@ $.class('!@Boilerplate', {
     'mark': { background: '#ff0', color: '#000', font_style: 'italic', font_weight: 'bold' },
 
     // Redeclare monospace font family: h5bp.com/j //
-    'pre & code & kbd &samp': { font_family: 'monospace, serif', font_size: '1em' },
+    'pre, code, kbd, samp': { font_family: 'monospace, serif', font_size: '1em' },
     'pre': { white_space: 'pre', 'white-space': 'pre-wrap', word_wrap: 'break-word' },
     'q': { quotes: 'none',
-        ':before & :after': { content1: '""', content2: 'none' }
+        ':before, :after': { content1: '""', content2: 'none' }
     },
     'small': { font_size: '85%' },
 
     // Position subscript and superscript content without affecting line-height: h5bp.com/k //
-    'sub & sup': { font_size: '75%', line_height: 0, position: 'relative', vertical_align: 'baseline' },
+    'sub, sup': { font_size: '75%', line_height: 0, position: 'relative', vertical_align: 'baseline' },
     'sup': { top: '-0.5em' },
     'sub': { bottom: '-0.25em' },
 
     // Lists
     // --------------------------------------------------------------------------------------------
-    'ul & ol': { margin: '1em 0', padding: '0 0 0 40px' },
+    'ul, ol': { margin: '1em 0', padding: '0 0 0 40px' },
     'dd': { margin: '0 0 0 40px' },
     'nav': {
-        'ul & ol': { list_style: 'none', list_style_image: 'none', margin: 0, padding: 0 }
+        'ul, ol': { list_style: 'none', list_style_image: 'none', margin: 0, padding: 0 }
     },
 
     // Embedded content.
@@ -92,17 +94,17 @@ $.class('!@Boilerplate', {
     'fieldset': { border: 0, margin: 0, padding: 0 },
     'label': { cursor: 'pointer' },
     'legend': { border: 0, $margin_left: -7, padding: 0 },
-    'button & input & select & textarea': { font_size: pr(100), margin: 0, vertical_align: 'baseline', $vertical_align: 'middle' },
-    'button & input': { line_height: 'normal' },
+    'button, input, select, textarea': { font_size: pr(100), margin: 0, vertical_align: 'baseline', $vertical_align: 'middle' },
+    'button, input': { line_height: 'normal' },
 
-    'button & input[type="button"] & input[type="reset"] & input[type="submit"]': { cursor: 'pointer', appearance: 'button', $overflow: 'visible' },
-    'input[type="checkbox"] & input[type="radio"]': { box_sizing: 'border-box', padding: 0 },
+    'button, input[type="button"], input[type="reset"], input[type="submit"]': { cursor: 'pointer', appearance: 'button', $overflow: 'visible' },
+    'input[type="checkbox"], input[type="radio"]': { box_sizing: 'border-box', padding: 0 },
     'input[type="search"]': {
         appearance: 'textfield',
 
         '::-webkit-search-decoration': { appearance: 'none' }
     },
-    'button::-moz-focus-inner & input::moz-focus-inner': { border: 0, padding: 0 },
+    'button::-moz-focus-inner, input::moz-focus-inner': { border: 0, padding: 0 },
 
     // Tables
     // --------------------------------------------------------------------------------------------
@@ -111,7 +113,7 @@ $.class('!@Boilerplate', {
 
     // Optional Resets.
     'p': { margin: 0 },
-    'img & span & a': { display: 'inline-block' }
+    'img, span, a': { display: 'inline-block' }
 
     // Non-semantic helper classes.
 });
@@ -137,7 +139,7 @@ $.class('!@Important', {
         overflow: 'hidden', padding: 0, position: 'absolute', width: 1
     },
     '.visualyhidden.focusable': {
-        ':active & :focus': {
+        ':active, :focus': {
             clip: 'auto', height: 'auto', margin: 0, overflow: 'visible', position: 'static', width: 'auto'
         }
     },
@@ -147,7 +149,7 @@ $.class('!@Important', {
     '.clearfix': {
         $zoom: 1,
 
-        ':before & :after': { content: '""', display: 'table' },
+        ':before, :after': { content: '""', display: 'table' },
         'after': { clear: 'both' }
     },
 
@@ -176,6 +178,7 @@ $.class('!@Important', {
     '.left'         : { text_align: 'left' },
     '.center'       : { text_align: 'center' },
     '.right'        : { text_align: 'right' },
+    '.justify'      : { text_align: 'justify' },
 
     '.top'          : { vertical_align: 'top' },
     '.middle'       : { vertical_align: 'middle' },
@@ -242,7 +245,7 @@ $.class('!@Tocmgrid', {
     },
     // Fluids Grid container class.
     '.fl-grid': {
-        width: pr(100), position: 'relative', ':before & :after': { content: '""', display: 'table' }, ':after': { clear: 'both' }
+        width: pr(100), position: 'relative', ':before, :after': { content: '""', display: 'table' }, ':after': { clear: 'both' }
     },
     // Fixed Grid container class.
     '.fx-grid': {
@@ -283,12 +286,12 @@ for (x = 1; x <= column; ++x) {
     }).back()
     // --------------------------------------------------------------------------------------------
     // Fluids column for tablet.
-    .add('!.grid-' + x + '.tablet@Tocmgrid-tablet', {
+    .add('!.tablet@Tocmgrid-tablet', {
         float: 'left', width: pr(((colSize * 4) + (filSize * 3))), margin_left: pr(marSize), margin_right: pr(marSize)
     }).back()
     // --------------------------------------------------------------------------------------------
     // Fluids column for mobile.
-    .add('!.grid-' + x + '.mobile@Tocmgrid-mobile', {
+    .add('!.mobile@Tocmgrid-mobile', {
         float: 'left', width: pr(((colSize * 12) + (filSize * 12))), margin: 0, padding_left: 10, padding_right: 10
     }).back();
     // --------------------------------------------------------------------------------------------
@@ -321,10 +324,10 @@ define('paintGrid', function (isdo) {
             $.path('#gd-ov .fl-grid').append('<div class="grid grid-1 mob tab fit-height"></div>');
         }
 
-        $.path('body').append('<div id="gd-ts" class="stretch overlay front"><div class="container"><div class="fl-grid fit-height"></div></div></div>');
+        //$.path('body').append('<div id="gd-ts" class="stretch overlay front"><div class="container"><div class="fl-grid fit-height"></div></div></div>');
         for (i = 1; i <= column; ++i) {
-            $.path('#gd-ts .fl-grid').append('<div class="col grid-' + i + ' mobile tablet">' + i + '</div>');
-            $.path('#gd-ts .fl-grid').append('<div class="col grid-' + (column - i) + ' mobile tablet">' + (column - i) + '</div>');
+            //$.path('#gd-ts .fl-grid').append('<div class="col grid-' + i + ' mobile tablet">' + i + '</div>');
+            //$.path('#gd-ts .fl-grid').append('<div class="col grid-' + (column - i) + ' mobile tablet">' + (column - i) + '</div>');
         }
         $.path('.grid-0').remove();
     }

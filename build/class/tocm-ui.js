@@ -155,23 +155,37 @@ for (i = 0; i < fmsize.length; ++i) {
 
 // CREATING COLOR SWATCHES.
 for (i = 1; i <= 12; ++i) {
-    // Foreground colors.
-    $$('!.' + ui_base.swatch['color_' + i].name + '-fg@Tocm-ui', {
-        color: ui_base.swatch['color_' + i].normal
+    var swname = ui_base.swatch['color_' + i].name,
+        swnorm = ui_base.swatch['color_' + i].normal,
+        swligt = ui_base.swatch['color_' + i].light,
+        swdark = ui_base.swatch['color_' + i].dark;
+    
+    $$('!.' + swname + '-fg@Tocm-ui', {
+        color: swnorm
     });
-    $$('!.' + ui_base.swatch['color_' + i].name + '-fl@Tocm-ui', {
-        color: ui_base.swatch['color_' + i].normal, ':hover': { color: ui_base.swatch['color_' + i].light }, ':active': { color: ui_base.swatch['color_' + i].dark }
+    $$('!.' + swname + '-fl@Tocm-ui', {
+        color: swnorm,
+        ':visited': { color: 'inherit' },
+        ':hover': { color: swligt },
+        ':active': { color: swdark }
     });
-    $$('!.' + ui_base.swatch['color_' + i].name + '-bg@Tocm-ui', {
-        background_color: ui_base.swatch['color_' + i].normal, fill: ui_base.swatch['color_' + i].normal
+    $$('!.' + swname + '-bg@Tocm-ui', {
+        background_color: swnorm, fill: swnorm
     });
-    $$('!.' + ui_base.swatch['color_' + i].name + '-bt@Tocm-ui', {
-        background_color: ui_base.swatch['color_' + i].normal, fill: ui_base.swatch['color_' + i].normal,
-        ':hover': { background_color: ui_base.swatch['color_' + i].light, fill: ui_base.swatch['color_' + i].normal },
-        ':active': { background_color: ui_base.swatch['color_' + i].dark, fill: ui_base.swatch['color_' + i].normal }
+    $$('!.' + swname + '-bt@Tocm-ui', {
+        background_color: swnorm, fill: swnorm,
+        ':hover': { background_color: swligt, fill: swligt },
+        ':active': { background_color: swdark, fill: swdark }
     });
-    $$('!.' + ui_base.swatch['color_' + i].name + '-bd@Tocm-ui', {
-        border_color: ui_base.swatch['color_' + i].normal, ':hover': { border_color: ui_base.swatch['color_' + i].light }, ':active': { border_color: ui_base.swatch['color_' + i].dark }
+    $$('!.' + swname + '-bd@Tocm-ui', {
+        border_color: swnorm,
+        ':hover': { border_color: swligt },
+        ':active': { border_color: swdark }
+    });
+    $$('!.' + swname + '-bx@Tocm-ui', {
+        box_shadow: '0 0 0 1px ' + swnorm,
+        ':hover': { box_shadow: '0 0 0 1px ' + swligt },
+        ':active': { box_shadow: '0 0 0 1px ' + swdark }
     });
 }
 
