@@ -13,3 +13,7 @@
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
+
+if (!window) {
+    var window = {};
+}

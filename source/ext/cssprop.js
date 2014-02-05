@@ -3,45 +3,45 @@
 // CREATING MOST USED SINGLE PROPERTIES CONSTANTS.
 (function (e) {
     var prop = {
+        absolute            : 'absolute',
+        auto                : 'auto',
+        baseline            : 'baseline',
         block               : 'block',
-        scroll              : 'scroll',
-        none                : 'none',
+        bold                : 'bold',
+        border_box          : 'border-box',
+        both                : 'both',
+        bottom              : 'bottom',
+        break_word          : 'break-word',
+        center              : 'center',
+        content_box         : 'content-box',
+        fixed               : 'fixed',
+        hidden              : 'hidden',
+        inherit             : 'inherit',
         inline              : 'inline',
         inline_block        : 'inline-block',
-        bold                : 'bold',
         italic              : 'italic',
+        justify             : 'justify',
+        left                : 'left',
+        middle              : 'middle',
+        none                : 'none',
+        normal              : 'normal',
+        padding_box         : 'padding-box',
+        pointer             : 'pointer',
         pre                 : 'pre',
         pre_wrap            : 'pre-wrap',
-        break_word          : 'break-word',
         relative            : 'relative',
-        absolute            : 'absolute',
-        fixed               : 'fixed',
-        inherit             : 'inherit',
-        top                 : 'top',
-        left                : 'left',
         right               : 'right',
-        bottom              : 'bottom',
-        center              : 'center',
-        middle              : 'middle',
-        baseline            : 'baseline',
-        justify             : 'justify',
-        hidden              : 'hidden',
-        pointer             : 'pointer',
-        normal              : 'normal',
-        border_box          : 'border-box',
-        content_box         : 'content-box',
-        padding_box         : 'padding-box',
-        auto                : 'auto',
-        vertical            : 'vertical',
-        transparent         : 'transparent',
+        scroll              : 'scroll',
         table               : 'table',
         table_row           : 'table-row',
-        both                : 'both'
+        top                 : 'top',
+        transparent         : 'transparent',
+        vertical            : 'vertical'
     };
     
     for (var key in prop) {
         if (prop.hasOwnProperty(key)) {
-            define(key.toUpperCase(), prop[key]);
+            assign(key.toUpperCase(), prop[key]);
         }
     }
 })(window);

@@ -13,16 +13,16 @@
             return src;
         }
     };
-    define('em', function (src) {
+    assign('em', function (src) {
         return conv(src, 'em');
     });
-    define('px', function (src) {
+    assign('px', function (src) {
         return conv(src, 'px');
     });
-    define('pt', function (src) {
+    assign('pt', function (src) {
         return conv(src, 'pt');
     });
-    define('pr', function (src) {
+    assign('pr', function (src) {
         return conv(src, '%');
     });
     // CREATING HEX TO RGBA CONVERTER.

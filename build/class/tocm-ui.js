@@ -92,7 +92,7 @@ var i, j, prop,
     fmsize = ['thin', 'small', 'medium', 'large', 'extra'];
 
 // Creating media group.
-$.media('Tocm-ui', 'all');
+$.media('Tocm-ui', '!');
 
 // CREATING MAIN CLASSES.
 for (i = 0; i < fmsize.length; ++i) {

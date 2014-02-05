@@ -19,7 +19,7 @@
 TocmConfig.autowrite = true;
 TocmConfig.writeload = false;
 
-$.media('Boilerplate', 'all');
+$.media('Boilerplate', '!');
 $.class('!@Boilerplate', {
     // Base
     // --------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ $.class('!@Boilerplate', {
  * to ensure that defining style after this file will not affect to the following style rules.
  * -------------------------------------------------------------------------------------------
  */
-$.media('Important', 'all');
+$.media('Important', '!');
 $.class('!@Important', {
     '.ir': {
         display: 'block', border: 0, text_indent: '-999em', overflow: 'hidden',
@@ -217,19 +217,19 @@ $.media('large-desktop', 'all and (min-width: 1600px)');
  */
 
 // CREATING CLASS DEFINITIONS CONSTANTS.
-define('baseWidth', 960);                                   // Main container width (px).
-define('column',     12);                                   // Column count.
-define('colgap',      8);                                   // Column gap count.
+assign('baseWidth', 960);                                   // Main container width (px).
+assign('column',     12);                                   // Column count.
+assign('colgap',      8);                                   // Column gap count.
 
-define('fixSize',   (baseWidth / column));                  // Each fixed column size (px).         ->                 80px
-define('gapSize',   (fixSize / colgap));                    // Each gap size (px).                  ->                 10px
+assign('fixSize',   (baseWidth / column));                  // Each fixed column size (px).         ->                 80px
+assign('gapSize',   (fixSize / colgap));                    // Each gap size (px).                  ->                 10px
 
-define('marSize',   (gapSize / baseWidth) * 100);           // Each margin size (%).                ->  1.0416666666666665%
-define('filSize',   (marSize * 2));                         // Each column fill size (%).           ->   2.083333333333333%
-define('colSize',   (marSize * (colgap - 2)));              // Each column size (%).                ->   6.249999999999999%
+assign('marSize',   (gapSize / baseWidth) * 100);           // Each margin size (%).                ->  1.0416666666666665%
+assign('filSize',   (marSize * 2));                         // Each column fill size (%).           ->   2.083333333333333%
+assign('colSize',   (marSize * (colgap - 2)));              // Each column size (%).                ->   6.249999999999999%
 
 // CREATING MEDIA GROUPS.
-$.media('Tocmgrid', 'all');
+$.media('Tocmgrid', '!');
 $.media('Tocmgrid-tablet', $.media('tablet').value);
 $.media('Tocmgrid-mobile', $.media('mobile').value);
 
@@ -312,7 +312,7 @@ $.class('!.overlay@Tocmgrid', {
     }
 });
 
-define('paintGrid', function (isdo) {
+assign('paintGrid', function (isdo) {
     'use strict';
     var i;
     if (isdo === false) {
@@ -335,4 +335,3 @@ define('paintGrid', function (isdo) {
 $.path(document).ready(function () {
     //paintGrid();
 });
-

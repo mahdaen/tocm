@@ -75,9 +75,9 @@
 
                 if (last.length > 0) {
                     if (TocmConfig.sortprior === true) {
-                        var isimp = last.attr('data').toLowerCase();
+                        var isimp = String(last.attr('data')).toLowerCase();
                         if (isimp === 'important') {
-                            var uni = last.prev().attr('data').toLowerCase();
+                            var uni = String(last.prev().attr('data')).toLowerCase();
                             if (uni === 'universal') {
                                 $(node).insertBefore($('style[data="universal"]').first());
                             } else {
@@ -116,26 +116,29 @@
             var area = object.config.write_area,
                 auto = object.config.write_auto,
                 family = object.family,
-                domid;
+                domid, ctab = '\t', ttab = '\t\t';
 
             if (object.media !== 'none') {
                 // GENERATING CLASS FROM MEDIA COLLECTIONS.
                 mediaInfo = new TocmMedia(object.media);
+                if (mediaInfo.value !== '!') {
+                    ctab = '\t\t'; ttab = '\t\t\t';
+                }
                 if (typeOf(mediaInfo) === 'object') {
                     // OPENING CSS SELECTOR.
-                    cssString += '\t\t' + object.name + ' {\n';
+                    cssString += ctab + object.name + ' {\n';
                     // CREATING CSS STRING.
-                    cssString += TocmBuilder.generateCSS(object.properties, '\t\t\t');
+                    cssString += TocmBuilder.generateCSS(object.properties, ttab);
                     // CLOSING CSS SELECTOR.
-                    cssString += '\t\t}\n';
+                    cssString += ctab + '}\n';
                     // CREATING PSEUDO IF EXISTS.
                     pseudo = object.pseudo;
                     for (property in pseudo) {
                         if (pseudo.hasOwnProperty(property)) {
                             if (typeOf(pseudo[property]) === 'object' && Object.keys(pseudo[property]).length > 0) {
-                                cssString += '\t\t' + object.name + ':' + property + ' {\n';
-                                cssString += TocmBuilder.generateCSS(pseudo[property], '\t\t\t');
-                                cssString += '\t\t}\n';
+                                cssString += ctab + object.name + ':' + property + ' {\n';
+                                cssString += TocmBuilder.generateCSS(pseudo[property], ttab);
+                                cssString += ctab + '}\n';
                             }
                         }
                     }
@@ -231,11 +234,15 @@
                     minfo = new TocmMedia(name);
                     gcstr = '';
                     // OPENING MEDIA QUERIES.
-                    gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    if (minfo.value !== '!') {
+                        gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    }
                     // ADDING CSS STRING.
                     gcstr += mstr;
                     // CLOSING MEDIA QUERIES.
-                    gcstr += '\t}\n';
+                    if (minfo.value !== '!') {
+                        gcstr += '\t}\n';
+                    }
                     TocmBuilder.writeDOM('Global Class', name, gcstr);
                     mstr = '';
                 }
@@ -244,12 +251,16 @@
                     if (pmdstr.hasOwnProperty(fml)) {
                         minfo = new TocmMedia(name);
                         fmcstr = '';
-                        // OPENING MEDIA QUERIES.
-                        fmcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    // OPENING MEDIA QUERIES.
+                    if (minfo.value !== '!') {
+                        gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    }
                         // ADDING CSS STRING.
                         fmcstr += pmdstr[fml];
-                        // CLOSING MEDIA QUERIES.
-                        fmcstr += '\t}\n';
+                    // CLOSING MEDIA QUERIES.
+                    if (minfo.value !== '!') {
+                        gcstr += '\t}\n';
+                    }
                         TocmBuilder.writeDOM(fml, name, fmcstr);
                     }
                 }

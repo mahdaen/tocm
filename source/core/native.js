@@ -8,7 +8,7 @@
     'use strict';
     // CREATING FUNCTION TO DEFINE CONSTANT/NON-WRITABLE OBJECT.
     if (Object.defineProperty) {
-        Object.defineProperty(window, 'define', {
+        Object.defineProperty(window, 'assign', {
             writable: false,
             value: function (name, value) {
                 if (name !== 'undefined' && value !== 'undefined') {
@@ -21,12 +21,12 @@
             }
         });
     } else {
-        window.define = function (name, value) {
+        window.assign = function (name, value) {
             window[name] = value;
         };
     }
     // CREATING FUNCTION TO LOCK OBJECT ON WINDOW.
-    define('glock', function (name) {
+    assign('glock', function (name) {
         if (typeof name === 'string' && Object.defineProperty) {
             var object = window[name];
             if (object) {
@@ -41,7 +41,7 @@
         }
     });
     // CREATING FUNCTION TO HIDE OBJECT ON WINDOW.
-    define('ghide', function (name) {
+    assign('ghide', function (name) {
         if (typeof name === 'string' && Object.defineProperty) {
             var object = window[name];
             if (object) {

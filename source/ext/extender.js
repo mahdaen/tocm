@@ -3,7 +3,7 @@
 /*jshint undef:false*/
 
 // EXTENDING JQUERY IDENTIFIER ($).
-(function($) {
+(function() {
     'use strict';
     $.anime         = TocmAnimation;
     $['class']      = window.$$ = Tocm;
@@ -140,10 +140,10 @@
         }
         return this;
     };
-})(jQuery);
+})();
 
 // CREATING JQUERY PLUGIN.
-(function ($) {
+(function () {
     $.fn.addAnimation = function (name) {
         if (typeOf(name) === 'string') {
             var runNode = this;
@@ -214,4 +214,4 @@
         }
         return this;
     };
-})(jQuery);
+})();

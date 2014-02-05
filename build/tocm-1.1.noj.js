@@ -14,6 +14,9 @@
 /*jshint boss:true*/
 /*jshint undef:false*/
 
+if (!window) {
+    var window = {};
+}
 /*jshint -W065 */
 /*jshint undef:false */
 
@@ -24,7 +27,7 @@
     'use strict';
     // CREATING FUNCTION TO DEFINE CONSTANT/NON-WRITABLE OBJECT.
     if (Object.defineProperty) {
-        Object.defineProperty(window, 'define', {
+        Object.defineProperty(window, 'assign', {
             writable: false,
             value: function (name, value) {
                 if (name !== 'undefined' && value !== 'undefined') {
@@ -37,12 +40,12 @@
             }
         });
     } else {
-        window.define = function (name, value) {
+        window.assign = function (name, value) {
             window[name] = value;
         };
     }
     // CREATING FUNCTION TO LOCK OBJECT ON WINDOW.
-    define('glock', function (name) {
+    assign('glock', function (name) {
         if (typeof name === 'string' && Object.defineProperty) {
             var object = window[name];
             if (object) {
@@ -57,7 +60,7 @@
         }
     });
     // CREATING FUNCTION TO HIDE OBJECT ON WINDOW.
-    define('ghide', function (name) {
+    assign('ghide', function (name) {
         if (typeof name === 'string' && Object.defineProperty) {
             var object = window[name];
             if (object) {
@@ -656,9 +659,9 @@
 
                 if (last.length > 0) {
                     if (TocmConfig.sortprior === true) {
-                        var isimp = last.attr('data').toLowerCase();
+                        var isimp = String(last.attr('data')).toLowerCase();
                         if (isimp === 'important') {
-                            var uni = last.prev().attr('data').toLowerCase();
+                            var uni = String(last.prev().attr('data')).toLowerCase();
                             if (uni === 'universal') {
                                 $(node).insertBefore($('style[data="universal"]').first());
                             } else {
@@ -697,26 +700,29 @@
             var area = object.config.write_area,
                 auto = object.config.write_auto,
                 family = object.family,
-                domid;
+                domid, ctab = '\t', ttab = '\t\t';
 
             if (object.media !== 'none') {
                 // GENERATING CLASS FROM MEDIA COLLECTIONS.
                 mediaInfo = new TocmMedia(object.media);
+                if (mediaInfo.value !== '!') {
+                    ctab = '\t\t'; ttab = '\t\t\t';
+                }
                 if (typeOf(mediaInfo) === 'object') {
                     // OPENING CSS SELECTOR.
-                    cssString += '\t\t' + object.name + ' {\n';
+                    cssString += ctab + object.name + ' {\n';
                     // CREATING CSS STRING.
-                    cssString += TocmBuilder.generateCSS(object.properties, '\t\t\t');
+                    cssString += TocmBuilder.generateCSS(object.properties, ttab);
                     // CLOSING CSS SELECTOR.
-                    cssString += '\t\t}\n';
+                    cssString += ctab + '}\n';
                     // CREATING PSEUDO IF EXISTS.
                     pseudo = object.pseudo;
                     for (property in pseudo) {
                         if (pseudo.hasOwnProperty(property)) {
                             if (typeOf(pseudo[property]) === 'object' && Object.keys(pseudo[property]).length > 0) {
-                                cssString += '\t\t' + object.name + ':' + property + ' {\n';
-                                cssString += TocmBuilder.generateCSS(pseudo[property], '\t\t\t');
-                                cssString += '\t\t}\n';
+                                cssString += ctab + object.name + ':' + property + ' {\n';
+                                cssString += TocmBuilder.generateCSS(pseudo[property], ttab);
+                                cssString += ctab + '}\n';
                             }
                         }
                     }
@@ -812,11 +818,15 @@
                     minfo = new TocmMedia(name);
                     gcstr = '';
                     // OPENING MEDIA QUERIES.
-                    gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    if (minfo.value !== '!') {
+                        gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    }
                     // ADDING CSS STRING.
                     gcstr += mstr;
                     // CLOSING MEDIA QUERIES.
-                    gcstr += '\t}\n';
+                    if (minfo.value !== '!') {
+                        gcstr += '\t}\n';
+                    }
                     TocmBuilder.writeDOM('Global Class', name, gcstr);
                     mstr = '';
                 }
@@ -825,12 +835,16 @@
                     if (pmdstr.hasOwnProperty(fml)) {
                         minfo = new TocmMedia(name);
                         fmcstr = '';
-                        // OPENING MEDIA QUERIES.
-                        fmcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    // OPENING MEDIA QUERIES.
+                    if (minfo.value !== '!') {
+                        gcstr += '\n\t@media ' + minfo.value + ' {\n';
+                    }
                         // ADDING CSS STRING.
                         fmcstr += pmdstr[fml];
-                        // CLOSING MEDIA QUERIES.
-                        fmcstr += '\t}\n';
+                    // CLOSING MEDIA QUERIES.
+                    if (minfo.value !== '!') {
+                        gcstr += '\t}\n';
+                    }
                         TocmBuilder.writeDOM(fml, name, fmcstr);
                     }
                 }
@@ -843,7 +857,6 @@
     window.TocmBuilder = TocmBuilder;
     lock('TocmBuilder');
 })(window);
-
 /*jshint strict:true*/
 /*jshint boss:true*/
 /*jshint undef:false*/
@@ -1654,16 +1667,16 @@
             return src;
         }
     };
-    define('em', function (src) {
+    assign('em', function (src) {
         return conv(src, 'em');
     });
-    define('px', function (src) {
+    assign('px', function (src) {
         return conv(src, 'px');
     });
-    define('pt', function (src) {
+    assign('pt', function (src) {
         return conv(src, 'pt');
     });
-    define('pr', function (src) {
+    assign('pr', function (src) {
         return conv(src, '%');
     });
     // CREATING HEX TO RGBA CONVERTER.
@@ -2695,7 +2708,7 @@
 /*jshint undef:false*/
 
 // EXTENDING JQUERY IDENTIFIER ($).
-(function($) {
+(function() {
     'use strict';
     $.anime         = TocmAnimation;
     $['class']      = window.$$ = Tocm;
@@ -2721,6 +2734,18 @@
             }
         } else {
             return {};
+        }
+    };
+    
+    $.exports        = window.exports = function (src, dest, media) {
+        if (src && typeOf(dest) === 'string') {
+            var nclass = new Tocm(dest, {});
+            if (typeOf(src) === 'string') {
+                var rclass = new Tocm(src, media);
+                nclass.properties = combine([nclass.properties, rclass.properties ]);
+            } else if (typeOf(src) === 'array') {
+                
+            }
         }
     };
     
@@ -2820,10 +2845,10 @@
         }
         return this;
     };
-})(jQuery);
+})();
 
 // CREATING JQUERY PLUGIN.
-(function ($) {
+(function () {
     $.fn.addAnimation = function (name) {
         if (typeOf(name) === 'string') {
             var runNode = this;
@@ -2894,51 +2919,51 @@
         }
         return this;
     };
-})(jQuery);
+})();
 /*jshint undef:false*/
 
 // CREATING MOST USED SINGLE PROPERTIES CONSTANTS.
 (function (e) {
     var prop = {
+        absolute            : 'absolute',
+        auto                : 'auto',
+        baseline            : 'baseline',
         block               : 'block',
-        scroll              : 'scroll',
-        none                : 'none',
+        bold                : 'bold',
+        border_box          : 'border-box',
+        both                : 'both',
+        bottom              : 'bottom',
+        break_word          : 'break-word',
+        center              : 'center',
+        content_box         : 'content-box',
+        fixed               : 'fixed',
+        hidden              : 'hidden',
+        inherit             : 'inherit',
         inline              : 'inline',
         inline_block        : 'inline-block',
-        bold                : 'bold',
         italic              : 'italic',
+        justify             : 'justify',
+        left                : 'left',
+        middle              : 'middle',
+        none                : 'none',
+        normal              : 'normal',
+        padding_box         : 'padding-box',
+        pointer             : 'pointer',
         pre                 : 'pre',
         pre_wrap            : 'pre-wrap',
-        break_word          : 'break-word',
         relative            : 'relative',
-        absolute            : 'absolute',
-        fixed               : 'fixed',
-        inherit             : 'inherit',
-        top                 : 'top',
-        left                : 'left',
         right               : 'right',
-        bottom              : 'bottom',
-        center              : 'center',
-        middle              : 'middle',
-        baseline            : 'baseline',
-        justify             : 'justify',
-        hidden              : 'hidden',
-        pointer             : 'pointer',
-        normal              : 'normal',
-        border_box          : 'border-box',
-        content_box         : 'content-box',
-        padding_box         : 'padding-box',
-        auto                : 'auto',
-        vertical            : 'vertical',
-        transparent         : 'transparent',
+        scroll              : 'scroll',
         table               : 'table',
         table_row           : 'table-row',
-        both                : 'both'
+        top                 : 'top',
+        transparent         : 'transparent',
+        vertical            : 'vertical'
     };
     
     for (var key in prop) {
         if (prop.hasOwnProperty(key)) {
-            define(key.toUpperCase(), prop[key]);
+            assign(key.toUpperCase(), prop[key]);
         }
     }
 })(window);
